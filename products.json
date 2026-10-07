@@ -1,1 +1,272 @@
-[]
+[
+  {
+    "id": "DSS-001",
+    "name": "IMOU 6MP Bullet PoE Aurora Full Color",
+    "category": "Kamera IP",
+    "price": 99,
+    "sale_price": 99,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-002",
+    "name": "IMOU 6MP Dome PoE Aurora Full Color",
+    "category": "Kamera IP",
+    "price": 106.2,
+    "sale_price": 106.2,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-003",
+    "name": "IMOU PoE IR 30m Full Color",
+    "category": "Kamera IP",
+    "price": 75.6,
+    "sale_price": 75.6,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-004",
+    "name": "IMOU PTZ WiFi 3MP",
+    "category": "Kamera IP",
+    "price": 50,
+    "sale_price": 50,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-005",
+    "name": "IMOU 6MP PoE Outdoor PTZ",
+    "category": "Kamera IP",
+    "price": 117,
+    "sale_price": 117,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-006",
+    "name": "IMOU 10MP PoE Outdoor PTZ",
+    "category": "Kamera IP",
+    "price": 135,
+    "sale_price": 135,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-007",
+    "name": "Dahua 4MP IP Bullet Camera",
+    "category": "Kamera IP",
+    "price": 89,
+    "sale_price": 89,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-008",
+    "name": "Dahua 5MP IP Dome Camera",
+    "category": "Kamera IP",
+    "price": 95,
+    "sale_price": 95,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-009",
+    "name": "Dahua 4MP PTZ Camera",
+    "category": "Kamera PTZ",
+    "price": 185,
+    "sale_price": 185,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-010",
+    "name": "Dahua 5MP PTZ Camera",
+    "category": "Kamera PTZ",
+    "price": 225,
+    "sale_price": 225,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-011",
+    "name": "Dahua 8 Channel NVR",
+    "category": "NVR",
+    "price": 145,
+    "sale_price": 145,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-012",
+    "name": "Dahua 16 Channel NVR",
+    "category": "NVR",
+    "price": 235,
+    "sale_price": 235,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-013",
+    "name": "Dahua 32 Channel NVR",
+    "category": "NVR",
+    "price": 390,
+    "sale_price": 390,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-014",
+    "name": "Dahua Access Control Terminal",
+    "category": "Kontroll Aksesi",
+    "price": 129,
+    "sale_price": 129,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-015",
+    "name": "Dahua Fingerprint & Card Access Controller",
+    "category": "Kontroll Aksesi",
+    "price": 169,
+    "sale_price": 169,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-016",
+    "name": "Dahua Video Intercom Indoor Monitor",
+    "category": "Video Intercom",
+    "price": 119,
+    "sale_price": 119,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-017",
+    "name": "Dahua Video Door Station",
+    "category": "Video Intercom",
+    "price": 139,
+    "sale_price": 139,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-018",
+    "name": "WD Purple 2TB Surveillance HDD",
+    "category": "Hard Disk",
+    "price": 69,
+    "sale_price": 69,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-019",
+    "name": "WD Purple 6TB Surveillance HDD",
+    "category": "Hard Disk",
+    "price": 189,
+    "sale_price": 189,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-020",
+    "name": "Seagate SkyHawk AI 16TB",
+    "category": "Hard Disk",
+    "price": 399,
+    "sale_price": 399,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-021",
+    "name": "Cat6 UTP Network Cable 305m",
+    "category": "Kabllo & Rrjet",
+    "price": 119,
+    "sale_price": 119,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-022",
+    "name": "Cat6 Patch Cable 1m",
+    "category": "Kabllo & Rrjet",
+    "price": 2.5,
+    "sale_price": 2.5,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-023",
+    "name": "8 Port PoE Network Switch",
+    "category": "Switch & PoE",
+    "price": 79,
+    "sale_price": 79,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-024",
+    "name": "16 Port PoE Network Switch",
+    "category": "Switch & PoE",
+    "price": 139,
+    "sale_price": 139,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-025",
+    "name": "24 Port Gigabit Network Switch",
+    "category": "Switch & PoE",
+    "price": 119,
+    "sale_price": 119,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-026",
+    "name": "IP Audio Speaker",
+    "category": "Audio",
+    "price": 59,
+    "sale_price": 59,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-027",
+    "name": "Fire Alarm Control Panel",
+    "category": "Alarm Zjarri",
+    "price": 249,
+    "sale_price": 249,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-028",
+    "name": "Smoke Detector",
+    "category": "Alarm Zjarri",
+    "price": 18,
+    "sale_price": 18,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-029",
+    "name": "Rack Fan 2U",
+    "category": "Rack & Accessories",
+    "price": 45,
+    "sale_price": 45,
+    "image_url": "",
+    "active": true
+  },
+  {
+    "id": "DSS-030",
+    "name": "19-inch 9U Wall Mount Rack",
+    "category": "Rack & Accessories",
+    "price": 129,
+    "sale_price": 129,
+    "image_url": "",
+    "active": true
+  }
+]
