@@ -1,3 +1,21 @@
+if (!window.supabase) {
+  const msg = document.getElementById("loginMsg");
+  if (msg) {
+    msg.textContent = "Gabim: Supabase nuk u ngarkua.";
+    msg.style.color = "#b42318";
+  }
+  throw new Error("Supabase JS nuk u ngarkua.");
+}
+
+if (!window.DSS_SUPABASE_URL || !window.DSS_SUPABASE_KEY) {
+  const msg = document.getElementById("loginMsg");
+  if (msg) {
+    msg.textContent = "Gabim: config.js nuk u ngarkua.";
+    msg.style.color = "#b42318";
+  }
+  throw new Error("Supabase config mungon.");
+}
+
 const supabase = window.supabase.createClient(
   window.DSS_SUPABASE_URL,
   window.DSS_SUPABASE_KEY
