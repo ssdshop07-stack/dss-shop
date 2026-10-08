@@ -261,7 +261,49 @@
   </section>
 
 </main>
+<script>
+async function dssAdminLogin(event) {
+  event.preventDefault();
 
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const msg = document.getElementById("loginMsg");
+
+  msg.textContent = "Duke hyrë...";
+  msg.style.color = "";
+
+  try {
+    if (!window.supabase) {
+      throw new Error("Supabase nuk u ngarkua.");
+    }
+
+    const client = window.supabase.createClient(
+      window.DSS_SUPABASE_URL,
+      window.DSS_SUPABASE_KEY
+    );
+
+    const { error } = await client.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      msg.textContent = error.message;
+      msg.style.color = "#b42318";
+      return false;
+    }
+
+    msg.textContent = "Hyrja u krye me sukses.";
+    window.location.reload();
+
+  } catch (err) {
+    msg.textContent = err.message || "Gabim gjatë hyrjes.";
+    msg.style.color = "#b42318";
+  }
+
+  return false;
+}
+</script>
 <script src="admin.js?v=4"></script>
 
 </body>
