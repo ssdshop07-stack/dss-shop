@@ -31,7 +31,7 @@
     <h1>Hyrje Admin</h1>
     <p>Vetëm administratori i DSS mund të hyjë.</p>
 
-    <form id="loginForm">
+    <form id="loginForm" onsubmit="return dssAdminLogin(event)">
       <input
         id="email"
         type="email"
