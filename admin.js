@@ -3,6 +3,8 @@ const supabase = window.supabase.createClient(
   window.DSS_SUPABASE_KEY
 );
 
+const STORAGE_BUCKET = "product-images";
+
 const login = document.getElementById("login");
 const reset = document.getElementById("reset");
 const panel = document.getElementById("panel");
@@ -27,6 +29,26 @@ const imagePreview = document.getElementById("imagePreview");
 let editingId = null;
 let currentImageUrl = "";
 
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  }[char]));
+}
+
+function money(value) {
+  return "€" + Number(value || 0).toFixed(2);
+}
+
+function message(element, text, error = false) {
+  if (!element) return;
+  element.textContent = text || "";
+  element.style.color = error ? "#b42318" : "";
+}
+
 
 /* =========================
    LOGIN
@@ -37,9 +59,9 @@ loginForm.addEventListener("submit", async (e) => {
 
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
-
   const msg = document.getElementById("loginMsg");
-  msg.textContent = "Duke hyrë...";
+
+  message(msg, "Duke hyrë...");
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
@@ -47,11 +69,11 @@ loginForm.addEventListener("submit", async (e) => {
   });
 
   if (error) {
-    msg.textContent = error.message;
+    message(msg, error.message, true);
     return;
   }
 
-  msg.textContent = "";
+  message(msg, "");
   await showPanel();
 });
 
@@ -65,23 +87,26 @@ forgotBtn.addEventListener("click", async () => {
   const msg = document.getElementById("loginMsg");
 
   if (!email) {
-    msg.textContent = "Shkruaj email-in fillimisht.";
+    message(msg, "Shkruaj email-in fillimisht.", true);
     return;
   }
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo:
-      window.location.origin +
-      window.location.pathname
-  });
+  message(msg, "Po dërgohet email-i...");
+
+  const { error } =
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.href.split("#")[0]
+    });
 
   if (error) {
-    msg.textContent = error.message;
+    message(msg, error.message, true);
     return;
   }
 
-  msg.textContent =
-    "U dërgua email-i për ndryshimin e fjalëkalimit.";
+  message(
+    msg,
+    "U dërgua email-i për ndryshimin e fjalëkalimit."
+  );
 });
 
 
@@ -98,11 +123,24 @@ resetForm.addEventListener("submit", async (e) => {
   const password2 =
     document.getElementById("newPassword2").value;
 
-  const msg = document.getElementById("resetMsg");
+  const msg =
+    document.getElementById("resetMsg");
+
+  if (password.length < 6) {
+    message(
+      msg,
+      "Fjalëkalimi duhet të ketë të paktën 6 karaktere.",
+      true
+    );
+    return;
+  }
 
   if (password !== password2) {
-    msg.textContent =
-      "Fjalëkalimet nuk përputhen.";
+    message(
+      msg,
+      "Fjalëkalimet nuk përputhen.",
+      true
+    );
     return;
   }
 
@@ -112,17 +150,16 @@ resetForm.addEventListener("submit", async (e) => {
     });
 
   if (error) {
-    msg.textContent = error.message;
+    message(msg, error.message, true);
     return;
   }
 
-  msg.textContent =
-    "Fjalëkalimi u ndryshua me sukses.";
+  message(msg, "Fjalëkalimi u ndryshua me sukses.");
 
   setTimeout(() => {
     reset.hidden = true;
     showPanel();
-  }, 1000);
+  }, 800);
 });
 
 
@@ -137,32 +174,73 @@ logout.addEventListener("click", async () => {
   logout.hidden = true;
   reset.hidden = true;
   login.hidden = false;
+  productFormBox.hidden = true;
 });
 
 
 /* =========================
-   CHECK SESSION
+   SESSION
 ========================= */
 
+supabase.auth.onAuthStateChange((event, session) => {
+
+  if (event === "PASSWORD_RECOVERY") {
+    login.hidden = true;
+    panel.hidden = true;
+    logout.hidden = true;
+    reset.hidden = false;
+    return;
+  }
+
+  if (event === "SIGNED_OUT") {
+    login.hidden = false;
+    panel.hidden = true;
+    reset.hidden = true;
+    logout.hidden = true;
+  }
+
+  if (event === "SIGNED_IN" && session) {
+    showPanel();
+  }
+});
+
+
 async function init() {
-  const { data } =
+
+  login.hidden = true;
+  panel.hidden = true;
+  reset.hidden = true;
+  logout.hidden = true;
+
+  const { data, error } =
     await supabase.auth.getSession();
+
+  if (error) {
+    login.hidden = false;
+
+    message(
+      document.getElementById("loginMsg"),
+      error.message,
+      true
+    );
+
+    return;
+  }
 
   if (data.session) {
     await showPanel();
   } else {
     login.hidden = false;
-    panel.hidden = true;
-    logout.hidden = true;
   }
 }
 
 
 /* =========================
-   SHOW ADMIN PANEL
+   SHOW ADMIN
 ========================= */
 
 async function showPanel() {
+
   login.hidden = true;
   reset.hidden = true;
   panel.hidden = false;
@@ -174,10 +252,11 @@ async function showPanel() {
 
 
 /* =========================
-   LOAD PRODUCTS
+   PRODUCTS
 ========================= */
 
 async function loadProducts() {
+
   productsAdmin.innerHTML =
     "<p>Duke ngarkuar produktet...</p>";
 
@@ -190,27 +269,38 @@ async function loadProducts() {
       });
 
   if (error) {
+
     productsAdmin.innerHTML =
       `<p>Gabim: ${escapeHtml(error.message)}</p>`;
+
     return;
   }
 
   if (!data || data.length === 0) {
     productsAdmin.innerHTML =
       "<p>Nuk ka produkte.</p>";
+
     return;
   }
 
   productsAdmin.innerHTML = data.map(p => {
 
     const price =
-      Number(p.sale_price ?? p.price ?? 0)
-        .toFixed(2);
+      Number(p.sale_price ?? p.price ?? 0);
 
     const image = p.image_url
-      ? `<img src="${escapeHtml(p.image_url)}"
-              alt="${escapeHtml(p.name)}"
-              style="width:80px;height:80px;object-fit:cover;border-radius:10px;">`
+
+      ? `<img
+          src="${escapeHtml(p.image_url)}"
+          alt="${escapeHtml(p.name)}"
+          style="
+            width:80px;
+            height:80px;
+            object-fit:cover;
+            border-radius:10px;
+          "
+        >`
+
       : `<div style="
           width:80px;
           height:80px;
@@ -218,19 +308,22 @@ async function loadProducts() {
           align-items:center;
           justify-content:center;
           background:#eee;
-          border-radius:10px;">
+          border-radius:10px;
+        ">
           📷
         </div>`;
 
     return `
-      <div class="admin-product"
-           style="
-             display:flex;
-             gap:15px;
-             align-items:center;
-             padding:15px 0;
-             border-bottom:1px solid #ddd;
-           ">
+      <div
+        class="admin-product"
+        style="
+          display:flex;
+          gap:15px;
+          align-items:center;
+          padding:15px 0;
+          border-bottom:1px solid #ddd;
+        "
+      >
 
         ${image}
 
@@ -245,7 +338,7 @@ async function loadProducts() {
           </div>
 
           <div>
-            €${price}
+            Çmimi: ${money(price)}
           </div>
 
           <div>
@@ -258,17 +351,25 @@ async function loadProducts() {
 
         </div>
 
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div
+          style="
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+          "
+        >
 
           <button
             type="button"
-            onclick="editProduct(${Number(p.id)})">
+            onclick="editProduct(${Number(p.id)})"
+          >
             Ndrysho
           </button>
 
           <button
             type="button"
-            onclick="deleteProduct(${Number(p.id)})">
+            onclick="deleteProduct(${Number(p.id)})"
+          >
             Fshi
           </button>
 
@@ -276,6 +377,7 @@ async function loadProducts() {
 
       </div>
     `;
+
   }).join("");
 }
 
@@ -308,7 +410,7 @@ newBtn.addEventListener("click", () => {
 
   imagePreview.innerHTML = "";
 
-  productMsg.textContent = "";
+  message(productMsg, "");
 
   productFormBox.hidden = false;
 
@@ -332,9 +434,7 @@ window.editProduct = async function(id) {
       .single();
 
   if (error || !data) {
-    alert(
-      "Nuk u gjet produkti."
-    );
+    alert("Nuk u gjet produkti.");
     return;
   }
 
@@ -368,32 +468,29 @@ window.editProduct = async function(id) {
 
   document.getElementById(
     "productSalePrice"
-  ).value =
-    data.sale_price ?? "";
+  ).value = data.sale_price ?? "";
 
   document.getElementById(
     "productStock"
-  ).value =
-    data.stock ?? 0;
+  ).value = data.stock ?? 0;
 
   document.getElementById(
     "productDescription"
-  ).value =
-    data.description || "";
+  ).value = data.description || "";
 
   document.getElementById(
     "productFeatured"
-  ).checked =
-    !!data.featured;
+  ).checked = !!data.featured;
 
   document.getElementById(
     "productActive"
-  ).checked =
-    data.active !== false;
+  ).checked = data.active !== false;
 
   if (currentImageUrl) {
+
     imagePreview.innerHTML = `
       <p>Foto aktuale:</p>
+
       <img
         src="${escapeHtml(currentImageUrl)}"
         alt=""
@@ -405,11 +502,14 @@ window.editProduct = async function(id) {
         "
       >
     `;
+
   } else {
+
     imagePreview.innerHTML = "";
+
   }
 
-  productMsg.textContent = "";
+  message(productMsg, "");
 
   productFormBox.hidden = false;
 
@@ -423,17 +523,19 @@ window.editProduct = async function(id) {
    CANCEL
 ========================= */
 
-cancelProduct.addEventListener(
-  "click",
-  () => {
-    productFormBox.hidden = true;
-    productForm.reset();
-    editingId = null;
-    currentImageUrl = "";
-    imagePreview.innerHTML = "";
-    productMsg.textContent = "";
-  }
-);
+cancelProduct.addEventListener("click", () => {
+
+  productFormBox.hidden = true;
+
+  productForm.reset();
+
+  editingId = null;
+  currentImageUrl = "";
+
+  imagePreview.innerHTML = "";
+
+  message(productMsg, "");
+});
 
 
 /* =========================
@@ -446,23 +548,504 @@ document
 
     const file = e.target.files[0];
 
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      productMsg.textContent =
-        "Zgjidh një skedar fotografie.";
+
+      message(
+        productMsg,
+        "Zgjidh një skedar fotografie.",
+        true
+      );
+
       e.target.value = "";
+
       return;
     }
 
-    const maxSize =
-      8 * 1024 * 1024;
+    if (file.size > 8 * 1024 * 1024) {
 
-    if (file.size > maxSize) {
-      productMsg.textContent =
-        "Fotoja duhet të jetë maksimumi 8 MB.";
+      message(
+        productMsg,
+        "Fotoja duhet të jetë maksimumi 8 MB.",
+        true
+      );
+
       e.target.value = "";
+
       return;
     }
+
+    const url =
+      URL.createObjectURL(file);
+
+    imagePreview.innerHTML = `
+      <p>Parapamje:</p>
+
+      <img
+        src="${url}"
+        alt=""
+        style="
+          max-width:180px;
+          max-height:180px;
+          object-fit:cover;
+          border-radius:10px;
+        "
+      >
+    `;
+});
+
+
+/* =========================
+   UPLOAD IMAGE
+========================= */
+
+async function uploadProductImage(file) {
+
+  if (!file) {
+    return currentImageUrl || "";
+  }
+
+  const extension =
+    (file.name.split(".").pop() || "jpg")
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "");
+
+  const fileName =
+    `${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2, 10)}.${extension}`;
+
+  const path =
+    `products/${fileName}`;
+
+  const { error } =
+    await supabase.storage
+      .from(STORAGE_BUCKET)
+      .upload(
+        path,
+        file,
+        {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: file.type
+        }
+      );
+
+  if (error) {
+
+    throw new Error(
+      "Fotoja nuk u ngarkua. Kontrollo Storage bucket 'product-images'. " +
+      error.message
+    );
+  }
+
+  const { data } =
+    supabase.storage
+      .from(STORAGE_BUCKET)
+      .getPublicUrl(path);
+
+  return data.publicUrl;
+}
+
+
+/* =========================
+   SAVE PRODUCT
+========================= */
+
+productForm.addEventListener("submit", async (e) => {
+
+  e.preventDefault();
+
+  const submitButton =
+    productForm.querySelector(
+      'button[type="submit"]'
+    );
+
+  submitButton.disabled = true;
+
+  try {
+
+    message(
+      productMsg,
+      "Po ruhet produkti..."
+    );
+
+    const name =
+      document.getElementById(
+        "productName"
+      ).value.trim();
+
+    const sku =
+      document.getElementById(
+        "productSku"
+      ).value.trim();
+
+    const category =
+      document.getElementById(
+        "productCategory"
+      ).value.trim();
+
+    const price =
+      Number(
+        document.getElementById(
+          "productPrice"
+        ).value
+      );
+
+    const salePriceValue =
+      document.getElementById(
+        "productSalePrice"
+      ).value;
+
+    const sale_price =
+      salePriceValue === ""
+        ? null
+        : Number(salePriceValue);
+
+    const stock =
+      Number(
+        document.getElementById(
+          "productStock"
+        ).value
+      );
+
+    const description =
+      document.getElementById(
+        "productDescription"
+      ).value.trim();
+
+    const featured =
+      document.getElementById(
+        "productFeatured"
+      ).checked;
+
+    const active =
+      document.getElementById(
+        "productActive"
+      ).checked;
+
+    const imageFile =
+      document.getElementById(
+        "productImage"
+      ).files[0];
+
+    if (
+      !name ||
+      !category ||
+      !Number.isFinite(price) ||
+      price < 0
+    ) {
+
+      message(
+        productMsg,
+        "Plotëso emrin, kategorinë dhe çmimin saktë.",
+        true
+      );
+
+      return;
+    }
+
+    if (!Number.isFinite(stock) || stock < 0) {
+
+      message(
+        productMsg,
+        "Stoku nuk është i vlefshëm.",
+        true
+      );
+
+      return;
+    }
+
+    if (
+      sale_price !== null &&
+      (
+        !Number.isFinite(sale_price) ||
+        sale_price < 0
+      )
+    ) {
+
+      message(
+        productMsg,
+        "Çmimi promocional nuk është i vlefshëm.",
+        true
+      );
+
+      return;
+    }
+
+    let image_url =
+      currentImageUrl;
+
+    if (imageFile) {
+      image_url =
+        await uploadProductImage(
+          imageFile
+        );
+    }
+
+    const product = {
+      name,
+      sku: sku || null,
+      category,
+      price,
+      sale_price,
+      stock,
+      description: description || null,
+      image_url: image_url || null,
+      featured,
+      active
+    };
+
+    let result;
+
+    if (editingId !== null) {
+
+      result =
+        await supabase
+          .from("products")
+          .update(product)
+          .eq("id", editingId)
+          .select()
+          .single();
+
+    } else {
+
+      result =
+        await supabase
+          .from("products")
+          .insert(product)
+          .select()
+          .single();
+    }
+
+    if (result.error) {
+      throw new Error(
+        result.error.message
+      );
+    }
+
+    message(
+      productMsg,
+      editingId !== null
+        ? "Produkti u ndryshua me sukses."
+        : "Produkti u shtua me sukses."
+    );
+
+    productForm.reset();
+
+    document.getElementById(
+      "productActive"
+    ).checked = true;
+
+    document.getElementById(
+      "productStock"
+    ).value = 0;
+
+    editingId = null;
+    currentImageUrl = "";
+
+    imagePreview.innerHTML = "";
+
+    await loadProducts();
+
+    setTimeout(() => {
+
+      productFormBox.hidden = true;
+
+      message(productMsg, "");
+
+    }, 700);
+
+  } catch (error) {
+
+    message(
+      productMsg,
+      "Gabim: " +
+      (error?.message ||
+       "Nuk u ruajt produkti."),
+      true
+    );
+
+  } finally {
+
+    submitButton.disabled = false;
+
+  }
+});
+
+
+/* =========================
+   DELETE PRODUCT
+========================= */
+
+window.deleteProduct = async function(id) {
+
+  const ok =
+    confirm(
+      "A je i sigurt që do ta fshish këtë produkt?"
+    );
+
+  if (!ok) return;
+
+  const { error } =
+    await supabase
+      .from("products")
+      .delete()
+      .eq("id", id);
+
+  if (error) {
+
+    alert(
+      "Produkti nuk u fshi: " +
+      error.message
+    );
+
+    return;
+  }
+
+  await loadProducts();
+};
+
+
+/* =========================
+   ORDERS
+========================= */
+
+async function loadOrders() {
+
+  orders.innerHTML =
+    "<p>Duke ngarkuar porositë...</p>";
+
+  const { data, error } =
+    await supabase
+      .from("orders")
+      .select("*")
+      .order("created_at", {
+        ascending: false
+      });
+
+  if (error) {
+
+    orders.innerHTML =
+      `<p>Gabim: ${escapeHtml(error.message)}</p>`;
+
+    return;
+  }
+
+  if (!data || data.length === 0) {
+
+    orders.innerHTML =
+      "<p>Nuk ka porosi.</p>";
+
+    return;
+  }
+
+  orders.innerHTML =
+    data.map(order => `
+
+      <div
+        style="
+          padding:15px 0;
+          border-bottom:1px solid #ddd;
+        "
+      >
+
+        <strong>
+          Porosia #${escapeHtml(order.id)}
+        </strong>
+
+        <div>
+          ${escapeHtml(
+            order.customer_name || ""
+          )}
+        </div>
+
+        <div>
+          Tel:
+          ${escapeHtml(
+            order.phone || ""
+          )}
+        </div>
+
+        <div>
+          Adresa:
+          ${escapeHtml(
+            order.address || ""
+          )}
+        </div>
+
+        <div>
+          Total:
+          <strong>
+            ${money(order.total)}
+          </strong>
+        </div>
+
+        <label
+          style="
+            display:block;
+            margin-top:8px;
+          "
+        >
+
+          Statusi:
+
+          <select
+            onchange="updateOrderStatus(${Number(order.id)}, this.value)"
+          >
+
+            ${[
+              "new",
+              "processing",
+              "completed",
+              "cancelled"
+            ].map(status => `
+
+              <option
+                value="${status}"
+                ${
+                  order.status === status
+                    ? "selected"
+                    : ""
+                }
+              >
+                ${status}
+              </option>
+
+            `).join("")}
+
+          </select>
+
+        </label>
+
+      </div>
+
+    `).join("");
+}
+
+
+window.updateOrderStatus =
+  async function(id, status) {
+
+    const { error } =
+      await supabase
+        .from("orders")
+        .update({ status })
+        .eq("id", id);
+
+    if (error) {
+
+      alert(
+        "Statusi nuk u ndryshua: " +
+        error.message
+      );
+    }
+  };
+
+
+/* =========================
+   START
+========================= */
+
+init();
