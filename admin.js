@@ -1,14 +1,468 @@
-const sb=window.supabase.createClient(window.DSS_SUPABASE_URL,window.DSS_SUPABASE_KEY);let editing=null;
-const $=s=>document.querySelector(s);const esc=s=>String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const adminRedirect=location.origin+location.pathname;
-async function start(){if(window.DSS_SUPABASE_URL.includes('PASTE_'))return;let {data:{session}}=await sb.auth.getSession();if(session)show()}
-async function show(){let {data:{session}}=await sb.auth.getSession();if(!session)return;$('#login').hidden=true;$('#reset').hidden=true;$('#panel').hidden=false;$('#logout').hidden=false;loadProducts();loadOrders()}
-sb.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){$('#login').hidden=true;$('#panel').hidden=true;$('#logout').hidden=true;$('#reset').hidden=false}else if(session&&event==='SIGNED_IN')show()});
-$('#loginForm').onsubmit=async e=>{e.preventDefault();let {error}=await sb.auth.signInWithPassword({email:$('#email').value.trim(),password:$('#password').value});$('#loginMsg').textContent=error?error.message:'Sukses';if(!error)show()};
-$('#forgotBtn').onclick=async()=>{const email=$('#email').value.trim();if(!email){$('#loginMsg').textContent='Shkruaj emailin e administratorit më parë.';return}const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:adminRedirect});$('#loginMsg').textContent=error?error.message:'Linku për ndryshimin e fjalëkalimit u dërgua në email.'};
-$('#resetForm').onsubmit=async e=>{e.preventDefault();const p1=$('#newPassword').value,p2=$('#newPassword2').value;if(p1!==p2){$('#resetMsg').textContent='Fjalëkalimet nuk përputhen.';return}const {error}=await sb.auth.updateUser({password:p1});if(error){$('#resetMsg').textContent=error.message;return}$('#resetMsg').textContent='Fjalëkalimi u ndryshua me sukses. Tani mund të hysh.';setTimeout(()=>location.href=adminRedirect,1200)};
-$('#logout').onclick=async()=>{await sb.auth.signOut();location.reload()};
-async function loadProducts(){let {data,error}=await sb.from('products').select('*').order('created_at',{ascending:false});if(error){$('#productsAdmin').textContent=error.message;return}$('#productsAdmin').innerHTML=`<div class="table">${(data||[]).map(p=>`<div class="row"><div><b>${esc(p.name)}</b><small>${esc(p.category||'')} · €${Number(p.price||0).toFixed(2)} · ${p.active?'Aktiv':'Joaktiv'}</small></div><button onclick='edit(${JSON.stringify(p)})'>Ndrysho</button><button onclick='removeP("${p.id}")'>Fshi</button></div>`).join('')}</div>`}
-window.edit=p=>{editing=p;let name=prompt('Emri',p.name);if(name===null)return;let price=prompt('Çmimi',p.price);let cat=prompt('Kategoria',p.category||'');let img=prompt('Image URL',p.image_url||'');update({id:p.id,name,price:Number(price),category:cat,image_url:img})};$('#newBtn').onclick=()=>{let name=prompt('Emri i produktit');if(!name)return;let price=Number(prompt('Çmimi','0')||0),cat=prompt('Kategoria','CCTV'),img=prompt('Image URL','');insert({name,price,category:cat,image_url:img})};
-async function insert(x){let r=await sb.from('products').insert({...x,active:true});if(r.error)alert(r.error.message);loadProducts()}async function update(x){let r=await sb.from('products').update(x).eq('id',x.id);if(r.error)alert(r.error.message);loadProducts()}window.removeP=async id=>{if(confirm('Fshi produktin?')){let r=await sb.from('products').delete().eq('id',id);if(r.error)alert(r.error.message);loadProducts()}};
-async function loadOrders(){let r=await sb.from('orders').select('*').order('created_at',{ascending:false});$('#orders').innerHTML=(r.data||[]).map(o=>`<div class="order"><b>#${esc(o.id)}</b> — ${esc(o.customer_name)} — ${esc(o.phone)} — €${Number(o.total||0).toFixed(2)} — <b>${esc(o.status)}</b></div>`).join('')||'<p>Nuk ka porosi.</p>'}start();
+const supabase = window.supabase.createClient(
+  window.DSS_SUPABASE_URL,
+  window.DSS_SUPABASE_KEY
+);
+
+const login = document.getElementById("login");
+const reset = document.getElementById("reset");
+const panel = document.getElementById("panel");
+const logout = document.getElementById("logout");
+
+const loginForm = document.getElementById("loginForm");
+const forgotBtn = document.getElementById("forgotBtn");
+const resetForm = document.getElementById("resetForm");
+
+const productsAdmin = document.getElementById("productsAdmin");
+const orders = document.getElementById("orders");
+
+const newBtn = document.getElementById("newBtn");
+const productFormBox = document.getElementById("productFormBox");
+const productForm = document.getElementById("productForm");
+const cancelProduct = document.getElementById("cancelProduct");
+
+const formTitle = document.getElementById("formTitle");
+const productMsg = document.getElementById("productMsg");
+const imagePreview = document.getElementById("imagePreview");
+
+let editingId = null;
+let currentImageUrl = "";
+
+
+/* =========================
+   LOGIN
+========================= */
+
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  const msg = document.getElementById("loginMsg");
+  msg.textContent = "Duke hyrë...";
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    msg.textContent = error.message;
+    return;
+  }
+
+  msg.textContent = "";
+  await showPanel();
+});
+
+
+/* =========================
+   FORGOT PASSWORD
+========================= */
+
+forgotBtn.addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const msg = document.getElementById("loginMsg");
+
+  if (!email) {
+    msg.textContent = "Shkruaj email-in fillimisht.";
+    return;
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo:
+      window.location.origin +
+      window.location.pathname
+  });
+
+  if (error) {
+    msg.textContent = error.message;
+    return;
+  }
+
+  msg.textContent =
+    "U dërgua email-i për ndryshimin e fjalëkalimit.";
+});
+
+
+/* =========================
+   RESET PASSWORD
+========================= */
+
+resetForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const password =
+    document.getElementById("newPassword").value;
+
+  const password2 =
+    document.getElementById("newPassword2").value;
+
+  const msg = document.getElementById("resetMsg");
+
+  if (password !== password2) {
+    msg.textContent =
+      "Fjalëkalimet nuk përputhen.";
+    return;
+  }
+
+  const { error } =
+    await supabase.auth.updateUser({
+      password
+    });
+
+  if (error) {
+    msg.textContent = error.message;
+    return;
+  }
+
+  msg.textContent =
+    "Fjalëkalimi u ndryshua me sukses.";
+
+  setTimeout(() => {
+    reset.hidden = true;
+    showPanel();
+  }, 1000);
+});
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+logout.addEventListener("click", async () => {
+  await supabase.auth.signOut();
+
+  panel.hidden = true;
+  logout.hidden = true;
+  reset.hidden = true;
+  login.hidden = false;
+});
+
+
+/* =========================
+   CHECK SESSION
+========================= */
+
+async function init() {
+  const { data } =
+    await supabase.auth.getSession();
+
+  if (data.session) {
+    await showPanel();
+  } else {
+    login.hidden = false;
+    panel.hidden = true;
+    logout.hidden = true;
+  }
+}
+
+
+/* =========================
+   SHOW ADMIN PANEL
+========================= */
+
+async function showPanel() {
+  login.hidden = true;
+  reset.hidden = true;
+  panel.hidden = false;
+  logout.hidden = false;
+
+  await loadProducts();
+  await loadOrders();
+}
+
+
+/* =========================
+   LOAD PRODUCTS
+========================= */
+
+async function loadProducts() {
+  productsAdmin.innerHTML =
+    "<p>Duke ngarkuar produktet...</p>";
+
+  const { data, error } =
+    await supabase
+      .from("products")
+      .select("*")
+      .order("created_at", {
+        ascending: false
+      });
+
+  if (error) {
+    productsAdmin.innerHTML =
+      `<p>Gabim: ${escapeHtml(error.message)}</p>`;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    productsAdmin.innerHTML =
+      "<p>Nuk ka produkte.</p>";
+    return;
+  }
+
+  productsAdmin.innerHTML = data.map(p => {
+
+    const price =
+      Number(p.sale_price ?? p.price ?? 0)
+        .toFixed(2);
+
+    const image = p.image_url
+      ? `<img src="${escapeHtml(p.image_url)}"
+              alt="${escapeHtml(p.name)}"
+              style="width:80px;height:80px;object-fit:cover;border-radius:10px;">`
+      : `<div style="
+          width:80px;
+          height:80px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          background:#eee;
+          border-radius:10px;">
+          📷
+        </div>`;
+
+    return `
+      <div class="admin-product"
+           style="
+             display:flex;
+             gap:15px;
+             align-items:center;
+             padding:15px 0;
+             border-bottom:1px solid #ddd;
+           ">
+
+        ${image}
+
+        <div style="flex:1">
+
+          <strong>
+            ${escapeHtml(p.name || "")}
+          </strong>
+
+          <div>
+            ${escapeHtml(p.category || "")}
+          </div>
+
+          <div>
+            €${price}
+          </div>
+
+          <div>
+            Stok: ${Number(p.stock || 0)}
+          </div>
+
+          <div>
+            ${p.active ? "🟢 Aktiv" : "🔴 Joaktiv"}
+          </div>
+
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+
+          <button
+            type="button"
+            onclick="editProduct(${Number(p.id)})">
+            Ndrysho
+          </button>
+
+          <button
+            type="button"
+            onclick="deleteProduct(${Number(p.id)})">
+            Fshi
+          </button>
+
+        </div>
+
+      </div>
+    `;
+  }).join("");
+}
+
+
+/* =========================
+   NEW PRODUCT
+========================= */
+
+newBtn.addEventListener("click", () => {
+
+  editingId = null;
+  currentImageUrl = "";
+
+  formTitle.textContent =
+    "Shto produkt";
+
+  productForm.reset();
+
+  document.getElementById(
+    "productActive"
+  ).checked = true;
+
+  document.getElementById(
+    "productFeatured"
+  ).checked = false;
+
+  document.getElementById(
+    "productStock"
+  ).value = 0;
+
+  imagePreview.innerHTML = "";
+
+  productMsg.textContent = "";
+
+  productFormBox.hidden = false;
+
+  productFormBox.scrollIntoView({
+    behavior: "smooth"
+  });
+});
+
+
+/* =========================
+   EDIT PRODUCT
+========================= */
+
+window.editProduct = async function(id) {
+
+  const { data, error } =
+    await supabase
+      .from("products")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+  if (error || !data) {
+    alert(
+      "Nuk u gjet produkti."
+    );
+    return;
+  }
+
+  editingId = data.id;
+
+  currentImageUrl =
+    data.image_url || "";
+
+  formTitle.textContent =
+    "Ndrysho produktin";
+
+  document.getElementById(
+    "productId"
+  ).value = data.id;
+
+  document.getElementById(
+    "productName"
+  ).value = data.name || "";
+
+  document.getElementById(
+    "productSku"
+  ).value = data.sku || "";
+
+  document.getElementById(
+    "productCategory"
+  ).value = data.category || "";
+
+  document.getElementById(
+    "productPrice"
+  ).value = data.price ?? "";
+
+  document.getElementById(
+    "productSalePrice"
+  ).value =
+    data.sale_price ?? "";
+
+  document.getElementById(
+    "productStock"
+  ).value =
+    data.stock ?? 0;
+
+  document.getElementById(
+    "productDescription"
+  ).value =
+    data.description || "";
+
+  document.getElementById(
+    "productFeatured"
+  ).checked =
+    !!data.featured;
+
+  document.getElementById(
+    "productActive"
+  ).checked =
+    data.active !== false;
+
+  if (currentImageUrl) {
+    imagePreview.innerHTML = `
+      <p>Foto aktuale:</p>
+      <img
+        src="${escapeHtml(currentImageUrl)}"
+        alt=""
+        style="
+          max-width:180px;
+          max-height:180px;
+          object-fit:cover;
+          border-radius:10px;
+        "
+      >
+    `;
+  } else {
+    imagePreview.innerHTML = "";
+  }
+
+  productMsg.textContent = "";
+
+  productFormBox.hidden = false;
+
+  productFormBox.scrollIntoView({
+    behavior: "smooth"
+  });
+};
+
+
+/* =========================
+   CANCEL
+========================= */
+
+cancelProduct.addEventListener(
+  "click",
+  () => {
+    productFormBox.hidden = true;
+    productForm.reset();
+    editingId = null;
+    currentImageUrl = "";
+    imagePreview.innerHTML = "";
+    productMsg.textContent = "";
+  }
+);
+
+
+/* =========================
+   IMAGE PREVIEW
+========================= */
+
+document
+  .getElementById("productImage")
+  .addEventListener("change", (e) => {
+
+    const file = e.target.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      productMsg.textContent =
+        "Zgjidh një skedar fotografie.";
+      e.target.value = "";
+      return;
+    }
+
+    const maxSize =
+      8 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      productMsg.textContent =
+        "Fotoja duhet të jetë maksimumi 8 MB.";
+      e.target.value = "";
+      return;
+    }
