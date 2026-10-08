@@ -1,1 +1,268 @@
-<!doctype html><html lang="sq"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DSS Admin</title><link rel="stylesheet" href="style.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script></head><body><header><div class="wrap nav"><a class="brand" href="index.html"><b>DSS</b><span>ADMIN</span></a><button id="logout" hidden>Dalje</button></div></header><main class="wrap admin"><section id="login"><h1>Hyrje Admin</h1><p>Vetëm administratori i DSS mund të hyjë.</p><form id="loginForm"><input id="email" type="email" placeholder="Email" required><input id="password" type="password" placeholder="Fjalëkalimi" required><button>Hyr</button></form><button id="forgotBtn" type="button">Harrova fjalëkalimin</button><p id="loginMsg"></p></section><section id="reset" hidden><h1>Vendos fjalëkalim të ri</h1><form id="resetForm"><input id="newPassword" type="password" placeholder="Fjalëkalimi i ri" minlength="6" required><input id="newPassword2" type="password" placeholder="Përsërite fjalëkalimin" minlength="6" required><button>Ruaj fjalëkalimin</button></form><p id="resetMsg"></p></section><section id="panel" hidden><div class="toolbar"><h1>Paneli DSS</h1><button id="newBtn">+ Produkt</button></div><div id="productsAdmin"></div><h2>Porositë</h2><div id="orders"></div></section></main><script src="admin.js"></script></body></html>
+<!doctype html>
+<html lang="sq">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DSS Admin</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+</head>
+
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="index.html">
+      <b>DSS</b>
+      <span>ADMIN</span>
+    </a>
+
+    <button id="logout" hidden>Dalje</button>
+  </div>
+</header>
+
+<main class="wrap admin">
+
+  <!-- LOGIN -->
+  <section id="login">
+    <h1>Hyrje Admin</h1>
+    <p>Vetëm administratori i DSS mund të hyjë.</p>
+
+    <form id="loginForm">
+      <input
+        id="email"
+        type="email"
+        placeholder="Email"
+        required
+      >
+
+      <input
+        id="password"
+        type="password"
+        placeholder="Fjalëkalimi"
+        required
+      >
+
+      <button type="submit">Hyr</button>
+    </form>
+
+    <button id="forgotBtn" type="button">
+      Harrova fjalëkalimin
+    </button>
+
+    <p id="loginMsg"></p>
+  </section>
+
+
+  <!-- RESET PASSWORD -->
+  <section id="reset" hidden>
+    <h1>Vendos fjalëkalim të ri</h1>
+
+    <form id="resetForm">
+      <input
+        id="newPassword"
+        type="password"
+        placeholder="Fjalëkalimi i ri"
+        minlength="6"
+        required
+      >
+
+      <input
+        id="newPassword2"
+        type="password"
+        placeholder="Përsërite fjalëkalimin"
+        minlength="6"
+        required
+      >
+
+      <button type="submit">
+        Ruaj fjalëkalimin
+      </button>
+    </form>
+
+    <p id="resetMsg"></p>
+  </section>
+
+
+  <!-- ADMIN PANEL -->
+  <section id="panel" hidden>
+
+    <div class="toolbar">
+      <h1>Paneli DSS</h1>
+
+      <button id="newBtn" type="button">
+        + Produkt
+      </button>
+    </div>
+
+
+    <!-- PRODUCT FORM -->
+    <section id="productFormBox" hidden>
+
+      <h2 id="formTitle">
+        Shto produkt
+      </h2>
+
+      <form id="productForm">
+
+        <input
+          type="hidden"
+          id="productId"
+        >
+
+
+        <label>
+          Emri i produktit
+          <input
+            id="productName"
+            type="text"
+            placeholder="p.sh. IMOU 6MP Bullet PoE"
+            required
+          >
+        </label>
+
+
+        <label>
+          SKU
+          <input
+            id="productSku"
+            type="text"
+            placeholder="p.sh. DSS-001"
+          >
+        </label>
+
+
+        <label>
+          Kategoria
+          <input
+            id="productCategory"
+            type="text"
+            placeholder="p.sh. Kamera IP"
+            required
+          >
+        </label>
+
+
+        <label>
+          Çmimi (€)
+          <input
+            id="productPrice"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="99.00"
+            required
+          >
+        </label>
+
+
+        <label>
+          Çmimi promocional (€)
+          <input
+            id="productSalePrice"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="89.00"
+          >
+        </label>
+
+
+        <label>
+          Stoku
+          <input
+            id="productStock"
+            type="number"
+            min="0"
+            step="1"
+            value="0"
+            required
+          >
+        </label>
+
+
+        <label>
+          Përshkrimi
+          <textarea
+            id="productDescription"
+            rows="5"
+            placeholder="Përshkrimi i produktit..."
+          ></textarea>
+        </label>
+
+
+        <label>
+          Foto e produktit
+          <input
+            id="productImage"
+            type="file"
+            accept="image/*"
+          >
+        </label>
+
+        <div id="imagePreview"></div>
+
+
+        <label>
+          <input
+            id="productFeatured"
+            type="checkbox"
+          >
+          Produkt i veçuar
+        </label>
+
+
+        <label>
+          <input
+            id="productActive"
+            type="checkbox"
+            checked
+          >
+          Produkt aktiv
+        </label>
+
+
+        <div class="form-actions">
+
+          <button type="submit">
+            💾 Ruaj produktin
+          </button>
+
+          <button
+            id="cancelProduct"
+            type="button"
+          >
+            Anulo
+          </button>
+
+        </div>
+
+        <p id="productMsg"></p>
+
+      </form>
+
+    </section>
+
+
+    <!-- PRODUCTS -->
+    <h2>Produktet</h2>
+
+    <div id="productsAdmin"></div>
+
+
+    <!-- ORDERS -->
+    <h2>Porositë</h2>
+
+    <div id="orders"></div>
+
+  </section>
+
+</main>
+
+<script src="admin.js"></script>
+
+</body>
+</html>
