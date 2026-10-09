@@ -1,528 +1,279 @@
-"use strict";
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>DSS SHOP | Admin</title>
 
-/* DSS SHOP - ADMIN */
-
-const loginMsg = document.getElementById("loginMsg");
-
-function message(element, text, error = false) {
-  if (!element) return;
-  element.textContent = text || "";
-  element.style.color = error ? "#b42318" : "";
-}
-
-function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  }[char]));
-}
-
-function money(value) {
-  return "€" + Number(value || 0).toFixed(2);
-}
-
-/* SUPABASE */
-
-if (!window.supabase) {
-  message(loginMsg, "Gabim: Supabase nuk u ngarkua.", true);
-  throw new Error("Supabase JS nuk u ngarkua.");
-}
-
-if (!window.DSS_SUPABASE_URL || !window.DSS_SUPABASE_KEY) {
-  message(loginMsg, "Gabim: config.js nuk u ngarkua.", true);
-  throw new Error("Supabase config mungon.");
-}
-
-const supabase = window.supabase.createClient(
-  window.DSS_SUPABASE_URL,
-  window.DSS_SUPABASE_KEY
-);
-
-const STORAGE_BUCKET = "product-images";
-
-/* ELEMENTET */
-
-const login = document.getElementById("login");
-const reset = document.getElementById("reset");
-const panel = document.getElementById("panel");
-const logout = document.getElementById("logout");
-
-const loginForm = document.getElementById("loginForm");
-const forgotBtn = document.getElementById("forgotBtn");
-const resetForm = document.getElementById("resetForm");
-
-const productsAdmin = document.getElementById("productsAdmin");
-const orders = document.getElementById("orders");
-
-const newBtn = document.getElementById("newBtn");
-const productFormBox = document.getElementById("productFormBox");
-const productForm = document.getElementById("productForm");
-const cancelProduct = document.getElementById("cancelProduct");
-
-const formTitle = document.getElementById("formTitle");
-const productMsg = document.getElementById("productMsg");
-const imagePreview = document.getElementById("imagePreview");
-
-let editingId = null;
-let currentImageUrl = "";
-let loginInProgress = false;
-
-/* HYRJA */
-
-loginForm.addEventListener("submit", async function(event) {
-  event.preventDefault();
-
-  if (loginInProgress) return false;
-  loginInProgress = true;
-
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  const button = loginForm.querySelector('button[type="submit"]');
-
-  if (button) button.disabled = true;
-  message(loginMsg, "Duke hyrë...");
-
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password
-    });
-
-    if (error) throw error;
-
-    if (!data.session) {
-      throw new Error("Hyrja nuk u konfirmua.");
+  <style>
+    * {
+      box-sizing: border-box;
     }
 
-    message(loginMsg, "Hyrja u krye me sukses.");
-    await showPanel();
-
-  } catch (error) {
-    message(loginMsg, error.message || "Gabim gjatë hyrjes.", true);
-  } finally {
-    loginInProgress = false;
-    if (button) button.disabled = false;
-  }
-
-  return false;
-});
-
-/* HARROVA FJALËKALIMIN */
-
-forgotBtn.addEventListener("click", async function() {
-  const email = document.getElementById("email").value.trim();
-
-  if (!email) {
-    message(loginMsg, "Shkruaj email-in fillimisht.", true);
-    return;
-  }
-
-  message(loginMsg, "Po dërgohet email-i...");
-
-  try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.href.split("#")[0]
-    });
-
-    if (error) throw error;
-
-    message(loginMsg, "U dërgua email-i për ndryshimin e fjalëkalimit.");
-  } catch (error) {
-    message(loginMsg, error.message || "Gabim gjatë dërgimit.", true);
-  }
-});
-
-/* NDRYSHIMI I FJALËKALIMIT */
-
-resetForm.addEventListener("submit", async function(event) {
-  event.preventDefault();
-
-  const password = document.getElementById("newPassword").value;
-  const password2 = document.getElementById("newPassword2").value;
-  const msg = document.getElementById("resetMsg");
-
-  if (password.length < 6) {
-    message(msg, "Fjalëkalimi duhet të ketë të paktën 6 karaktere.", true);
-    return;
-  }
-
-  if (password !== password2) {
-    message(msg, "Fjalëkalimet nuk përputhen.", true);
-    return;
-  }
-
-  try {
-    const { error } = await supabase.auth.updateUser({
-      password: password
-    });
-
-    if (error) throw error;
-
-    message(msg, "Fjalëkalimi u ndryshua me sukses.");
-    reset.hidden = true;
-    await showPanel();
-  } catch (error) {
-    message(msg, error.message || "Gabim gjatë ndryshimit.", true);
-  }
-});
-
-/* DALJA */
-
-logout.addEventListener("click", async function() {
-  const { error } = await supabase.auth.signOut();
-
-  if (error) {
-    alert("Gabim gjatë daljes: " + error.message);
-    return;
-  }
-
-  login.hidden = false;
-  panel.hidden = true;
-  reset.hidden = true;
-  logout.hidden = true;
-});
-
-/* SESIONI */
-
-supabase.auth.onAuthStateChange(function(event, session) {
-  if (event === "PASSWORD_RECOVERY") {
-    login.hidden = true;
-    panel.hidden = true;
-    logout.hidden = true;
-    reset.hidden = false;
-  }
-
-  if (event === "SIGNED_OUT") {
-    login.hidden = false;
-    panel.hidden = true;
-    reset.hidden = true;
-    logout.hidden = true;
-  }
-});
-
-async function init() {
-  login.hidden = true;
-  panel.hidden = true;
-  reset.hidden = true;
-  logout.hidden = true;
-
-  try {
-    const { data, error } = await supabase.auth.getSession();
-    if (error) throw error;
-
-    if (data.session) {
-      await showPanel();
-    } else {
-      login.hidden = false;
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f3f5f9;
+      color: #172033;
     }
-  } catch (error) {
-    login.hidden = false;
-    message(loginMsg, error.message || "Gabim gjatë kontrollit të sesionit.", true);
-  }
-}
 
-async function showPanel() {
-  login.hidden = true;
-  reset.hidden = true;
-  panel.hidden = false;
-  logout.hidden = false;
+    .container {
+      max-width: 900px;
+      margin: 25px auto;
+    }
 
-  await Promise.all([
-    loadProducts(),
-    loadOrders()
-  ]);
-}
+    .card {
+      background: #fff;
+      padding: 24px;
+      margin-bottom: 20px;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+    }
 
-/* PRODUKTET */
+    h1, h2, h3 {
+      margin-top: 0;
+    }
 
-async function loadProducts() {
-  productsAdmin.innerHTML = "<p>Duke ngarkuar produktet...</p>";
+    input, textarea, select {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0 16px;
+      border: 1px solid #d0d5dd;
+      border-radius: 8px;
+      font-size: 16px;
+      background: #fff;
+    }
 
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .order("created_at", { ascending: false });
+    input[type="checkbox"] {
+      display: inline-block;
+      width: auto;
+      margin-right: 8px;
+    }
 
-  if (error) {
-    productsAdmin.textContent = "Gabim te produktet: " + error.message;
-    return;
-  }
+    button {
+      padding: 12px 16px;
+      margin: 4px 4px 4px 0;
+      border: 0;
+      border-radius: 8px;
+      background: #155eef;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
 
-  if (!data || data.length === 0) {
-    productsAdmin.innerHTML = "<p>Nuk ka produkte.</p>";
-    return;
-  }
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
 
-  productsAdmin.innerHTML = data.map(function(p) {
-    const image = p.image_url
-      ? `<img src="${escapeHtml(p.image_url)}" alt=""
-          style="width:80px;height:80px;object-fit:cover">`
-      : "";
+    .secondary {
+      background: #475467;
+    }
 
-    return `
-      <div style="display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #ddd">
-        ${image}
-        <div style="flex:1">
-          <strong>${escapeHtml(p.name)}</strong>
-          <div>${escapeHtml(p.category)}</div>
-          <div>Çmimi: ${money(p.sale_price ?? p.price)}</div>
-          <div>Stoku: ${Number(p.stock || 0)}</div>
-          <div>${p.active ? "Aktiv" : "Joaktiv"}</div>
+    .danger {
+      background: #b42318;
+    }
+
+    .message {
+      margin-top: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    img {
+      max-width: 100%;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+
+      .card {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+
+    <header class="card">
+      <h1>DSS SHOP</h1>
+      <p>Paneli i administrimit</p>
+      <button type="button" id="logout" class="danger" hidden>
+        Dil nga llogaria
+      </button>
+    </header>
+
+    <!-- HYRJA -->
+    <section id="login" class="card">
+      <h2>Hyr në Admin</h2>
+
+      <form id="loginForm">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          autocomplete="username"
+          placeholder="Email-i yt"
+          required
+        >
+
+        <label for="password">Fjalëkalimi</label>
+        <input
+          type="password"
+          id="password"
+          autocomplete="current-password"
+          placeholder="Fjalëkalimi"
+          required
+        >
+
+        <button type="submit">Hyr</button>
+        <button type="button" id="forgotBtn" class="secondary">
+          Harrova fjalëkalimin
+        </button>
+      </form>
+
+      <p id="loginMsg" class="message" role="status"></p>
+    </section>
+
+    <!-- RIVENDOSJA E FJALËKALIMIT -->
+    <section id="reset" class="card" hidden>
+      <h2>Ndrysho fjalëkalimin</h2>
+
+      <form id="resetForm">
+        <label for="newPassword">Fjalëkalimi i ri</label>
+        <input
+          type="password"
+          id="newPassword"
+          autocomplete="new-password"
+          minlength="6"
+          required
+        >
+
+        <label for="newPassword2">Përsërite fjalëkalimin</label>
+        <input
+          type="password"
+          id="newPassword2"
+          autocomplete="new-password"
+          minlength="6"
+          required
+        >
+
+        <button type="submit">Ruaj fjalëkalimin</button>
+      </form>
+
+      <p id="resetMsg" class="message" role="status"></p>
+    </section>
+
+    <!-- PANELI ADMIN -->
+    <section id="panel" hidden>
+
+      <section class="card">
+        <h2>Produktet</h2>
+        <button type="button" id="newBtn">+ Shto produkt</button>
+        <div id="productsAdmin">
+          <p>Produktet do të shfaqen këtu.</p>
         </div>
-        <button type="button" onclick="editProduct('${String(p.id).replace(/'/g, "\\'")}')">Ndrysho</button>
-        <button type="button" onclick="deleteProduct('${String(p.id).replace(/'/g, "\\'")}')">Fshi</button>
-      </div>`;
-  }).join("");
-}
+      </section>
 
-/* SHTO PRODUKT */
+      <!-- FORMA E PRODUKTIT -->
+      <section id="productFormBox" class="card" hidden>
+        <h2 id="formTitle">Shto produkt</h2>
 
-newBtn.addEventListener("click", function() {
-  editingId = null;
-  currentImageUrl = "";
-  productForm.reset();
+        <form id="productForm">
+          <input type="hidden" id="productId">
 
-  document.getElementById("productId").value = "";
-  document.getElementById("productStock").value = 0;
-  document.getElementById("productActive").checked = true;
-  document.getElementById("productFeatured").checked = false;
+          <label for="productName">Emri i produktit</label>
+          <input id="productName" type="text" required>
 
-  formTitle.textContent = "Shto produkt";
-  imagePreview.innerHTML = "";
-  message(productMsg, "");
+          <label for="productSku">Kodi SKU</label>
+          <input id="productSku" type="text">
 
-  productFormBox.hidden = false;
-  productFormBox.scrollIntoView({ behavior: "smooth" });
-});
+          <label for="productCategory">Kategoria</label>
+          <input id="productCategory" type="text" required>
 
-/* NDRYSHO PRODUKT */
+          <label for="productPrice">Çmimi (€)</label>
+          <input
+            id="productPrice"
+            type="number"
+            min="0"
+            step="0.01"
+            required
+          >
 
-window.editProduct = async function(id) {
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("id", id)
-    .single();
+          <label for="productSalePrice">Çmimi promocional (€)</label>
+          <input
+            id="productSalePrice"
+            type="number"
+            min="0"
+            step="0.01"
+          >
 
-  if (error || !data) {
-    alert("Nuk u gjet produkti: " + (error?.message || ""));
-    return;
-  }
+          <label for="productStock">Stoku</label>
+          <input
+            id="productStock"
+            type="number"
+            min="0"
+            step="1"
+            value="0"
+            required
+          >
 
-  editingId = data.id;
-  currentImageUrl = data.image_url || "";
+          <label for="productDescription">Përshkrimi</label>
+          <textarea id="productDescription" rows="4"></textarea>
 
-  document.getElementById("productId").value = data.id;
-  document.getElementById("productName").value = data.name || "";
-  document.getElementById("productSku").value = data.sku || "";
-  document.getElementById("productCategory").value = data.category || "";
-  document.getElementById("productPrice").value = data.price ?? "";
-  document.getElementById("productSalePrice").value = data.sale_price ?? "";
-  document.getElementById("productStock").value = data.stock ?? 0;
-  document.getElementById("productDescription").value = data.description || "";
-  document.getElementById("productFeatured").checked = !!data.featured;
-  document.getElementById("productActive").checked = data.active !== false;
+          <label>
+            <input type="checkbox" id="productFeatured">
+            Produkt i veçuar
+          </label>
 
-  formTitle.textContent = "Ndrysho produktin";
+          <label>
+            <input type="checkbox" id="productActive" checked>
+            Produkt aktiv
+          </label>
 
-  imagePreview.innerHTML = currentImageUrl
-    ? `<img src="${escapeHtml(currentImageUrl)}" alt="" style="max-width:180px">`
-    : "";
+          <label for="productImage">Fotoja e produktit</label>
+          <input
+            id="productImage"
+            type="file"
+            accept="image/*"
+          >
 
-  message(productMsg, "");
-  productFormBox.hidden = false;
-  productFormBox.scrollIntoView({ behavior: "smooth" });
-};
+          <div id="imagePreview"></div>
 
-/* ANULO PRODUKTIN */
+          <p id="productMsg" class="message" role="status"></p>
 
-cancelProduct.addEventListener("click", function() {
-  productFormBox.hidden = true;
-  productForm.reset();
-  editingId = null;
-  currentImageUrl = "";
-  imagePreview.innerHTML = "";
-  message(productMsg, "");
-});
+          <button type="submit">Ruaj produktin</button>
+          <button type="button" id="cancelProduct" class="secondary">
+            Anulo
+          </button>
+        </form>
+      </section>
 
-/* PARAPAMJE FOTOJE */
+      <!-- POROSITË -->
+      <section class="card">
+        <h2>Porositë</h2>
+        <div id="orders">
+          <p>Porositë do të shfaqen këtu.</p>
+        </div>
+      </section>
 
-document.getElementById("productImage").addEventListener("change", function(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+    </section>
+  </main>
 
-  if (!file.type.startsWith("image/")) {
-    message(productMsg, "Zgjidh një foto të vlefshme.", true);
-    event.target.value = "";
-    return;
-  }
+  <!-- NGARKIMI I SKRIPTEVE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./config.js?v=1"></script>
+  <script src="./admin.js?v=10"></script>
 
-  if (file.size > 8 * 1024 * 1024) {
-    message(productMsg, "Fotoja duhet të jetë maksimumi 8 MB.", true);
-    event.target.value = "";
-    return;
-  }
-
-  imagePreview.innerHTML =
-    `<img src="${URL.createObjectURL(file)}" alt="" style="max-width:180px">`;
-});
-
-/* NGARKO FOTO */
-
-async function uploadProductImage(file) {
-  if (!file) return currentImageUrl || "";
-
-  const extension = (file.name.split(".").pop() || "jpg")
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-
-  const path = "products/" + Date.now() + "-" +
-    Math.random().toString(36).slice(2, 9) + "." + extension;
-
-  const { error } = await supabase.storage
-    .from(STORAGE_BUCKET)
-    .upload(path, file, {
-      cacheControl: "3600",
-      upsert: false,
-      contentType: file.type
-    });
-
-  if (error) throw error;
-
-  return supabase.storage
-    .from(STORAGE_BUCKET)
-    .getPublicUrl(path).data.publicUrl;
-}
-
-/* RUAJ PRODUKT */
-
-productForm.addEventListener("submit", async function(event) {
-  event.preventDefault();
-
-  const button = productForm.querySelector('button[type="submit"]');
-  button.disabled = true;
-
-  try {
-    message(productMsg, "Po ruhet produkti...");
-
-    const saleValue = document.getElementById("productSalePrice").value;
-
-    const product = {
-      name: document.getElementById("productName").value.trim(),
-      sku: document.getElementById("productSku").value.trim() || null,
-      category: document.getElementById("productCategory").value.trim(),
-      price: Number(document.getElementById("productPrice").value),
-      sale_price: saleValue === "" ? null : Number(saleValue),
-      stock: Number(document.getElementById("productStock").value),
-      description: document.getElementById("productDescription").value.trim() || null,
-      featured: document.getElementById("productFeatured").checked,
-      active: document.getElementById("productActive").checked
-    };
-
-    const file = document.getElementById("productImage").files[0];
-    product.image_url = await uploadProductImage(file) || null;
-
-    let result;
-
-    if (editingId !== null) {
-      result = await supabase
-        .from("products")
-        .update(product)
-        .eq("id", editingId);
-    } else {
-      result = await supabase
-        .from("products")
-        .insert(product);
-    }
-
-    if (result.error) throw result.error;
-
-    message(productMsg, "Produkti u ruajt me sukses.");
-    productForm.reset();
-    editingId = null;
-    currentImageUrl = "";
-    imagePreview.innerHTML = "";
-    await loadProducts();
-
-  } catch (error) {
-    message(productMsg, "Gabim: " + error.message, true);
-  } finally {
-    button.disabled = false;
-  }
-});
-
-/* FSHI PRODUKT */
-
-window.deleteProduct = async function(id) {
-  if (!confirm("A dëshiron ta fshish këtë produkt?")) return;
-
-  const { error } = await supabase
-    .from("products")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    alert("Gabim: " + error.message);
-    return;
-  }
-
-  await loadProducts();
-};
-
-/* POROSITË */
-
-async function loadOrders() {
-  orders.innerHTML = "<p>Duke ngarkuar porositë...</p>";
-
-  const { data, error } = await supabase
-    .from("orders")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    orders.textContent = "Gabim te porositë: " + error.message;
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    orders.innerHTML = "<p>Nuk ka porosi.</p>";
-    return;
-  }
-
-  orders.innerHTML = data.map(function(order) {
-    return `
-      <div style="padding:12px 0;border-bottom:1px solid #ddd">
-        <strong>Porosia #${escapeHtml(order.id)}</strong>
-        <div>${escapeHtml(order.customer_name || "")}</div>
-        <div>Tel: ${escapeHtml(order.phone || "")}</div>
-        <div>Adresa: ${escapeHtml(order.address || "")}</div>
-        <div>Totali: ${money(order.total)}</div>
-        <label>
-          Statusi:
-          <select onchange="updateOrderStatus('${String(order.id).replace(/'/g, "\\'")}', this.value)">
-            ${["new", "processing", "completed", "cancelled"].map(function(status) {
-              return `<option value="${status}" ${order.status === status ? "selected" : ""}>${status}</option>`;
-            }).join("")}
-          </select>
-        </label>
-      </div>`;
-  }).join("");
-}
-
-window.updateOrderStatus = async function(id, status) {
-  const { error } = await supabase
-    .from("orders")
-    .update({ status: status })
-    .eq("id", id);
-
-  if (error) {
-    alert("Gabim gjatë ndryshimit të statusit: " + error.message);
-  }
-};
-
-/* NIS ADMIN */
-
-init();
+</body>
+</html>
