@@ -75,7 +75,26 @@ let savingProduct = false;
 
 /* KONTROLLI I ELEMENTEVE */
 
+
 const requiredElements = [
+  login,
+  reset,
+  panel,
+  logout,
+  loginForm,
+  $("email"),
+  $("password")
+];
+
+if (requiredElements.some((element) => !element)) {
+  message(
+    loginMsg,
+    "Gabim: Mungon një element i hyrjes në admin.html.",
+    true
+  );
+  throw new Error("Elemente të hyrjes mungojnë.");
+}
+
   login, reset, panel, logout, loginForm, forgotBtn, resetForm,
   productsAdmin, orders, newBtn, productFormBox, productForm,
   cancelProduct, formTitle, productMsg, imagePreview,
