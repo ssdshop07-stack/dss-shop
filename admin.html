@@ -2,7 +2,7 @@
 <html lang="sq">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DSS Admin</title>
 
   <link rel="stylesheet" href="style.css">
@@ -20,22 +20,23 @@
       <span>ADMIN</span>
     </a>
 
-    <button id="logout" hidden>Dalje</button>
+    <button id="logout" type="button" hidden>Dalje</button>
   </div>
 </header>
 
 <main class="wrap admin">
 
-  <!-- LOGIN -->
+  <!-- HYRJA -->
   <section id="login">
     <h1>Hyrje Admin</h1>
     <p>Vetëm administratori i DSS mund të hyjë.</p>
 
-    <form id="loginForm" onsubmit="return dssAdminLogin(event)">
+    <form id="loginForm">
       <input
         id="email"
         type="email"
         placeholder="Email"
+        autocomplete="username"
         required
       >
 
@@ -43,21 +44,21 @@
         id="password"
         type="password"
         placeholder="Fjalëkalimi"
+        autocomplete="current-password"
         required
       >
 
-      <button type="submit">Hyr</button>
+      <button id="loginBtn" type="submit">Hyr</button>
     </form>
 
     <button id="forgotBtn" type="button">
       Harrova fjalëkalimin
     </button>
 
-    <p id="loginMsg"></p>
+    <p id="loginMsg" role="status"></p>
   </section>
 
-
-  <!-- RESET PASSWORD -->
+  <!-- RIKUPERIMI I FJALËKALIMIT -->
   <section id="reset" hidden>
     <h1>Vendos fjalëkalim të ri</h1>
 
@@ -78,41 +79,25 @@
         required
       >
 
-      <button type="submit">
-        Ruaj fjalëkalimin
-      </button>
+      <button type="submit">Ruaj fjalëkalimin</button>
     </form>
 
-    <p id="resetMsg"></p>
+    <p id="resetMsg" role="status"></p>
   </section>
 
-
-  <!-- ADMIN PANEL -->
+  <!-- PANELI ADMIN -->
   <section id="panel" hidden>
-
     <div class="toolbar">
       <h1>Paneli DSS</h1>
-
-      <button id="newBtn" type="button">
-        + Produkt
-      </button>
+      <button id="newBtn" type="button">+ Produkt</button>
     </div>
 
-
-    <!-- PRODUCT FORM -->
+    <!-- FORMA E PRODUKTIT -->
     <section id="productFormBox" hidden>
-
-      <h2 id="formTitle">
-        Shto produkt
-      </h2>
+      <h2 id="formTitle">Shto produkt</h2>
 
       <form id="productForm">
-
-        <input
-          type="hidden"
-          id="productId"
-        >
-
+        <input type="hidden" id="productId">
 
         <label>
           Emri i produktit
@@ -124,7 +109,6 @@
           >
         </label>
 
-
         <label>
           SKU
           <input
@@ -133,7 +117,6 @@
             placeholder="p.sh. DSS-001"
           >
         </label>
-
 
         <label>
           Kategoria
@@ -144,7 +127,6 @@
             required
           >
         </label>
-
 
         <label>
           Çmimi (€)
@@ -158,7 +140,6 @@
           >
         </label>
 
-
         <label>
           Çmimi promocional (€)
           <input
@@ -169,7 +150,6 @@
             placeholder="89.00"
           >
         </label>
-
 
         <label>
           Stoku
@@ -183,7 +163,6 @@
           >
         </label>
 
-
         <label>
           Përshkrimi
           <textarea
@@ -192,7 +171,6 @@
             placeholder="Përshkrimi i produktit..."
           ></textarea>
         </label>
-
 
         <label>
           Foto e produktit
@@ -205,108 +183,35 @@
 
         <div id="imagePreview"></div>
 
-
         <label>
-          <input
-            id="productFeatured"
-            type="checkbox"
-          >
+          <input id="productFeatured" type="checkbox">
           Produkt i veçuar
         </label>
 
-
         <label>
-          <input
-            id="productActive"
-            type="checkbox"
-            checked
-          >
+          <input id="productActive" type="checkbox" checked>
           Produkt aktiv
         </label>
 
-
         <div class="form-actions">
-
-          <button type="submit">
-            💾 Ruaj produktin
-          </button>
-
-          <button
-            id="cancelProduct"
-            type="button"
-          >
-            Anulo
-          </button>
-
+          <button type="submit">💾 Ruaj produktin</button>
+          <button id="cancelProduct" type="button">Anulo</button>
         </div>
 
-        <p id="productMsg"></p>
-
+        <p id="productMsg" role="status"></p>
       </form>
-
     </section>
 
-
-    <!-- PRODUCTS -->
     <h2>Produktet</h2>
-
     <div id="productsAdmin"></div>
 
-
-    <!-- ORDERS -->
     <h2>Porositë</h2>
-
     <div id="orders"></div>
-
   </section>
 
 </main>
-<script>
-async function dssAdminLogin(event) {
-  event.preventDefault();
 
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  const msg = document.getElementById("loginMsg");
-
-  msg.textContent = "Duke hyrë...";
-  msg.style.color = "";
-
-  try {
-    if (!window.supabase) {
-      throw new Error("Supabase nuk u ngarkua.");
-    }
-
-    const client = window.supabase.createClient(
-      window.DSS_SUPABASE_URL,
-      window.DSS_SUPABASE_KEY
-    );
-
-    const { error } = await client.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) {
-      msg.textContent = error.message;
-      msg.style.color = "#b42318";
-      return false;
-    }
-
-    msg.textContent = "Hyrja u krye me sukses.";
-    window.location.reload();
-
-  } catch (err) {
-    msg.textContent = err.message || "Gabim gjatë hyrjes.";
-    msg.style.color = "#b42318";
-  }
-
-  return false;
-}
-</script>
-<script>
-alert("VERSIONI I RI U NGARKUA");
-</script>
+<script src="admin.js?v=6"></script>
 
 </body>
 </html>
