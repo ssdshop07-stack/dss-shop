@@ -1,3 +1,4 @@
+
 "use strict";
 
 /* DSS SHOP - ADMIN */
@@ -75,7 +76,6 @@ let savingProduct = false;
 
 /* KONTROLLI I ELEMENTEVE */
 
-
 const requiredElements = [
   login,
   reset,
@@ -93,25 +93,6 @@ if (requiredElements.some((element) => !element)) {
     true
   );
   throw new Error("Elemente të hyrjes mungojnë.");
-}
-
-  login, reset, panel, logout, loginForm, forgotBtn, resetForm,
-  productsAdmin, orders, newBtn, productFormBox, productForm,
-  cancelProduct, formTitle, productMsg, imagePreview,
-  $("email"), $("password"), $("newPassword"), $("newPassword2"),
-  $("productId"), $("productName"), $("productSku"),
-  $("productCategory"), $("productPrice"), $("productSalePrice"),
-  $("productStock"), $("productDescription"), $("productFeatured"),
-  $("productActive"), $("productImage")
-];
-
-if (requiredElements.some((element) => !element)) {
-  message(
-    loginMsg,
-    "Gabim: Mungon një element në admin.html. Kontrollo HTML-në.",
-    true
-  );
-  throw new Error("Elemente të admin.html mungojnë.");
 }
 
 /* HYRJA */
