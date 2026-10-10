@@ -204,13 +204,14 @@ $("#orderForm").onsubmit = async (e) => {
       return;
     }
 
-    const items = cart.map(x => ({
-      order_id: data.id,
-      product_id: x.id,
-      product_name: x.name,
-      quantity: x.qty,
-      unit_price: x.price
-    }));
+const items = cart.map(x => ({
+  order_id: data.id,
+  product_id: x.id,
+  product_name: x.name,
+  quantity: x.qty,
+  price: x.price,
+  subtotal: x.price * x.qty
+}));
 
     const { error: itemsError } = await sb
       .from("order_items")
