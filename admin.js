@@ -1,4 +1,3 @@
-
 "use strict";
 
 /* DSS SHOP - ADMIN */
@@ -83,21 +82,33 @@ const requiredElements = [
   logout,
   loginForm,
   $("email"),
-  $("password")
+  $("password"),
+  forgotBtn,
+  resetForm,
+  productsAdmin,
+  orders,
+  newBtn,
+  productFormBox,
+  productForm,
+  cancelProduct,
+  formTitle,
+  productMsg,
+  imagePreview,
+  $("productImage")
 ];
 
 if (requiredElements.some((element) => !element)) {
   message(
     loginMsg,
-    "Gabim: Mungon një element i hyrjes në admin.html.",
+    "Gabim: Mungon një element në admin.html.",
     true
   );
-  throw new Error("Elemente të hyrjes mungojnë.");
+  throw new Error("Elemente të Admin-it mungojnë.");
 }
 
-/* HYRJA */
+/* HYRJA — PJESA E RREGULLUAR */
 
-message(loginMsg, "Kodi i hyrjes u aktivizua.");
+loginForm.addEventListener("submit", async function(event) {
   event.preventDefault();
 
   if (loginInProgress) return;
@@ -109,13 +120,15 @@ message(loginMsg, "Kodi i hyrjes u aktivizua.");
   const button = loginForm.querySelector('button[type="submit"]');
 
   if (button) button.disabled = true;
-  message(loginMsg, "Duke hyrë...");
+
+  message(loginMsg, "Po kontrollohen të dhënat...");
 
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+    const { data, error } =
+      await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
 
     if (error) throw error;
 
@@ -127,7 +140,11 @@ message(loginMsg, "Kodi i hyrjes u aktivizua.");
 
     await showPanel();
   } catch (error) {
-    message(loginMsg, error.message || "Gabim gjatë hyrjes.", true);
+    message(
+      loginMsg,
+      error.message || "Gabim gjatë hyrjes.",
+      true
+    );
   } finally {
     loginInProgress = false;
     if (button) button.disabled = false;
@@ -211,6 +228,7 @@ logout.addEventListener("click", async function() {
     reset.hidden = true;
     logout.hidden = true;
     loginForm.reset();
+
     message(loginMsg, "Dole nga llogaria.");
   } catch (error) {
     alert("Gabim gjatë daljes: " + error.message);
@@ -244,6 +262,8 @@ async function init() {
   panel.hidden = true;
   reset.hidden = true;
   logout.hidden = true;
+
+  message(loginMsg, "Admin.js u ngarkua.");
 
   try {
     const { data, error } = await supabase.auth.getSession();
