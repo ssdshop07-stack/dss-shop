@@ -516,7 +516,7 @@ productForm.addEventListener("submit", async function(event) {
 
     const product = {
       name: $("productName").value.trim(),
-      sku: $("productSku").value.trim() || null,
+      sku: $("productSku").value.trim() || ("DSS-" + Date.now()),
       category: $("productCategory").value.trim(),
       price,
       sale_price: saleValue === "" ? null : Number(saleValue),
