@@ -272,8 +272,8 @@
 
   <!-- NGARKIMI I SKRIPTEVE -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./config.js?v=1"></script>
-  <script src="./admin.js?v=12"></script>
+  <script src="./config.js?v=99"></script>
+  <script src="./admin.js?v=99"></script>
   
 <script>
 window.addEventListener("error", function(e) {
@@ -281,16 +281,7 @@ window.addEventListener("error", function(e) {
   if (m) m.textContent = "Gabim JavaScript: " + e.message;
 });
 
-document.addEventListener("submit", function(e) {
-  if (e.target && e.target.id === "loginForm") {
-    setTimeout(function() {
-      var m = document.getElementById("loginMsg");
-      if (m && !m.textContent.trim()) {
-        m.textContent = "Formulari u shtyp, por kodi i hyrjes nuk dha përgjigje.";
-      }
-    }, 1000);
-  }
-}, true);
+
 </script>
 
 
