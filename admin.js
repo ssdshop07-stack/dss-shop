@@ -1,3 +1,5 @@
+(function () {
+function startAdmin() {
 "use strict";
 
 /* DSS SHOP - ADMIN */
@@ -38,7 +40,7 @@ if (!window.DSS_SUPABASE_URL || !window.DSS_SUPABASE_KEY) {
   throw new Error("Supabase config mungon.");
 }
 
-const supabase = window.supabase.createClient(
+const dssClient = window.supabase.createClient(
   window.DSS_SUPABASE_URL,
   window.DSS_SUPABASE_KEY
 );
@@ -71,6 +73,7 @@ const imagePreview = $("imagePreview");
 let editingId = null;
 let currentImageUrl = "";
 let loginInProgress = false;
+let passwordRecovery = new URLSearchParams(window.location.hash.slice(1)).get("type") === "recovery";
 let savingProduct = false;
 
 /* KONTROLLI I ELEMENTEVE */
@@ -103,7 +106,7 @@ if (requiredElements.some((element) => !element)) {
     "Gabim: Mungon një element në admin.html.",
     true
   );
-  throw new Error("Elemente të Admin-it mungojnë.");
+  throw new Error("Elemente të Admin-it mungojnë: " + requiredElements.map((element, index) => element ? null : index).filter((index) => index !== null).join(", "));
 }
 
 /* HYRJA — PJESA E RREGULLUAR */
@@ -125,14 +128,14 @@ loginForm.addEventListener("submit", async function(event) {
 
   try {
     const { data, error } =
-      await supabase.auth.signInWithPassword({
+      await dssClient.auth.signInWithPassword({
         email: email,
         password: password
       });
 
     if (error) throw error;
 
-    if (!data.session) {
+    if (!data?.session) {
       throw new Error("Hyrja nuk u konfirmua.");
     }
 
@@ -165,7 +168,7 @@ forgotBtn.addEventListener("click", async function() {
   message(loginMsg, "Po dërgohet email-i...");
 
   try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await dssClient.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.href.split("#")[0]
     });
 
@@ -200,10 +203,11 @@ resetForm.addEventListener("submit", async function(event) {
   }
 
   try {
-    const { error } = await supabase.auth.updateUser({ password });
+    const { error } = await dssClient.auth.updateUser({ password });
 
     if (error) throw error;
 
+    passwordRecovery = false;
     message(msg, "Fjalëkalimi u ndryshua me sukses.");
     resetForm.reset();
     reset.hidden = true;
@@ -219,7 +223,7 @@ logout.addEventListener("click", async function() {
   logout.disabled = true;
 
   try {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await dssClient.auth.signOut();
 
     if (error) throw error;
 
@@ -239,8 +243,9 @@ logout.addEventListener("click", async function() {
 
 /* SESIONI */
 
-supabase.auth.onAuthStateChange(function(event) {
+dssClient.auth.onAuthStateChange(function(event) {
   if (event === "PASSWORD_RECOVERY") {
+    passwordRecovery = true;
     login.hidden = true;
     panel.hidden = true;
     logout.hidden = true;
@@ -266,11 +271,14 @@ async function init() {
   message(loginMsg, "Admin.js u ngarkua.");
 
   try {
-    const { data, error } = await supabase.auth.getSession();
+    const { data, error } = await dssClient.auth.getSession();
 
     if (error) throw error;
 
-    if (data.session) {
+    if (passwordRecovery) {
+      login.hidden = true;
+      reset.hidden = false;
+    } else if (data.session) {
       await showPanel();
     }
   } catch (error) {
@@ -302,7 +310,7 @@ async function loadProducts() {
   productsAdmin.textContent = "Duke ngarkuar produktet...";
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await dssClient
       .from("products")
       .select("*")
       .order("created_at", { ascending: false });
@@ -372,7 +380,7 @@ newBtn.addEventListener("click", function() {
 
 window.editProduct = async function(id) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await dssClient
       .from("products")
       .select("*")
       .eq("id", id)
@@ -460,7 +468,7 @@ async function uploadProductImage(file) {
   const path = "products/" + Date.now() + "-" +
     Math.random().toString(36).slice(2, 9) + "." + extension;
 
-  const { error } = await supabase.storage
+  const { error } = await dssClient.storage
     .from(STORAGE_BUCKET)
     .upload(path, file, {
       cacheControl: "3600",
@@ -470,7 +478,7 @@ async function uploadProductImage(file) {
 
   if (error) throw error;
 
-  return supabase.storage
+  return dssClient.storage
     .from(STORAGE_BUCKET)
     .getPublicUrl(path).data.publicUrl;
 }
@@ -528,12 +536,12 @@ productForm.addEventListener("submit", async function(event) {
     let result;
 
     if (editingId !== null) {
-      result = await supabase
+      result = await dssClient
         .from("products")
         .update(product)
         .eq("id", editingId);
     } else {
-      result = await supabase
+      result = await dssClient
         .from("products")
         .insert(product);
     }
@@ -565,7 +573,7 @@ window.deleteProduct = async function(id) {
   if (!confirm("A dëshiron ta fshish këtë produkt?")) return;
 
   try {
-    const { error } = await supabase
+    const { error } = await dssClient
       .from("products")
       .delete()
       .eq("id", id);
@@ -584,7 +592,7 @@ async function loadOrders() {
   orders.textContent = "Duke ngarkuar porositë...";
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await dssClient
       .from("orders")
       .select("*")
       .order("created_at", { ascending: false });
@@ -633,7 +641,7 @@ window.updateOrderStatus = async function(id, status) {
   if (!allowed.includes(status)) return;
 
   try {
-    const { error } = await supabase
+    const { error } = await dssClient
       .from("orders")
       .update({ status })
       .eq("id", id);
@@ -650,3 +658,10 @@ window.updateOrderStatus = async function(id, status) {
 /* NIS ADMIN */
 
 init();
+}
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", startAdmin, { once: true });
+} else {
+  startAdmin();
+}
+})();
