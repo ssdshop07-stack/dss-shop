@@ -45,7 +45,7 @@ const dssClient = window.supabase.createClient(
   window.DSS_SUPABASE_KEY
 );
 
-const STORAGE_BUCKET = "product-images";
+const STORAGE_BUCKET = "product-image";
 
 /* ELEMENTET */
 
