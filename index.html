@@ -1,1 +1,102 @@
-<!doctype html><html lang="sq"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DSS — Security & Technology</title><link rel="stylesheet" href="style.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script></head><body><header><div class="wrap nav"><a class="brand" href="."><b>DSS</b><span>SECURITY & TECHNOLOGY</span></a><nav><a href="#products">Produktet</a><a href="admin.html">Admin</a></nav><button id="cartBtn">Shporta <span id="cartCount">0</span></button></div></header><main><section class="hero wrap"><div><p class="eyebrow">SIGURI • TEKNOLOGJI • BESUESHMËRI</p><h1>Zgjidhje profesionale për sigurinë.</h1><p>Kamera, alarm, akses, rrjetëzim dhe pajisje profesionale për biznes dhe shtëpi.</p><a class="cta" href="#products">Shiko produktet</a></div></section><section id="products" class="wrap"><div class="toolbar"><h2>Produktet</h2><input id="search" placeholder="Kërko produkt..."><select id="sort"><option value="default">Renditja</option><option value="low">Çmimi: ulët → lart</option><option value="high">Çmimi: lart → ulët</option></select></div><div id="grid" class="grid"></div></section></main><aside id="cart" class="drawer"><div class="drawerHead"><h2>Shporta</h2><button id="closeCart">×</button></div><div id="cartItems"></div><div class="total">Total: <b id="total">€0.00</b></div><form id="orderForm"><input name="name" placeholder="Emri dhe mbiemri" required><input name="phone" placeholder="Telefoni" required><input name="address" placeholder="Adresa" required><button>Porosit</button></form></aside><div id="toast"></div><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="sq">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111827">
+  <meta name="description" content="DSS Shop — Security & Technology">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="DSS Shop">
+
+  <title>DSS Shop — Security & Technology</title>
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+</head>
+
+<body>
+  <header>
+    <div class="wrap nav">
+      <a class="brand" href="./">
+        <b>DSS</b>
+        <span>SECURITY & TECHNOLOGY</span>
+      </a>
+
+      <nav>
+        <a href="#products">Produktet</a>
+        <a href="admin.html">Admin</a>
+      </nav>
+
+      <button id="cartBtn" type="button">
+        Shporta <span id="cartCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <div>
+        <p class="eyebrow">SIGURI • TEKNOLOGJI • BESUESHMËRI</p>
+        <h1>Zgjidhje profesionale për sigurinë.</h1>
+        <p>
+          Kamera, alarm, akses, rrjetëzim dhe pajisje profesionale
+          për biznes dhe shtëpi.
+        </p>
+        <a class="cta" href="#products">Shiko produktet</a>
+      </div>
+    </section>
+
+    <section id="products" class="wrap">
+      <div class="toolbar">
+        <h2>Produktet</h2>
+        <input id="search" type="search" placeholder="Kërko produkt...">
+        <select id="sort">
+          <option value="default">Renditja</option>
+          <option value="low">Çmimi: ulët → lart</option>
+          <option value="high">Çmimi: lart → ulët</option>
+        </select>
+      </div>
+
+      <div id="grid" class="grid"></div>
+    </section>
+  </main>
+
+  <aside id="cart" class="drawer">
+    <div class="drawerHead">
+      <h2>Shporta</h2>
+      <button id="closeCart" type="button" aria-label="Mbyll shportën">×</button>
+    </div>
+
+    <div id="cartItems"></div>
+
+    <div class="total">
+      Total: <b id="total">€0.00</b>
+    </div>
+
+    <form id="orderForm">
+      <input name="name" placeholder="Emri dhe mbiemri" required>
+      <input name="phone" type="tel" placeholder="Telefoni" required>
+      <input name="address" placeholder="Adresa" required>
+      <button type="submit">Porosit</button>
+    </form>
+  </aside>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("./service-worker.js")
+          .catch(function (error) {
+            console.error("Service Worker error:", error);
+          });
+      });
+    }
+  </script>
+</body>
+</html>
