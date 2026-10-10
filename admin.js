@@ -97,7 +97,7 @@ if (requiredElements.some((element) => !element)) {
 
 /* HYRJA */
 
-loginForm.addEventListener("submit", async function(event) {
+message(loginMsg, "Kodi i hyrjes u aktivizua.");
   event.preventDefault();
 
   if (loginInProgress) return;
