@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>DSS SHOP | Admin</title>
+  <title>SSD Shop | Admin</title>
 
   <style>
     * {
@@ -13,7 +13,7 @@
 
     body {
       margin: 0;
-      padding: 20px;
+      padding: 16px;
       font-family: Arial, sans-serif;
       background: #f3f5f9;
       color: #172033;
@@ -21,19 +21,15 @@
 
     .container {
       max-width: 900px;
-      margin: 25px auto;
+      margin: 20px auto;
     }
 
     .card {
-      background: #fff;
-      padding: 24px;
-      margin-bottom: 20px;
-      border-radius: 14px;
-      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
-    }
-
-    h1, h2, h3 {
-      margin-top: 0;
+      background: white;
+      padding: 20px;
+      margin-bottom: 18px;
+      border-radius: 12px;
+      box-shadow: 0 3px 15px #0000000d;
     }
 
     input, textarea, select {
@@ -44,7 +40,7 @@
       border: 1px solid #d0d5dd;
       border-radius: 8px;
       font-size: 16px;
-      background: #fff;
+      background: white;
     }
 
     input[type="checkbox"] {
@@ -66,7 +62,6 @@
 
     button:disabled {
       opacity: 0.6;
-      cursor: wait;
     }
 
     .secondary {
@@ -92,11 +87,11 @@
 
     @media (max-width: 600px) {
       body {
-        padding: 10px;
+        padding: 8px;
       }
 
       .card {
-        padding: 16px;
+        padding: 15px;
       }
     }
   </style>
@@ -106,14 +101,18 @@
   <main class="container">
 
     <header class="card">
-      <h1>DSS SHOP</h1>
+      <h1>SSD SHOP</h1>
       <p>Paneli i administrimit</p>
-      <button type="button" id="logout" class="danger" hidden>
+
+      <button
+        type="button"
+        id="logout"
+        class="danger"
+        hidden>
         Dil nga llogaria
       </button>
     </header>
 
-    <!-- HYRJA -->
     <section id="login" class="card">
       <h2>Hyr në Admin</h2>
 
@@ -137,7 +136,11 @@
         >
 
         <button type="submit">Hyr</button>
-        <button type="button" id="forgotBtn" class="secondary">
+
+        <button
+          type="button"
+          id="forgotBtn"
+          class="secondary">
           Harrova fjalëkalimin
         </button>
       </form>
@@ -145,7 +148,6 @@
       <p id="loginMsg" class="message" role="status"></p>
     </section>
 
-    <!-- RIVENDOSJA E FJALËKALIMIT -->
     <section id="reset" class="card" hidden>
       <h2>Ndrysho fjalëkalimin</h2>
 
@@ -159,7 +161,9 @@
           required
         >
 
-        <label for="newPassword2">Përsërite fjalëkalimin</label>
+        <label for="newPassword2">
+          Përsërite fjalëkalimin
+        </label>
         <input
           type="password"
           id="newPassword2"
@@ -174,18 +178,20 @@
       <p id="resetMsg" class="message" role="status"></p>
     </section>
 
-    <!-- PANELI ADMIN -->
     <section id="panel" hidden>
 
       <section class="card">
         <h2>Produktet</h2>
-        <button type="button" id="newBtn">+ Shto produkt</button>
+
+        <button type="button" id="newBtn">
+          + Shto produkt
+        </button>
+
         <div id="productsAdmin">
           <p>Produktet do të shfaqen këtu.</p>
         </div>
       </section>
 
-      <!-- FORMA E PRODUKTIT -->
       <section id="productFormBox" class="card" hidden>
         <h2 id="formTitle">Shto produkt</h2>
 
@@ -210,7 +216,9 @@
             required
           >
 
-          <label for="productSalePrice">Çmimi promocional (€)</label>
+          <label for="productSalePrice">
+            Çmimi promocional (€)
+          </label>
           <input
             id="productSalePrice"
             type="number"
@@ -253,15 +261,19 @@
           <p id="productMsg" class="message" role="status"></p>
 
           <button type="submit">Ruaj produktin</button>
-          <button type="button" id="cancelProduct" class="secondary">
+
+          <button
+            type="button"
+            id="cancelProduct"
+            class="secondary">
             Anulo
           </button>
         </form>
       </section>
 
-      <!-- POROSITË -->
       <section class="card">
         <h2>Porositë</h2>
+
         <div id="orders">
           <p>Porositë do të shfaqen këtu.</p>
         </div>
@@ -270,20 +282,19 @@
     </section>
   </main>
 
-  <!-- NGARKIMI I SKRIPTEVE -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./config.js?v=99"></script>
-  <script src="./admin.js?v=99"></script>
-  
-<script>
-window.addEventListener("error", function(e) {
-  var m = document.getElementById("loginMsg");
-  if (m) m.textContent = "Gabim JavaScript: " + e.message;
-});
+  <script src="./config.js?v=100"></script>
+  <script src="./admin.js?v=100"></script>
 
+  <script>
+    window.addEventListener("error", function(event) {
+      var message = document.getElementById("loginMsg");
 
-</script>
-
-
+      if (message) {
+        message.textContent =
+          "Gabim JavaScript: " + event.message;
+      }
+    });
+  </script>
 </body>
 </html>
