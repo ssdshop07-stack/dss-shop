@@ -1,4 +1,3 @@
-
 const sb = window.supabase.createClient(
   window.DSS_SUPABASE_URL,
   window.DSS_SUPABASE_KEY
@@ -9,15 +8,147 @@ let cart = JSON.parse(localStorage.getItem("dss_cart") || "[]");
 let selectedCategory = "all";
 let currentUser = null;
 let accountMode = "signup";
+let language = localStorage.getItem("dss_language") || "sq";
 
 const $ = (s) => document.querySelector(s);
 
+const translations = {
+  sq: {
+    products: "Produktet", admin: "Admin", categories: "Kategoritë", all: "Të gjitha",
+    search: "Kërko produkt...", sort: "Renditja", low: "Çmimi: ulët → lart",
+    high: "Çmimi: lart → ulët", cart: "Shporta", close: "Mbyll shportën",
+    total: "Total:", name: "Emri dhe mbiemri", phone: "Telefoni", address: "Adresa",
+    order: "Porosit", account: "Llogaria DSS", accountIntro: "Regjistrohu ose hyr për të përfituar 10% ulje.",
+    email: "Email-i", password: "Fjalëkalimi (minimumi 6 karaktere)",
+    signup: "Regjistrohu", login: "Hyr", switchLogin: "Kam llogari — Hyr",
+    switchSignup: "Nuk kam llogari — Regjistrohu", logout: "Dil nga llogaria",
+    closeAccount: "Mbyll ×", home: "Kryesore", profile: "Profili",
+    add: "Shto në shportë", emptyCart: "Shporta është bosh.",
+    noProducts: "Nuk u gjetën produkte në këtë kategori.",
+    added: "U shtua në shportë", emptyNotice: "Shporta është bosh",
+    loggedIn: "Je i/e kyçur si", discountAll: ". Përfiton 10% ulje në të gjitha produktet.",
+    signupIntro: "Krijo llogari për të përfituar 10% ulje në të gjitha produktet.",
+    loginIntro: "Hyr në llogarinë tënde për të përfituar 10% ulje.",
+    enterBoth: "Shkruaj email-in dhe fjalëkalimin.", wait: "Prit...",
+    registered: "Regjistrimi u krye. Kontrollo email-in për konfirmim, pastaj hyr në llogari.",
+    signupSuccess: "Llogaria u krijua me sukses! Ke 10% ulje.",
+    loginSuccess: "U kyçe me sukses! Tani ke 10% ulje.",
+    loggedOut: "Dole nga llogaria. Çmimet tani janë pa ulje.",
+    logoutError: "Gabim gjatë daljes: ", orderSuccess: "Porosia u regjistrua! Nr. ",
+    orderError: "Gabim Supabase: ", orderCode: " | Kodi: ", noCode: "pa kod",
+    orderFail: "Gabim gjatë porosisë: ", unknown: "Gabim i panjohur",
+    registerError: "Gabim: ", accountMissing: "Nuk u gjet formulari i llogarisë në index.html.",
+    discount: "ulje klienti: 10%"
+  },
+  en: {
+    products: "Products", admin: "Admin", categories: "Categories", all: "All",
+    search: "Search products...", sort: "Sort by", low: "Price: low → high",
+    high: "Price: high → low", cart: "Cart", close: "Close cart",
+    total: "Total:", name: "Full name", phone: "Phone", address: "Address",
+    order: "Place order", account: "DSS Account", accountIntro: "Register or sign in to get 10% off.",
+    email: "Email", password: "Password (minimum 6 characters)",
+    signup: "Register", login: "Sign in", switchLogin: "I have an account — Sign in",
+    switchSignup: "I don't have an account — Register", logout: "Sign out",
+    closeAccount: "Close ×", home: "Home", profile: "Profile",
+    add: "Add to cart", emptyCart: "Your cart is empty.",
+    noProducts: "No products found in this category.",
+    added: "Added to cart", emptyNotice: "Your cart is empty",
+    loggedIn: "Signed in as", discountAll: ". You get 10% off all products.",
+    signupIntro: "Create an account to get 10% off all products.",
+    loginIntro: "Sign in to your account to get 10% off.",
+    enterBoth: "Enter your email and password.", wait: "Please wait...",
+    registered: "Registration complete. Check your email to confirm, then sign in.",
+    signupSuccess: "Account created successfully! You get 10% off.",
+    loginSuccess: "Signed in successfully! You now get 10% off.",
+    loggedOut: "You signed out. Prices are now shown without the discount.",
+    logoutError: "Sign-out error: ", orderSuccess: "Order registered! No. ",
+    orderError: "Supabase error: ", orderCode: " | Code: ", noCode: "no code",
+    orderFail: "Order error: ", unknown: "Unknown error",
+    registerError: "Error: ", accountMissing: "Account form not found in index.html.",
+    discount: "customer discount: 10%"
+  }
+};
+
+const t = (key) => (translations[language] || translations.sq)[key] || translations.sq[key] || key;
+
+function applyLanguage() {
+  document.documentElement.lang = language;
+  const setText = (selector, value) => {
+    const el = $(selector);
+    if (el) el.textContent = value;
+  };
+  setText("#navProducts", t("products"));
+  setText("#navAdmin", t("admin"));
+  setText("#categoriesTitle", t("categories"));
+  setText("#productsTitle", t("products"));
+  setText("#cartTitle", t("cart"));
+  setText("#orderSubmit", t("order"));
+  setText("#accountTitle", t("account"));
+  setText("#accountClose", t("closeAccount"));
+  setText("#accountSubmit", currentUser ? t("signup") : (accountMode === "signup" ? t("signup") : t("login")));
+  setText("#accountSwitch", accountMode === "signup" ? t("switchLogin") : t("switchSignup"));
+  setText("#accountLogout", t("logout"));
+  setText("#homeLabel", t("home"));
+  setText("#bottomCartLabel", t("cart"));
+  setText("#profileLabel", t("profile"));
+  const search = $("#search");
+  if (search) {
+    search.placeholder = t("search");
+    search.setAttribute("aria-label", t("search"));
+  }
+  const sort = $("#sort");
+  if (sort && sort.options.length >= 3) {
+    sort.options[0].textContent = t("sort");
+    sort.options[1].textContent = t("low");
+    sort.options[2].textContent = t("high");
+  }
+  const name = $('#orderForm input[name="name"]');
+  const phone = $('#orderForm input[name="phone"]');
+  const address = $('#orderForm input[name="address"]');
+  if (name) name.placeholder = t("name");
+  if (phone) phone.placeholder = t("phone");
+  if (address) address.placeholder = t("address");
+  const email = $("#accountEmail");
+  const password = $("#accountPassword");
+  if (email) email.placeholder = t("email");
+  if (password) {
+    password.placeholder = t("password");
+    password.autocomplete = accountMode === "signup" ? "new-password" : "current-password";
+  }
+  document.querySelectorAll(".category-btn").forEach((button) => {
+    const span = button.querySelector("span");
+    if (!span) return;
+    const category = button.dataset.category;
+    if (category === "all") span.textContent = t("all");
+    else if (language === "en") span.textContent = ({
+      "Kamera IP": "IP Cameras", "Kamera Wi-Fi": "Wi-Fi Cameras",
+      "Kamera analoge": "Analog Cameras", "DVR/XVR": "DVR/XVR",
+      "NVR": "NVR", "Komplete kamerash": "Camera Kits",
+      "Alarme": "Alarms", "Kontroll aksesi": "Access Control",
+      "Interfonë": "Intercoms", "Pajisje rrjeti": "Network Devices",
+      "Aksesorë": "Accessories"
+    })[category] || category;
+    else span.textContent = category;
+  });
+  const langButton = $("#languageBtn");
+  if (langButton) {
+    langButton.textContent = language === "sq" ? "SQ | EN" : "EN | SQ";
+    langButton.setAttribute("aria-label", language === "sq" ? "Switch to English" : "Kalo në shqip");
+  }
+  updateAccountUI();
+  render();
+  renderCart();
+}
+
+function toggleLanguage() {
+  language = language === "sq" ? "en" : "sq";
+  localStorage.setItem("dss_language", language);
+  applyLanguage();
+}
+
 const esc = (s) =>
   String(s ?? "").replace(/[&<>"]/g, (c) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;"
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"
   })[c]);
 
 function money(n) {
@@ -29,9 +160,7 @@ function basePrice(p) {
 }
 
 function customerPrice(price) {
-  return currentUser
-    ? Math.round(Number(price) * 90) / 100
-    : Number(price);
+  return currentUser ? Math.round(Number(price) * 90) / 100 : Number(price);
 }
 
 function save() {
@@ -41,201 +170,120 @@ function save() {
 
 function refreshCartPrices() {
   cart = cart.map((x) => {
-    const product = products.find(
-      (p) => String(p.id) === String(x.id)
-    );
-
-    const base = product
-      ? basePrice(product)
-      : Number(x.basePrice ?? x.price ?? 0);
-
-    return {
-      ...x,
-      basePrice: base,
-      price: customerPrice(base)
-    };
+    const product = products.find((p) => String(p.id) === String(x.id));
+    const base = product ? basePrice(product) : Number(x.basePrice ?? x.price ?? 0);
+    return { ...x, basePrice: base, price: customerPrice(base) };
   });
-
   save();
 }
 
 function renderCart() {
-  $("#cartCount").textContent =
-    cart.reduce((a, x) => a + x.qty, 0);
+  const count = $("#cartCount");
+  const items = $("#cartItems");
+  const totalEl = $("#total");
+  if (!count || !items || !totalEl) return;
 
-  $("#cartItems").innerHTML = cart.map((x, i) => `
+  count.textContent = cart.reduce((a, x) => a + x.qty, 0);
+  items.innerHTML = cart.map((x, i) => `
     <div class="cartItem">
-      <div>
-        <b>${esc(x.name)}</b>
-        <small>${money(x.price)} × ${x.qty}</small>
-      </div>
-      <div>
-        <button onclick="change(${i},-1)">−</button>
-        <button onclick="change(${i},1)">+</button>
-      </div>
+      <div><b>${esc(x.name)}</b><small>${money(x.price)} × ${x.qty}</small></div>
+      <div><button type="button" onclick="change(${i},-1)" aria-label="Decrease quantity">−</button>
+      <button type="button" onclick="change(${i},1)" aria-label="Increase quantity">+</button></div>
     </div>
-  `).join("") || "<p>Shporta është bosh.</p>";
+  `).join("") || `<p>${t("emptyCart")}</p>`;
 
-  const total = cart.reduce(
-    (a, x) => a + x.price * x.qty, 0
-  );
-
-  $("#total").textContent = money(total);
+  const total = cart.reduce((a, x) => a + x.price * x.qty, 0);
+  totalEl.textContent = money(total);
 }
 
 window.change = (i, d) => {
   if (!cart[i]) return;
-
   cart[i].qty += d;
-
-  if (cart[i].qty <= 0) {
-    cart.splice(i, 1);
-  }
-
+  if (cart[i].qty <= 0) cart.splice(i, 1);
   save();
 };
 
 function render() {
-  const q = ($("#search").value || "").toLowerCase().trim();
-
+  const searchEl = $("#search");
+  const q = (searchEl?.value || "").toLowerCase().trim();
   let a = products.filter((p) => {
     const name = (p.name || "").toLowerCase();
     const category = (p.category || "").toLowerCase();
-
-    return (
-      (name.includes(q) || category.includes(q)) &&
-      (
-        selectedCategory === "all" ||
-        category === selectedCategory.toLowerCase()
-      )
-    );
+    return (name.includes(q) || category.includes(q)) &&
+      (selectedCategory === "all" || category === selectedCategory.toLowerCase());
   });
 
-  const sort = $("#sort").value;
+  const sort = $("#sort")?.value;
+  if (sort === "low") a.sort((x, y) => basePrice(x) - basePrice(y));
+  if (sort === "high") a.sort((x, y) => basePrice(y) - basePrice(x));
 
-  if (sort === "low") {
-    a.sort((x, y) => basePrice(x) - basePrice(y));
-  }
-
-  if (sort === "high") {
-    a.sort((x, y) => basePrice(y) - basePrice(x));
-  }
-
-  $("#grid").innerHTML = a.map((p) => {
+  const grid = $("#grid");
+  if (!grid) return;
+  grid.innerHTML = a.map((p) => {
     const price = basePrice(p);
     const discounted = customerPrice(price);
-
     const priceHtml = currentUser
-      ? `
-        <div class="price">
-          <span style="color:#aaa;text-decoration:line-through;font-size:14px">
-            ${money(price)}
-          </span>
-          <br>
-          ${money(discounted)}
-          <span style="color:#35d07f;font-size:12px">-10%</span>
-        </div>
-      `
+      ? `<div class="price"><span style="color:#aaa;text-decoration:line-through;font-size:14px">${money(price)}</span><br>${money(discounted)} <span style="color:#35d07f;font-size:12px">-10%</span></div>`
       : `<div class="price">${money(price)}</div>`;
-
-    return `
-      <article class="card">
-        <div class="pic">
-          ${p.image_url
-            ? `<img src="${esc(p.image_url)}" alt="${esc(p.name)}" loading="lazy">`
-            : "DSS"}
-        </div>
-        <div class="cat">${esc(p.category || "")}</div>
-        <h3>${esc(p.name)}</h3>
-        ${priceHtml}
-        <button onclick='add(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
-          Shto në shportë
-        </button>
-      </article>
-    `;
-  }).join("") || "<p>Nuk u gjetën produkte në këtë kategori.</p>";
+    const encodedProduct = JSON.stringify(p).replace(/</g, "\\u003c").replace(/'/g, "&#39;");
+    return `<article class="card">
+      <div class="pic">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(p.name)}" loading="lazy">` : "DSS"}</div>
+      <div class="cat">${esc(p.category || "")}</div>
+      <h3>${esc(p.name)}</h3>${priceHtml}
+      <button type="button" onclick='add(${encodedProduct})'>${t("add")}</button>
+    </article>`;
+  }).join("") || `<p>${t("noProducts")}</p>`;
 }
 
 document.querySelectorAll(".category-btn").forEach((button) => {
   button.addEventListener("click", () => {
     selectedCategory = button.dataset.category;
-
-    document.querySelectorAll(".category-btn").forEach((b) => {
-      b.classList.toggle("active", b === button);
-    });
-
+    document.querySelectorAll(".category-btn").forEach((b) => b.classList.toggle("active", b === button));
     render();
   });
 });
 
 window.add = (p) => {
-  const existing = cart.find(
-    (x) => String(x.id) === String(p.id)
-  );
-
+  const existing = cart.find((x) => String(x.id) === String(p.id));
   const base = basePrice(p);
-
   if (existing) {
     existing.qty++;
     existing.basePrice = base;
     existing.price = customerPrice(base);
   } else {
-    cart.push({
-      id: p.id,
-      name: p.name,
-      basePrice: base,
-      price: customerPrice(base),
-      qty: 1
-    });
+    cart.push({ id: p.id, name: p.name, basePrice: base, price: customerPrice(base), qty: 1 });
   }
-
   save();
-  toast("U shtua në shportë");
+  toast(t("added"));
 };
 
 function toast(message) {
-  $("#toast").textContent = message;
-  $("#toast").classList.add("show");
-
-  setTimeout(() => {
-    $("#toast").classList.remove("show");
-  }, 1800);
+  const el = $("#toast");
+  if (!el) return;
+  el.textContent = message;
+  el.classList.add("show");
+  setTimeout(() => el.classList.remove("show"), 1800);
 }
 
 async function load() {
   try {
-    if (
-      window.DSS_SUPABASE_URL &&
-      !window.DSS_SUPABASE_URL.includes("PASTE_")
-    ) {
-      const { data, error } = await sb
-        .from("products")
-        .select("*")
-        .eq("active", true)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Gabim gjatë ngarkimit të produkteve:", error);
-      } else {
-        products = data || [];
-      }
+    if (window.DSS_SUPABASE_URL && !window.DSS_SUPABASE_URL.includes("PASTE_")) {
+      const { data, error } = await sb.from("products").select("*").eq("active", true).order("created_at", { ascending: false });
+      if (error) console.error("Product loading error:", error);
+      else products = data || [];
     }
   } catch (error) {
-    console.error("Lidhja me Supabase dështoi:", error);
+    console.error("Supabase connection failed:", error);
   }
 
   if (!products.length) {
     try {
       const response = await fetch("products.json");
-
-      if (response.ok) {
-        products = await response.json();
-      }
+      if (response.ok) products = await response.json();
     } catch (error) {
-      console.error("Gabim te products.json:", error);
+      console.error("products.json error:", error);
     }
   }
-
   refreshCartPrices();
   render();
   renderCart();
@@ -244,10 +292,9 @@ async function load() {
 function openAccount() {
   const box = $("#accountBox");
   if (!box) {
-    alert("Nuk u gjet formulari i llogarisë në index.html.");
+    alert(t("accountMissing"));
     return;
   }
-
   box.hidden = false;
   box.style.display = "flex";
   updateAccountUI();
@@ -256,7 +303,6 @@ function openAccount() {
 function closeAccount() {
   const box = $("#accountBox");
   if (!box) return;
-
   box.style.display = "none";
   box.hidden = true;
 }
@@ -269,104 +315,64 @@ function updateAccountUI(message) {
   const submit = $("#accountSubmit");
   const switchBtn = $("#accountSwitch");
   const logout = $("#accountLogout");
+  if (!status || !form || !email || !password || !submit || !switchBtn || !logout) return;
 
   if (currentUser) {
-    status.textContent = message ||
-      "Je i/e kyçur si " + currentUser.email +
-      ". Përfiton 10% ulje në të gjitha produktet.";
-
+    status.textContent = message || (t("loggedIn") + " " + currentUser.email + t("discountAll"));
     form.hidden = true;
     switchBtn.hidden = true;
     logout.hidden = false;
+    logout.textContent = t("logout");
   } else {
-    status.textContent = message || (
-      accountMode === "signup"
-        ? "Krijo llogari për të përfituar 10% ulje në të gjitha produktet."
-        : "Hyr në llogarinë tënde për të përfituar 10% ulje."
-    );
-
+    status.textContent = message || (accountMode === "signup" ? t("signupIntro") : t("loginIntro"));
     form.hidden = false;
     email.disabled = false;
     password.disabled = false;
     submit.disabled = false;
-
-    submit.textContent =
-      accountMode === "signup" ? "Regjistrohu" : "Hyr";
-
+    submit.textContent = accountMode === "signup" ? t("signup") : t("login");
     switchBtn.hidden = false;
-    switchBtn.textContent =
-      accountMode === "signup"
-        ? "Kam llogari — Hyr"
-        : "Nuk kam llogari — Regjistrohu";
-
+    switchBtn.textContent = accountMode === "signup" ? t("switchLogin") : t("switchSignup");
     logout.hidden = true;
   }
 }
 
 $("#accountForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-
   const email = $("#accountEmail").value.trim();
   const password = $("#accountPassword").value;
   const submit = $("#accountSubmit");
-
   if (!email || !password) {
-    updateAccountUI("Shkruaj email-in dhe fjalëkalimin.");
+    updateAccountUI(t("enterBoth"));
     return;
   }
-
   submit.disabled = true;
-  submit.textContent = "Prit...";
-
+  submit.textContent = t("wait");
   try {
     if (accountMode === "signup") {
-      const { data, error } = await sb.auth.signUp({
-        email,
-        password
-      });
-
+      const { data, error } = await sb.auth.signUp({ email, password });
       if (error) throw error;
-
       if (data.session && data.user) {
         currentUser = data.user;
         refreshCartPrices();
         render();
-
-        updateAccountUI(
-          "Llogaria u krijua me sukses! Ke 10% ulje."
-        );
+        updateAccountUI(t("signupSuccess"));
       } else {
         accountMode = "login";
-
-        updateAccountUI(
-          "Regjistrimi u krye. Kontrollo email-in për konfirmim, pastaj hyr në llogari."
-        );
+        updateAccountUI(t("registered"));
       }
     } else {
-      const { data, error } = await sb.auth.signInWithPassword({
-        email,
-        password
-      });
-
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
       if (error) throw error;
-
       currentUser = data.user;
       refreshCartPrices();
       render();
-
-      updateAccountUI("U kyçe me sukses! Tani ke 10% ulje.");
+      updateAccountUI(t("loginSuccess"));
     }
   } catch (error) {
-    updateAccountUI(
-      "Gabim: " + (error.message || "Nuk u krye veprimi.")
-    );
+    updateAccountUI(t("registerError") + (error.message || "Action failed."));
   } finally {
     submit.disabled = false;
-
-    if (!currentUser) {
-      submit.textContent =
-        accountMode === "signup" ? "Regjistrohu" : "Hyr";
-    }
+    if (!currentUser) submit.textContent = accountMode === "signup" ? t("signup") : t("login");
   }
 });
 
@@ -377,20 +383,17 @@ $("#accountSwitch").addEventListener("click", () => {
 
 $("#accountLogout").addEventListener("click", async () => {
   const { error } = await sb.auth.signOut();
-
   if (error) {
-    updateAccountUI("Gabim gjatë daljes: " + error.message);
+    updateAccountUI(t("logoutError") + error.message);
     return;
   }
-
   currentUser = null;
   refreshCartPrices();
   render();
-  updateAccountUI("Dole nga llogaria. Çmimet tani janë pa ulje.");
+  updateAccountUI(t("loggedOut"));
 });
 
 $("#accountClose").addEventListener("click", closeAccount);
-
 $("#accountBox").addEventListener("click", (e) => {
   if (e.target === $("#accountBox")) closeAccount();
 });
@@ -398,8 +401,7 @@ $("#accountBox").addEventListener("click", (e) => {
 $("#profileBtn").onclick = openAccount;
 
 sb.auth.getSession().then(({ data, error }) => {
-  if (error) console.error("Gabim në kontrollin e sesionit:", error);
-
+  if (error) console.error("Session check error:", error);
   currentUser = data?.session?.user || null;
   refreshCartPrices();
   render();
@@ -415,91 +417,56 @@ sb.auth.onAuthStateChange((_event, session) => {
 
 $("#search").oninput = render;
 $("#sort").onchange = render;
-
 $("#cartBtn").onclick = () => $("#cart").classList.add("open");
 $("#closeCart").onclick = () => $("#cart").classList.remove("open");
+const langButton = $("#languageBtn");
+if (langButton) langButton.addEventListener("click", toggleLanguage);
 
 $("#orderForm").onsubmit = async (e) => {
   e.preventDefault();
-
   if (!cart.length) {
-    toast("Shporta është bosh");
+    toast(t("emptyNotice"));
     return;
   }
-
   const button = e.target.querySelector('button[type="submit"]');
   if (button) button.disabled = true;
-
   try {
     const form = new FormData(e.target);
-
     const order = {
       customer_name: String(form.get("name") || "").trim(),
       phone: String(form.get("phone") || "").trim(),
       address: String(form.get("address") || "").trim()
     };
-
-    const p_items = cart.map((x) => ({
-      id: String(x.id),
-      qty: Number(x.qty)
-    }));
-
-    const { data: orderId, error } = await sb.rpc(
-      "dss_create_order",
-      {
-        p_customer_name: order.customer_name,
-        p_phone: order.phone,
-        p_address: order.address,
-        p_items
-      }
-    );
-
+    const p_items = cart.map((x) => ({ id: String(x.id), qty: Number(x.qty) }));
+    const { data: orderId, error } = await sb.rpc("dss_create_order", {
+      p_customer_name: order.customer_name,
+      p_phone: order.phone,
+      p_address: order.address,
+      p_items
+    });
     if (error) {
-      console.error("Gabim gjatë regjistrimit të porosisë:", error);
-
-      alert(
-        "Gabim Supabase: " + error.message +
-        " | Kodi: " + (error.code || "pa kod")
-      );
-
+      console.error("Order registration error:", error);
+      alert(t("orderError") + error.message + t("orderCode") + (error.code || t("noCode")));
       return;
     }
-
-    const total = cart.reduce(
-      (a, x) => a + x.price * x.qty, 0
-    );
-
+    const total = cart.reduce((a, x) => a + x.price * x.qty, 0);
     const message =
       "Përshëndetje DSS, dua të bëj një porosi.\n\n" +
-      cart.map((x) =>
-        `${x.name} x${x.qty} — ${money(x.price * x.qty)}`
-      ).join("\n") +
-      `\n\nTotal: ${money(total)}` +
-      `\nEmri: ${order.customer_name}` +
-      `\nTel: ${order.phone}` +
-      `\nAdresa: ${order.address}` +
+      cart.map((x) => `${x.name} x${x.qty} — ${money(x.price * x.qty)}`).join("\n") +
+      `\n\nTotal: ${money(total)}\nEmri: ${order.customer_name}\nTel: ${order.phone}\nAdresa: ${order.address}` +
       (currentUser ? "\nUlje klienti: 10%" : "");
-
     cart = [];
     save();
     e.target.reset();
-
-    toast("Porosia u regjistrua! Nr. " + orderId);
-
-    window.open(
-      "https://wa.me/?text=" + encodeURIComponent(message),
-      "_blank"
-    );
+    toast(t("orderSuccess") + orderId);
+    window.open("https://wa.me/?text=" + encodeURIComponent(message), "_blank");
   } catch (error) {
-    console.error("Gabim gjatë porosisë:", error);
-
-    alert(
-      "Gabim gjatë porosisë: " +
-      (error.message || "Gabim i panjohur")
-    );
+    console.error("Order error:", error);
+    alert(t("orderFail") + (error.message || t("unknown")));
   } finally {
     if (button) button.disabled = false;
   }
 };
 
+applyLanguage();
 load();
