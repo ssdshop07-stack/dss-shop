@@ -266,12 +266,13 @@
     document.getElementById("bottomCartBtn").addEventListener("click", function () {
       document.getElementById("cartBtn").click();
     });
-    document.getElementById("profileBtn").addEventListener("click", function () {
-      document.getElementById("cartBtn").click();
-      setTimeout(function () {
-        document.getElementById("orderForm").scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 300);
-    });
+    
+document.getElementById("profileBtn").addEventListener("click", function () {
+  const box = document.getElementById("accountBox");
+  box.hidden = false;
+  box.style.display = "flex";
+});
+
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", function () {
         navigator.serviceWorker.register("./service-worker.js").catch(function (error) {
