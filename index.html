@@ -11,158 +11,35 @@
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="style.css">
   <style>
-    :root {
-      color-scheme: dark;
-      --bg: #080808;
-      --panel: #191919;
-      --red: #e50914;
-      --text: #f5f5f5;
-      --muted: #aaa;
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
-    body { margin: 0; background: var(--bg); color: var(--text); font-family: Arial, sans-serif; }
-    button, input, select { font: inherit; }
-    button, a { -webkit-tap-highlight-color: transparent; }
-    header { background: #090909; border-bottom: 1px solid #292929; position: sticky; top: 0; z-index: 100; }
-    .wrap { width: min(1200px, 94%); margin: auto; }
-    .nav { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; }
-    .brand { color: white; text-decoration: none; display: flex; align-items: center; gap: 9px; min-width: 0; }
-    .brand b { display: flex; align-items: center; justify-content: center; background: #e50914; width: 44px; height: 44px; border-radius: 9px; font-size: 19px; flex-shrink: 0; }
-    .brand span { font-size: 10px; letter-spacing: 1px; line-height: 1.5; }
-    nav { display: flex; align-items: center; gap: 14px; }
-    nav a { color: white; text-decoration: none; font-size: 13px; }
-    button { cursor: pointer; }
-    .main-cart-btn { border: 1px solid var(--red); background: transparent; color: white; border-radius: 24px; padding: 10px 14px; font-weight: bold; white-space: nowrap; }
-    #cartCount { display: inline-flex; justify-content: center; align-items: center; min-width: 21px; height: 21px; border-radius: 50%; background: var(--red); margin-left: 4px; }
-    .categories-section { padding-top: 24px; padding-bottom: 20px; }
-    .categories-section h2 { font-size: 24px; margin: 8px 0 22px; }
-    .categories { display: flex; gap: 24px; overflow-x: auto; padding: 4px 0 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-    .categories::-webkit-scrollbar { display: none; }
-    .category-btn { flex: 0 0 150px; padding: 0; background: transparent; border: 0; color: white; border-radius: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; white-space: normal; }
-    .category-btn img { display: block; width: 150px; height: 150px; object-fit: cover; border-radius: 22px; background: #191919; border: 1px solid #252525; }
-    .category-btn span { font-size: 15px; font-weight: bold; text-align: center; line-height: 1.4; min-height: 42px; }
-    .category-btn.active { background: transparent; color: #ff2530; }
-    .category-btn.active img { border: 2px solid var(--red); }
-    #products { padding-bottom: 100px; }
-    .toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
-    .toolbar h2 { margin: 0 auto 0 0; font-size: 25px; }
-    input, select { min-height: 44px; padding: 11px 13px; border-radius: 8px; border: 1px solid #414141; background: #171717; color: white; max-width: 100%; }
-    #search { flex: 1; min-width: 170px; }
-    .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
-    .card { overflow: hidden; border: 1px solid #303030; border-radius: 13px; background: var(--panel); padding: 10px; min-width: 0; }
-    .pic { height: 210px; display: flex; align-items: center; justify-content: center; background: #fff; border-radius: 9px; overflow: hidden; color: var(--red); font-size: 30px; font-weight: bold; }
-    .pic img { width: 100%; height: 100%; object-fit: contain; }
-    .cat { color: #ff535b; font-size: 12px; margin-top: 13px; }
-    .card h3 { font-size: 16px; line-height: 1.4; min-height: 42px; overflow-wrap: anywhere; }
-    .price { font-size: 21px; font-weight: bold; margin: 14px 0; }
-    .card button { width: 100%; border: 0; border-radius: 8px; padding: 12px 8px; background: var(--red); color: white; font-weight: bold; }
-    .drawer { position: fixed; z-index: 1001; top: 0; right: 0; height: 100%; width: min(420px, 100%); overflow-y: auto; padding: 20px; background: #101010; border-left: 1px solid #333; box-shadow: -10px 0 35px #0009; transform: translateX(110%); visibility: hidden; transition: transform .25s ease, visibility .25s; }
-    .drawer.open { transform: translateX(0); visibility: visible; }
-    .drawerHead { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; margin-bottom: 18px; }
-    .drawerHead button { font-size: 25px; padding: 5px 13px; background: var(--red); color: white; border: 0; border-radius: 8px; }
-    .cartItem { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #333; }
-    .cartItem small { display: block; color: #bbb; margin-top: 6px; }
-    .cartItem button { padding: 8px 12px; margin-left: 3px; background: var(--red); color: white; border: 0; border-radius: 7px; }
-    .total { padding: 20px 0; font-size: 20px; }
-    #orderForm { display: grid; gap: 12px; }
-    #orderForm input { width: 100%; }
-    #orderForm button { min-height: 48px; border: 0; border-radius: 8px; background: var(--red); color: white; font-weight: bold; }
-    #toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid #444; padding: 13px 20px; border-radius: 8px; z-index: 2000; opacity: 0; pointer-events: none; transition: opacity .2s; max-width: 90%; text-align: center; }
-    #toast.show { opacity: 1; }
-    .search-float { position: fixed; right: 20px; bottom: 112px; z-index: 997; width: 66px; height: 66px; border-radius: 50%; border: 0; background: var(--red); color: white; display: flex; align-items: center; justify-content: center; font-size: 0; box-shadow: 0 4px 15px #0008; }
-    .search-float svg { width: 31px; height: 31px; fill: none; stroke: white; stroke-width: 2; stroke-linecap: round; }
-    .whatsapp-contact { position: fixed; right: 20px; bottom: 78px; z-index: 998; width: 66px; height: 66px; border-radius: 50%; background: #25d366; color: white; display: flex; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 4px 15px #0008; }
-    .whatsapp-contact svg { width: 37px; height: 37px; fill: none; stroke: white; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-    .bottom-nav { display: none; }
-    @media (max-width: 900px) {
-      .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      .pic { height: 180px; }
-    }
-    @media (max-width: 650px) {
-      .wrap { width: 94%; }
-      .nav { min-height: 68px; gap: 8px; }
-      .brand { gap: 7px; }
-      .brand b { width: 39px; height: 39px; font-size: 17px; }
-      .brand span { font-size: 9px; letter-spacing: .5px; }
-      nav { gap: 10px; }
-      nav a { font-size: 12px; }
-      .main-cart-btn { padding: 9px 10px; font-size: 12px; }
-      .categories-section { padding-top: 20px; }
-      .categories-section h2 { font-size: 23px; }
-      .categories { gap: 24px; }
-      .category-btn { flex-basis: 150px; }
-      .category-btn img { width: 150px; height: 150px; }
-      .toolbar { gap: 10px; }
-      .toolbar h2 { width: 100%; font-size: 24px; }
-      .toolbar input, .toolbar select { width: 100%; }
-      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-      .card { padding: 8px; border-radius: 12px; }
-      .pic { height: 155px; border-radius: 8px; }
-      .cat { font-size: 11px; margin-top: 12px; }
-      .card h3 { font-size: 15px; min-height: 42px; }
-      .price { font-size: 20px; }
-      .card button { font-size: 12px; padding: 12px 5px; }
-      #products { padding-bottom: 105px; }
-
-      /* Të dy butonat në të djathtë, njëri mbi tjetrin dhe larg menusë */
-      .search-float {
-        width: 58px;
-        height: 58px;
-        right: 18px;
-        bottom: 185px;
-        z-index: 997;
-      }
-      .whatsapp-contact {
-        position: fixed;
-        width: 58px;
-        height: 58px;
-        right: 18px;
-        left: auto;
-        bottom: 115px;
-        z-index: 998;
-      }
-
-      .bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 990;
-        min-height: 68px;
-        padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
-        background: #0b0b0b;
-        border-top: 1px solid #292929;
-        display: flex;
-        align-items: center;
-        justify-content: space-around;
-      }
-      .bottom-nav a, .bottom-nav button {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        color: #ccc;
-        text-decoration: none;
-        background: transparent;
-        border: 0;
-        padding: 2px;
-        font-size: 11px;
-      }
-      .bottom-nav svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-      .bottom-nav .home-link { color: var(--red); }
-    }
-    @media (max-width: 360px) {
-      .brand span { display: none; }
-      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .category-btn, .category-btn img { width: 135px; }
-      .category-btn { flex-basis: 135px; }
-      .category-btn img { height: 135px; }
-      .pic { height: 135px; }
-    }
-    @media (min-width: 651px) { .search-float { display: none; } }
+    :root{color-scheme:dark;--bg:#080808;--panel:#191919;--red:#e50914;--text:#f5f5f5;--muted:#aaa}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+    button,input,select{font:inherit}button,a{-webkit-tap-highlight-color:transparent}header{background:#090909;border-bottom:1px solid #292929;position:sticky;top:0;z-index:100}
+    .wrap{width:min(1200px,94%);margin:auto}.nav{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0}
+    .brand{color:white;text-decoration:none;display:flex;align-items:center;gap:9px;min-width:0}.brand b{display:flex;align-items:center;justify-content:center;background:#e50914;width:44px;height:44px;border-radius:9px;font-size:19px;flex-shrink:0}.brand span{font-size:10px;letter-spacing:1px;line-height:1.5}
+    nav{display:flex;align-items:center;gap:14px}nav a{color:white;text-decoration:none;font-size:13px}button{cursor:pointer}
+    .header-actions{display:flex;align-items:center;gap:7px}.header-actions button{min-height:40px;border:1px solid #444;background:#171717;color:#fff;border-radius:22px;padding:8px 11px;white-space:nowrap}
+    .header-actions #languageBtn{border-color:#777;font-size:12px;font-weight:bold}.main-cart-btn{border:1px solid var(--red)!important;background:transparent!important;color:white;border-radius:24px;padding:10px 14px;font-weight:bold;white-space:nowrap}
+    #cartCount{display:inline-flex;justify-content:center;align-items:center;min-width:21px;height:21px;border-radius:50%;background:var(--red);margin-left:4px}
+    .categories-section{padding-top:24px;padding-bottom:20px}.categories-section h2{font-size:24px;margin:8px 0 22px}.categories{display:flex;gap:24px;overflow-x:auto;padding:4px 0 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.categories::-webkit-scrollbar{display:none}
+    .category-btn{flex:0 0 150px;padding:0;background:transparent;border:0;color:white;border-radius:0;display:flex;flex-direction:column;align-items:center;gap:12px;white-space:normal}.category-btn img{display:block;width:150px;height:150px;object-fit:cover;border-radius:22px;background:#191919;border:1px solid #252525}.category-btn span{font-size:15px;font-weight:bold;text-align:center;line-height:1.4;min-height:42px}.category-btn.active{background:transparent;color:#ff2530}.category-btn.active img{border:2px solid var(--red)}
+    #products{padding-bottom:100px}.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.toolbar h2{margin:0 auto 0 0;font-size:25px}
+    input,select{min-height:44px;padding:11px 13px;border-radius:8px;border:1px solid #414141;background:#171717;color:white;max-width:100%}#search{flex:1;min-width:170px}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}.card{overflow:hidden;border:1px solid #303030;border-radius:13px;background:var(--panel);padding:10px;min-width:0}
+    .pic{height:210px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:9px;overflow:hidden;color:var(--red);font-size:30px;font-weight:bold}.pic img{width:100%;height:100%;object-fit:contain}.cat{color:#ff535b;font-size:12px;margin-top:13px}.card h3{font-size:16px;line-height:1.4;min-height:42px;overflow-wrap:anywhere}.price{font-size:21px;font-weight:bold;margin:14px 0}.card button{width:100%;border:0;border-radius:8px;padding:12px 8px;background:var(--red);color:white;font-weight:bold}
+    .drawer{position:fixed;z-index:1001;top:0;right:0;height:100%;width:min(420px,100%);overflow-y:auto;padding:20px;background:#101010;border-left:1px solid #333;box-shadow:-10px 0 35px #0009;transform:translateX(110%);visibility:hidden;transition:transform .25s ease,visibility .25s}.drawer.open{transform:translateX(0);visibility:visible}
+    .drawerHead{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #333;margin-bottom:18px}.drawerHead button{font-size:25px;padding:5px 13px;background:var(--red);color:white;border:0;border-radius:8px}
+    .cartItem{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #333}.cartItem small{display:block;color:#bbb;margin-top:6px}.cartItem button{padding:8px 12px;margin-left:3px;background:var(--red);color:white;border:0;border-radius:7px}.total{padding:20px 0;font-size:20px}
+    #orderForm{display:grid;gap:12px}#orderForm input{width:100%}#orderForm button{min-height:48px;border:0;border-radius:8px;background:var(--red);color:white;font-weight:bold}
+    #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#222;border:1px solid #444;padding:13px 20px;border-radius:8px;z-index:2000;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center}#toast.show{opacity:1}
+    .search-float{position:fixed;right:20px;bottom:112px;z-index:997;width:66px;height:66px;border-radius:50%;border:0;background:var(--red);color:white;display:flex;align-items:center;justify-content:center;font-size:0;box-shadow:0 4px 15px #0008}.search-float svg{width:31px;height:31px;fill:none;stroke:white;stroke-width:2;stroke-linecap:round}
+    .whatsapp-contact{position:fixed;right:20px;bottom:78px;z-index:998;width:66px;height:66px;border-radius:50%;background:#25d366;color:white;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 15px #0008}.whatsapp-contact svg{width:37px;height:37px;fill:none;stroke:white;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.bottom-nav{display:none}
+    @media(max-width:900px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.pic{height:180px}}
+    @media(max-width:650px){.wrap{width:94%}.nav{min-height:68px;gap:7px}.brand{gap:7px}.brand b{width:39px;height:39px;font-size:17px}.brand span{font-size:9px;letter-spacing:.5px}nav{gap:8px}nav a{font-size:12px}.header-actions{gap:4px}.header-actions button{min-height:36px;padding:7px 8px;font-size:12px}.header-actions #languageBtn{font-size:11px;padding:7px 6px}.main-cart-btn{padding:8px!important;font-size:12px}.categories-section{padding-top:20px}.categories-section h2{font-size:23px}.categories{gap:24px}.category-btn{flex-basis:150px}.category-btn img{width:150px;height:150px}.toolbar{gap:10px}.toolbar h2{width:100%;font-size:24px}.toolbar input,.toolbar select{width:100%}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{padding:8px;border-radius:12px}.pic{height:155px;border-radius:8px}.cat{font-size:11px;margin-top:12px}.card h3{font-size:15px;min-height:42px}.price{font-size:20px}.card button{font-size:12px;padding:12px 5px}#products{padding-bottom:105px}
+      .search-float{width:58px;height:58px;right:18px;bottom:185px;z-index:997}.whatsapp-contact{position:fixed;width:58px;height:58px;right:18px;left:auto;bottom:115px;z-index:998}
+      .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:990;min-height:68px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:#0b0b0b;border-top:1px solid #292929;display:flex;align-items:center;justify-content:space-around}
+      .bottom-nav a,.bottom-nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#ccc;text-decoration:none;background:transparent;border:0;padding:2px;font-size:11px}.bottom-nav svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.bottom-nav .home-link{color:var(--red)}}
+    @media(max-width:390px){.brand span{display:none}.nav{gap:5px}nav{gap:6px}.header-actions button{padding:6px}.main-cart-btn{font-size:11px!important}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.category-btn,.category-btn img{width:135px}.category-btn{flex-basis:135px}.category-btn img{height:135px}.pic{height:135px}}
+    @media(min-width:651px){.search-float{display:none}}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
@@ -171,114 +48,91 @@
   <header>
     <div class="wrap nav">
       <a class="brand" href="./" aria-label="DSS Shop - Kryesore"><b>DSS</b><span>SECURITY &amp; TECHNOLOGY</span></a>
-      <nav><a href="#products">Produktet</a><a href="admin.html">Admin</a></nav>
-      <button id="cartBtn" class="main-cart-btn" type="button">🛒 <span id="cartCount">0</span></button>
+      <nav><a href="#products" id="navProducts">Produktet</a><a href="admin.html" id="navAdmin">Admin</a></nav>
+      <div class="header-actions">
+        <button id="headerSearchBtn" type="button" aria-label="Kërko produkt">🔍</button>
+        <button id="languageBtn" type="button" aria-label="Ndrysho gjuhën">SQ | EN</button>
+        <button id="cartBtn" class="main-cart-btn" type="button">🛒 <span id="cartCount">0</span></button>
+      </div>
     </div>
   </header>
   <main>
     <section class="wrap categories-section">
-      <h2>Kategoritë</h2>
+      <h2 id="categoriesTitle">Kategoritë</h2>
       <div class="categories" id="categories">
-        <button type="button" class="category-btn active" data-category="all"><img src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Të gjitha produktet"><span>Të gjitha</span></button>
-        <button type="button" class="category-btn" data-category="Kamera IP"><img src="https://images.unsplash.com/photo-1557324232-b8917d3c3dcb?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Kamera IP"><span>Kamera IP</span></button>
-        <button type="button" class="category-btn" data-category="Kamera Wi-Fi"><img src="https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Kamera Wi-Fi"><span>Kamera Wi-Fi</span></button>
-        <button type="button" class="category-btn" data-category="Kamera analoge"><img src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Kamera analoge"><span>Kamera analoge</span></button>
-        <button type="button" class="category-btn" data-category="DVR/XVR"><img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="DVR dhe XVR"><span>DVR/XVR</span></button>
+        <button type="button" class="category-btn active" data-category="all"><img src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="All products"><span>Të gjitha</span></button>
+        <button type="button" class="category-btn" data-category="Kamera IP"><img src="https://images.unsplash.com/photo-1557324232-b8917d3c3dcb?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="IP cameras"><span>Kamera IP</span></button>
+        <button type="button" class="category-btn" data-category="Kamera Wi-Fi"><img src="https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Wi-Fi cameras"><span>Kamera Wi-Fi</span></button>
+        <button type="button" class="category-btn" data-category="Kamera analoge"><img src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Analog cameras"><span>Kamera analoge</span></button>
+        <button type="button" class="category-btn" data-category="DVR/XVR"><img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="DVR and XVR"><span>DVR/XVR</span></button>
         <button type="button" class="category-btn" data-category="NVR"><img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="NVR"><span>NVR</span></button>
-        <button type="button" class="category-btn" data-category="Komplete kamerash"><img src="https://images.unsplash.com/photo-1557324232-b8917d3c3dcb?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Komplete kamerash"><span>Komplete kamerash</span></button>
-        <button type="button" class="category-btn" data-category="Alarme"><img src="https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Alarme"><span>Alarme</span></button>
-        <button type="button" class="category-btn" data-category="Kontroll aksesi"><img src="https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Kontroll aksesi"><span>Kontroll aksesi</span></button>
-        <button type="button" class="category-btn" data-category="Interfonë"><img src="https://images.unsplash.com/photo-1557324232-b8917d3c3dcb?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Interfonë"><span>Interfonë</span></button>
-        <button type="button" class="category-btn" data-category="Pajisje rrjeti"><img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Pajisje rrjeti"><span>Pajisje rrjeti</span></button>
-        <button type="button" class="category-btn" data-category="Aksesorë"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Aksesorë"><span>Aksesorë</span></button>
+        <button type="button" class="category-btn" data-category="Komplete kamerash"><img src="https://images.unsplash.com/photo-1557324232-b8917d3c3dcb?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Camera kits"><span>Komplete kamerash</span></button>
+        <button type="button" class="category-btn" data-category="Alarme"><img src="https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Alarms"><span>Alarme</span></button>
+        <button type="button" class="category-btn" data-category="Kontroll aksesi"><img src="https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Access control"><span>Kontroll aksesi</span></button>
+        <button type="button" class="category-btn" data-category="Interfonë"><img src="https://images.unsplash.com/photo-1557324232-b8917d3c3dcb?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Intercoms"><span>Interfonë</span></button>
+        <button type="button" class="category-btn" data-category="Pajisje rrjeti"><img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Network devices"><span>Pajisje rrjeti</span></button>
+        <button type="button" class="category-btn" data-category="Aksesorë"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Accessories"><span>Aksesorë</span></button>
       </div>
     </section>
     <section id="products" class="wrap">
-      <div class="toolbar">
-        <h2>Produktet</h2>
+      <div class="toolbar"><h2 id="productsTitle">Produktet</h2>
         <input id="search" type="search" placeholder="Kërko produkt..." aria-label="Kërko produkt">
-        <select id="sort" aria-label="Rendit produktet">
-          <option value="default">Renditja</option>
-          <option value="low">Çmimi: ulët → lart</option>
-          <option value="high">Çmimi: lart → ulët</option>
-        </select>
+        <select id="sort" aria-label="Sort products"><option value="default">Renditja</option><option value="low">Çmimi: ulët → lart</option><option value="high">Çmimi: lart → ulët</option></select>
       </div>
       <div id="grid" class="grid"></div>
     </section>
   </main>
-  <aside id="cart" class="drawer" aria-label="Shporta">
-    <div class="drawerHead"><h2>Shporta</h2><button id="closeCart" type="button" aria-label="Mbyll shportën">×</button></div>
+  <aside id="cart" class="drawer" aria-label="Cart">
+    <div class="drawerHead"><h2 id="cartTitle">Shporta</h2><button id="closeCart" type="button" aria-label="Close cart">×</button></div>
     <div id="cartItems"></div>
-    <div class="total">Total: <b id="total">€0.00</b></div>
+    <div class="total"><span id="totalLabel">Total:</span> <b id="total">€0.00</b></div>
     <form id="orderForm">
       <input name="name" placeholder="Emri dhe mbiemri" autocomplete="name" required>
       <input name="phone" type="tel" placeholder="Telefoni" autocomplete="tel" required>
       <input name="address" placeholder="Adresa" autocomplete="street-address" required>
-      <button type="submit">Porosit</button>
+      <button id="orderSubmit" type="submit">Porosit</button>
     </form>
   </aside>
-  <div id="toast" role="status" aria-live="polite"></div><!-- DSS Customer Account --><div id="accountBox" hidden style="position:fixed;inset:0;z-index:3000;background:#000b;align-items:center;justify-content:center;padding:18px">
-  <div style="width:100%;max-width:400px;background:#191919;border:1px solid #444;border-radius:14px;padding:20px;color:#fff">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-      <h2 style="margin:0">Llogaria DSS</h2>
-      <button id="accountClose" type="button" style="background:#e50914;color:#fff;border:0;border-radius:7px;padding:8px 12px">Mbyll ×</button>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="accountBox" hidden style="position:fixed;inset:0;z-index:3000;background:#000b;align-items:center;justify-content:center;padding:18px">
+    <div style="width:100%;max-width:400px;background:#191919;border:1px solid #444;border-radius:14px;padding:20px;color:#fff">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h2 id="accountTitle" style="margin:0">Llogaria DSS</h2><button id="accountClose" type="button" style="background:#e50914;color:#fff;border:0;border-radius:7px;padding:8px 12px">Mbyll ×</button></div>
+      <p id="accountStatus">Regjistrohu ose hyr për të përfituar 10% ulje.</p>
+      <form id="accountForm" style="display:grid;gap:12px">
+        <input id="accountEmail" type="email" placeholder="Email-i" autocomplete="email" required>
+        <input id="accountPassword" type="password" placeholder="Fjalëkalimi (minimumi 6 karaktere)" autocomplete="new-password" minlength="6" required>
+        <button id="accountSubmit" type="submit" style="background:#e50914;color:white;border:0;border-radius:8px;padding:13px;font-weight:bold">Regjistrohu</button>
+      </form>
+      <button id="accountSwitch" type="button" style="margin-top:12px;width:100%;padding:12px;background:#292929;color:white;border:1px solid #555;border-radius:8px">Kam llogari — Hyr</button>
+      <button id="accountLogout" type="button" hidden style="margin-top:12px;width:100%;padding:12px;background:#292929;color:white;border:1px solid #555;border-radius:8px">Dil nga llogaria</button>
     </div>
-    <p id="accountStatus">Regjistrohu ose hyr për të përfituar 10% ulje.</p>
-    <form id="accountForm" style="display:grid;gap:12px">
-      <input id="accountEmail" type="email" placeholder="Email-i" autocomplete="email" required>
-      <input id="accountPassword" type="password" placeholder="Fjalëkalimi (minimumi 6 karaktere)" autocomplete="new-password" minlength="6" required>
-      <button id="accountSubmit" type="submit" style="background:#e50914;color:white;border:0;border-radius:8px;padding:13px;font-weight:bold">Regjistrohu</button>
-    </form>
-    <button id="accountSwitch" type="button" style="margin-top:12px;width:100%;padding:12px;background:#292929;color:white;border:1px solid #555;border-radius:8px">Kam llogari — Hyr</button>
-    <button id="accountLogout" type="button" hidden style="margin-top:12px;width:100%;padding:12px;background:#292929;color:white;border:1px solid #555;border-radius:8px">Dil nga llogaria</button>
   </div>
-  </div>
-  <a class="whatsapp-contact" href="https://wa.me/355684398803" target="_blank" rel="noopener noreferrer" aria-label="Kontakto në WhatsApp">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M20.5 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.7A8.5 8.5 0 1 1 20.5 11.5Z"/>
-      <path d="M8.5 7.5c.3-.5.6-.5.9-.5h.4c.2 0 .4.1.5.4l.8 1.9c.1.2.1.4-.1.6l-.7.8c-.2.2-.2.4 0 .7.5.9 1.3 1.7 2.2 2.2.3.2.5.2.7 0l.8-.9c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.3.4.5 0 .4-.2 1.2-.7 1.6-.5.5-1.2.7-1.9.6-1-.1-2.3-.7-3.8-2-1.6-1.4-2.6-3.1-2.8-4.2-.2-1 .4-1.9.9-2.5Z"/>
-    </svg>
+  <a class="whatsapp-contact" href="https://wa.me/355684398803" target="_blank" rel="noopener noreferrer" aria-label="Contact on WhatsApp">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.7A8.5 8.5 0 1 1 20.5 11.5Z"/><path d="M8.5 7.5c.3-.5.6-.5.9-.5h.4c.2 0 .4.1.5.4l.8 1.9c.1.2.1.4-.1.6l-.7.8c-.2.2-.2.4 0 .7.5.9 1.3 1.7 2.2 2.2.3.2.5.2.7 0l.8-.9c.2-.2.4-.2.6-.1l1.8.9c.3.1.4.3.4.5 0 .4-.2 1.2-.7 1.6-.5.5-1.2.7-1.9.6-1-.1-2.3-.7-3.8-2-1.6-1.4-2.6-3.1-2.8-4.2-.2-1 .4-1.9.9-2.5Z"/></svg>
   </a>
-  <button class="search-float" id="searchFloat" type="button" aria-label="Kërko produkt">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.2"></circle><path d="m16 16 5 5"></path></svg>
-  </button>
+  <button class="search-float" id="searchFloat" type="button" aria-label="Search products"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.2"></circle><path d="m16 16 5 5"></path></svg></button>
   <div class="bottom-nav">
-    <a href="./" class="home-link">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-7h6v7"></path></svg>
-      <span>Kryesore</span>
-    </a>
-    <button type="button" id="bottomCartBtn">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"></path></svg>
-      <span>Shporta</span>
-    </button>
-    <button type="button" id="profileBtn">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"></circle><path d="M4 21v-2a8 8 0 0 1 16 0v2"></path></svg>
-      <span>Profili</span>
-    </button>
+    <a href="./" class="home-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7"></path><path d="M5 9v12h14V9"></path><path d="M9 21v-7h6v7"></path></svg><span id="homeLabel">Kryesore</span></a>
+    <button type="button" id="bottomCartBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"></path></svg><span id="bottomCartLabel">Shporta</span></button>
+    <button type="button" id="profileBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"></circle><path d="M4 21v-2a8 8 0 0 1 16 0v2"></path></svg><span id="profileLabel">Profili</span></button>
   </div>
   <script src="app.js"></script>
   <script>
-    document.getElementById("searchFloat").addEventListener("click", function () {
+    function focusSearch() {
       const search = document.getElementById("search");
-      search.scrollIntoView({ behavior: "smooth", block: "center" });
-      setTimeout(function () { search.focus(); }, 350);
+      search.scrollIntoView({behavior:"smooth", block:"center"});
+      setTimeout(() => search.focus(), 350);
+    }
+    document.getElementById("searchFloat").addEventListener("click", focusSearch);
+    document.getElementById("headerSearchBtn").addEventListener("click", focusSearch);
+    document.getElementById("bottomCartBtn").addEventListener("click", () => document.getElementById("cartBtn").click());
+    document.getElementById("profileBtn").addEventListener("click", () => {
+      const box = document.getElementById("accountBox");
+      box.hidden = false;
+      box.style.display = "flex";
     });
-    document.getElementById("bottomCartBtn").addEventListener("click", function () {
-      document.getElementById("cartBtn").click();
-    });
-    
-document.getElementById("profileBtn").addEventListener("click", function () {
-  const box = document.getElementById("accountBox");
-  box.hidden = false;
-  box.style.display = "flex";
-});
-
     if ("serviceWorker" in navigator) {
-      window.addEventListener("load", function () {
-        navigator.serviceWorker.register("./service-worker.js").catch(function (error) {
-          console.error("Service Worker error:", error);
-        });
-      });
+      window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(error => console.error("Service Worker error:", error)));
     }
   </script>
 </body>
