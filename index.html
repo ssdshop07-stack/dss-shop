@@ -1,17 +1,371 @@
+
 <!doctype html>
 <html lang="sq">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111827">
-  <meta name="description" content="DSS Shop — Security & Technology">
+  <meta name="theme-color" content="#080808">
+  <meta name="description" content="DSS Shop — Kamera sigurie, alarme dhe teknologji">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="DSS Shop">
 
-  <title>DSS Shop — Security & Technology</title>
+  <title>DSS Shop | Security & Technology</title>
 
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080808;
+      --panel: #141414;
+      --red: #e50914;
+      --text: #f5f5f5;
+      --muted: #aaa;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      background: #050505;
+      border-bottom: 1px solid #292929;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .wrap {
+      width: min(1200px, 94%);
+      margin: auto;
+    }
+
+    .nav {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+
+    .brand {
+      color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand b {
+      background: var(--red);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 24px;
+    }
+
+    .brand span {
+      font-size: 12px;
+      letter-spacing: 1.5px;
+    }
+
+    nav {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+    }
+
+    nav a:hover { color: #ff424a; }
+
+    button, .cta {
+      cursor: pointer;
+      border: 0;
+      border-radius: 7px;
+      padding: 12px 16px;
+      background: var(--red);
+      color: white;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    button:hover, .cta:hover {
+      background: #b80710;
+    }
+
+    .hero {
+      margin-top: 28px;
+      margin-bottom: 40px;
+      padding: 55px 30px;
+      border: 1px solid #292929;
+      border-radius: 16px;
+      background: linear-gradient(120deg, #000, #211010, #101010);
+    }
+
+    .hero > div { max-width: 700px; }
+
+    .eyebrow {
+      color: #ff424a;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .hero h1 {
+      font-size: clamp(30px, 5vw, 52px);
+      line-height: 1.1;
+      margin: 16px 0;
+    }
+
+    .hero p:not(.eyebrow) {
+      color: #ccc;
+      line-height: 1.7;
+    }
+
+    .cta {
+      display: inline-block;
+      margin-top: 12px;
+    }
+
+    #products { padding-bottom: 60px; }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .toolbar h2 {
+      margin-right: auto;
+      font-size: 27px;
+    }
+
+    input, select {
+      min-height: 44px;
+      padding: 11px 13px;
+      border-radius: 7px;
+      border: 1px solid #414141;
+      background: #171717;
+      color: white;
+      font-size: 15px;
+      max-width: 100%;
+    }
+
+    #search { flex: 1; min-width: 170px; }
+
+    .categories {
+      display: flex;
+      gap: 9px;
+      overflow-x: auto;
+      padding: 4px 0 18px;
+      margin-bottom: 8px;
+      scrollbar-width: thin;
+    }
+
+    .category-btn {
+      flex: 0 0 auto;
+      background: #191919;
+      border: 1px solid #393939;
+      color: #eee;
+      border-radius: 22px;
+      padding: 10px 15px;
+    }
+
+    .category-btn.active {
+      background: var(--red);
+      border-color: var(--red);
+      color: white;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      overflow: hidden;
+      border: 1px solid #303030;
+      border-radius: 12px;
+      background: var(--panel);
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .pic {
+      height: 190px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #202020;
+      border-radius: 8px;
+      overflow: hidden;
+      color: #ff424a;
+      font-size: 30px;
+      font-weight: bold;
+    }
+
+    .pic img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .cat {
+      color: #ff535b;
+      font-size: 12px;
+      margin-top: 15px;
+    }
+
+    .card h3 {
+      font-size: 17px;
+      line-height: 1.4;
+      min-height: 45px;
+    }
+
+    .price {
+      font-size: 21px;
+      font-weight: bold;
+      margin: 14px 0;
+    }
+
+    .card button { width: 100%; }
+
+    .drawer {
+      position: fixed;
+      z-index: 1001;
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: min(420px, 100%);
+      overflow-y: auto;
+      padding: 20px;
+      background: #101010;
+      border-left: 1px solid #333;
+      box-shadow: -10px 0 35px #0009;
+      transform: translateX(110%);
+      visibility: hidden;
+      transition: transform .25s ease, visibility .25s;
+    }
+
+    .drawer.open {
+      transform: translateX(0);
+      visibility: visible;
+    }
+
+    .drawerHead {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #333;
+      margin-bottom: 18px;
+    }
+
+    .drawerHead button {
+      font-size: 25px;
+      padding: 5px 13px;
+    }
+
+    .cartItem {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid #333;
+    }
+
+    .cartItem small {
+      display: block;
+      color: #bbb;
+      margin-top: 6px;
+    }
+
+    .cartItem button {
+      padding: 8px 12px;
+      margin-left: 3px;
+    }
+
+    .total {
+      padding: 20px 0;
+      font-size: 20px;
+    }
+
+    #orderForm {
+      display: grid;
+      gap: 12px;
+    }
+
+    #orderForm input { width: 100%; }
+
+    #orderForm button { min-height: 48px; }
+
+    #toast {
+      position: fixed;
+      bottom: 85px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #222;
+      border: 1px solid #444;
+      padding: 13px 20px;
+      border-radius: 8px;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+    }
+
+    #toast.show { opacity: 1; }
+
+    .whatsapp-contact {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 999;
+      padding: 13px 18px;
+      border-radius: 30px;
+      background: #25d366;
+      color: #052b14;
+      text-decoration: none;
+      font-weight: bold;
+      box-shadow: 0 4px 15px #0009;
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 650px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .hero { padding: 35px 20px; }
+      .pic { height: 145px; }
+      .card { padding: 10px; }
+      .toolbar h2 { width: 100%; margin-bottom: 0; }
+      .toolbar input, .toolbar select { width: 100%; }
+      .brand span { font-size: 10px; }
+      .nav { gap: 12px; }
+    }
+
+    @media (max-width: 360px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
@@ -22,7 +376,7 @@
     <div class="wrap nav">
       <a class="brand" href="./">
         <b>DSS</b>
-        <span>SECURITY & TECHNOLOGY</span>
+        <span>SECURITY &amp; TECHNOLOGY</span>
       </a>
 
       <nav>
@@ -42,7 +396,7 @@
         <p class="eyebrow">SIGURI • TEKNOLOGJI • BESUESHMËRI</p>
         <h1>Zgjidhje profesionale për sigurinë.</h1>
         <p>
-          Kamera, alarm, akses, rrjetëzim dhe pajisje profesionale
+          Kamera, alarme, kontroll aksesi dhe pajisje profesionale
           për biznes dhe shtëpi.
         </p>
         <a class="cta" href="#products">Shiko produktet</a>
@@ -58,6 +412,21 @@
           <option value="low">Çmimi: ulët → lart</option>
           <option value="high">Çmimi: lart → ulët</option>
         </select>
+      </div>
+
+      <div class="categories" id="categories">
+        <button type="button" class="category-btn active" data-category="all">Të gjitha</button>
+        <button type="button" class="category-btn" data-category="Kamera IP">Kamera IP</button>
+        <button type="button" class="category-btn" data-category="Kamera Wi-Fi">Kamera Wi-Fi</button>
+        <button type="button" class="category-btn" data-category="Kamera analoge">Kamera analoge</button>
+        <button type="button" class="category-btn" data-category="DVR/XVR">DVR/XVR</button>
+        <button type="button" class="category-btn" data-category="NVR">NVR</button>
+        <button type="button" class="category-btn" data-category="Komplete kamerash">Komplete kamerash</button>
+        <button type="button" class="category-btn" data-category="Alarme">Alarme</button>
+        <button type="button" class="category-btn" data-category="Kontroll aksesi">Kontroll aksesi</button>
+        <button type="button" class="category-btn" data-category="Interfonë">Interfonë</button>
+        <button type="button" class="category-btn" data-category="Pajisje rrjeti">Pajisje rrjeti</button>
+        <button type="button" class="category-btn" data-category="Aksesorë">Aksesorë</button>
       </div>
 
       <div id="grid" class="grid"></div>
@@ -86,6 +455,13 @@
 
   <div id="toast" role="status" aria-live="polite"></div>
 
+  <a class="whatsapp-contact"
+     href="https://wa.me/355684398803"
+     target="_blank"
+     rel="noopener noreferrer">
+    WhatsApp 0684398803
+  </a>
+
   <script src="app.js"></script>
 
   <script>
@@ -97,12 +473,6 @@
           });
       });
     }
-  </script>  <!-- WhatsApp Contact --><a href="https://wa.me/355684398803"
-target="_blank"
-rel="noopener noreferrer"
-style="position:fixed;right:18px;bottom:18px;z-index:1000;background:#25D366;color:#fff;padding:14px 20px;border-radius:30px;text-decoration:none;font-weight:bold;box-shadow:0 4px 12px #0004;">
-WhatsApp 0684398803
-</a>
-
+  </script>
 </body>
 </html>
