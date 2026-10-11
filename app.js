@@ -1,3 +1,4 @@
+
 const sb = window.supabase.createClient(
   window.DSS_SUPABASE_URL,
   window.DSS_SUPABASE_KEY
@@ -5,6 +6,7 @@ const sb = window.supabase.createClient(
 
 let products = [];
 let cart = JSON.parse(localStorage.getItem("dss_cart") || "[]");
+let selectedCategory = "all";
 
 const $ = (s) => document.querySelector(s);
 
@@ -58,39 +60,66 @@ window.change = (i, d) => {
 };
 
 function render() {
-  const q = $("#search").value.toLowerCase();
+  const q = ($("#search").value || "").toLowerCase().trim();
 
-  let a = products.filter(p =>
-    (p.name || "").toLowerCase().includes(q) ||
-    (p.category || "").toLowerCase().includes(q)
-  );
+  let a = products.filter(p => {
+    const name = (p.name || "").toLowerCase();
+    const category = (p.category || "").toLowerCase();
+
+    const matchesSearch =
+      name.includes(q) || category.includes(q);
+
+    const matchesCategory =
+      selectedCategory === "all" ||
+      category === selectedCategory.toLowerCase();
+
+    return matchesSearch && matchesCategory;
+  });
 
   const s = $("#sort").value;
 
   if (s === "low") {
-    a.sort((x, y) => x.price - y.price);
+    a.sort((x, y) =>
+      Number(x.sale_price || x.price || 0) -
+      Number(y.sale_price || y.price || 0)
+    );
   }
 
   if (s === "high") {
-    a.sort((x, y) => y.price - x.price);
+    a.sort((x, y) =>
+      Number(y.sale_price || y.price || 0) -
+      Number(x.sale_price || x.price || 0)
+    );
   }
 
   $("#grid").innerHTML = a.map(p => `
     <article class="card">
       <div class="pic">
         ${p.image_url
-          ? `<img src="${esc(p.image_url)}" alt="">`
+          ? `<img src="${esc(p.image_url)}" alt="${esc(p.name)}" loading="lazy">`
           : "DSS"}
       </div>
       <div class="cat">${esc(p.category || "")}</div>
       <h3>${esc(p.name)}</h3>
       <div class="price">${money(p.sale_price || p.price)}</div>
-      <button onclick='add(${JSON.stringify(p)})'>
+      <button onclick='add(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
         Shto në shportë
       </button>
     </article>
-  `).join("") || "<p>Nuk u gjetën produkte.</p>";
+  `).join("") || "<p>Nuk u gjetën produkte në këtë kategori.</p>";
 }
+
+document.querySelectorAll(".category-btn").forEach(button => {
+  button.addEventListener("click", () => {
+    selectedCategory = button.dataset.category;
+
+    document.querySelectorAll(".category-btn").forEach(b => {
+      b.classList.toggle("active", b === button);
+    });
+
+    render();
+  });
+});
 
 window.add = (p) => {
   const x = cart.find(x => x.id === p.id);
@@ -204,14 +233,14 @@ $("#orderForm").onsubmit = async (e) => {
       return;
     }
 
-const items = cart.map(x => ({
-  order_id: data.id,
-  product_id: x.id,
-  product_name: x.name,
-  quantity: x.qty,
-  price: x.price,
-  subtotal: x.price * x.qty
-}));
+    const items = cart.map(x => ({
+      order_id: data.id,
+      product_id: x.id,
+      product_name: x.name,
+      quantity: x.qty,
+      price: x.price,
+      subtotal: x.price * x.qty
+    }));
 
     const { error: itemsError } = await sb
       .from("order_items")
