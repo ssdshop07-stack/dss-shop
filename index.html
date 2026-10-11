@@ -217,7 +217,22 @@
       <button type="submit">Porosit</button>
     </form>
   </aside>
-  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="toast" role="status" aria-live="polite"></div><!-- DSS Customer Account --><div id="accountBox" hidden style="position:fixed;inset:0;z-index:3000;background:#000b;align-items:center;justify-content:center;padding:18px">
+  <div style="width:100%;max-width:400px;background:#191919;border:1px solid #444;border-radius:14px;padding:20px;color:#fff">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+      <h2 style="margin:0">Llogaria DSS</h2>
+      <button id="accountClose" type="button" style="background:#e50914;color:#fff;border:0;border-radius:7px;padding:8px 12px">Mbyll ×</button>
+    </div>
+    <p id="accountStatus">Regjistrohu ose hyr për të përfituar 10% ulje.</p>
+    <form id="accountForm" style="display:grid;gap:12px">
+      <input id="accountEmail" type="email" placeholder="Email-i" autocomplete="email" required>
+      <input id="accountPassword" type="password" placeholder="Fjalëkalimi (minimumi 6 karaktere)" autocomplete="new-password" minlength="6" required>
+      <button id="accountSubmit" type="submit" style="background:#e50914;color:white;border:0;border-radius:8px;padding:13px;font-weight:bold">Regjistrohu</button>
+    </form>
+    <button id="accountSwitch" type="button" style="margin-top:12px;width:100%;padding:12px;background:#292929;color:white;border:1px solid #555;border-radius:8px">Kam llogari — Hyr</button>
+    <button id="accountLogout" type="button" hidden style="margin-top:12px;width:100%;padding:12px;background:#292929;color:white;border:1px solid #555;border-radius:8px">Dil nga llogaria</button>
+  </div>
+  </div>
   <a class="whatsapp-contact" href="https://wa.me/355684398803" target="_blank" rel="noopener noreferrer" aria-label="Kontakto në WhatsApp">
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M20.5 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.7A8.5 8.5 0 1 1 20.5 11.5Z"/>
