@@ -1,4 +1,3 @@
-
 (function () {
   "use strict";
 
@@ -65,7 +64,8 @@
     }
 
     const ext = (file.name.split(".").pop() || "jpg")
-      .toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "") || "jpg";
 
     const path = folder + "/" + Date.now() + "-" +
       Math.random().toString(36).slice(2, 9) + "." + ext;
@@ -204,8 +204,28 @@
 
     el.innerHTML = categories.map(c => `
       <article style="padding:14px 0;border-bottom:1px solid #ddd">
-        <strong>${esc(c.name)}</strong>
-        <p>Renditja: ${Number(c.sort_order || 0)}</p>
+        <label style="display:block;margin-bottom:8px">
+          Emri i kategorisë:
+          <input
+            type="text"
+            data-category-name="${esc(c.id)}"
+            value="${esc(c.name)}"
+            required
+            maxlength="100"
+            style="display:block;width:100%;box-sizing:border-box;margin-top:4px;padding:9px">
+        </label>
+
+        <label style="display:block;margin-bottom:8px">
+          Renditja:
+          <input
+            type="number"
+            min="0"
+            step="1"
+            data-category-order="${esc(c.id)}"
+            value="${Number(c.sort_order || 0)}"
+            required
+            style="display:block;width:100%;box-sizing:border-box;margin-top:4px;padding:9px">
+        </label>
 
         ${c.image_url ? `
           <img src="${esc(c.image_url)}"
@@ -213,21 +233,117 @@
                style="width:120px;height:100px;object-fit:cover;border-radius:10px;display:block;margin:8px 0">
         ` : "<p>Nuk ka foto të kategorisë.</p>"}
 
-        <label>
+        <label style="display:block;margin-bottom:8px">
           Ndrysho foton:
-          <input type="file"
-                 accept="image/*"
-                 data-category-photo="${esc(c.id)}">
+          <input
+            type="file"
+            accept="image/*"
+            data-category-photo="${esc(c.id)}">
         </label>
+
+        <button type="button"
+                data-save-category="${esc(c.id)}"
+                style="margin:6px 6px 6px 0">
+          Ruaj ndryshimet
+        </button>
 
         <button type="button"
                 data-delete-category="${esc(c.id)}"
                 class="danger"
-                style="margin-top:8px">
+                style="margin:6px 0">
           Fshi kategorinë
         </button>
       </article>
     `).join("");
+
+    /* RUAJTJA E EMRIT DHE RENDITJES */
+
+    el.querySelectorAll("[data-save-category]").forEach(button => {
+      button.addEventListener("click", async function () {
+        const id = button.dataset.saveCategory;
+        const original = categories.find(
+          c => String(c.id) === String(id)
+        );
+
+        if (!original) return;
+
+        const nameInput = el.querySelector(
+          '[data-category-name="' + id + '"]'
+        );
+        const orderInput = el.querySelector(
+          '[data-category-order="' + id + '"]'
+        );
+
+        const newName = nameInput.value.trim();
+        const newOrder = Number(orderInput.value);
+
+        if (!newName) {
+          msg("categoryMsg", "Shkruaj emrin e kategorisë.", true);
+          nameInput.focus();
+          return;
+        }
+
+        if (orderInput.value.trim() === "" ||
+            !Number.isInteger(newOrder) ||
+            newOrder < 0) {
+          msg("categoryMsg", "Renditja duhet të jetë numër i plotë zero ose më i madh.", true);
+          orderInput.focus();
+          return;
+        }
+
+        const duplicate = categories.some(c =>
+          String(c.id) !== String(id) &&
+          c.name.trim().toLowerCase() === newName.toLowerCase()
+        );
+
+        if (duplicate) {
+          msg("categoryMsg", "Ekziston një kategori me këtë emër.", true);
+          nameInput.focus();
+          return;
+        }
+
+        setButtonBusy(button, true);
+
+        try {
+          msg("categoryMsg", "Po ruhen ndryshimet...");
+
+          /*
+           * Përditëso emrin e kategorisë te produktet
+           * kur ndryshon emri i kategorisë.
+           */
+
+          if (newName !== original.name) {
+            const { error: productError } = await db
+              .from("products")
+              .update({ category: newName })
+              .eq("category", original.name);
+
+            if (productError) throw productError;
+          }
+
+          const { error } = await db
+            .from("categories")
+            .update({
+              name: newName,
+              sort_order: newOrder
+            })
+            .eq("id", original.id);
+
+          if (error) throw error;
+
+          await loadCategories();
+          await loadProducts();
+
+          msg("categoryMsg", "Kategoria u ndryshua me sukses.");
+        } catch (e) {
+          msg("categoryMsg", "Gabim gjatë ruajtjes: " + e.message, true);
+        } finally {
+          setButtonBusy(button, false);
+        }
+      });
+    });
+
+    /* NDRYSHIMI I FOTOS SE KATEGORISE */
 
     el.querySelectorAll("[data-category-photo]").forEach(input => {
       input.addEventListener("change", async function () {
@@ -247,14 +363,16 @@
 
           if (error) throw error;
 
-          msg("categoryMsg", "Fotoja e kategorisë u ruajt.");
           await loadCategories();
+          msg("categoryMsg", "Fotoja e kategorisë u ruajt.");
         } catch (e) {
           msg("categoryMsg", "Gabim: " + e.message, true);
           input.disabled = false;
         }
       });
     });
+
+    /* FSHIRJA E KATEGORISE */
 
     el.querySelectorAll("[data-delete-category]").forEach(button => {
       button.addEventListener("click", async function () {
@@ -263,6 +381,27 @@
         );
 
         if (!category) return;
+
+        const { data: usedProducts, error: checkError } = await db
+          .from("products")
+          .select("id")
+          .eq("category", category.name)
+          .limit(1);
+
+        if (checkError) {
+          msg("categoryMsg", "Nuk u kontrolluan produktet: " + checkError.message, true);
+          return;
+        }
+
+        if (usedProducts && usedProducts.length) {
+          msg(
+            "categoryMsg",
+            'Kategoria "' + category.name +
+            '" ka produkte. Ndrysho kategorinë e produkteve përpara se ta fshish.',
+            true
+          );
+          return;
+        }
 
         if (!confirm(
           'Dëshiron të fshish kategorinë "' + category.name + '"?'
@@ -282,6 +421,7 @@
           msg("categoryMsg", "Kategoria u fshi.");
         } catch (e) {
           msg("categoryMsg", "Gabim: " + e.message, true);
+        } finally {
           setButtonBusy(button, false);
         }
       });
@@ -304,11 +444,22 @@
     }
 
     if (!Number.isInteger(sortOrder) || sortOrder < 0) {
-      msg("categoryMsg", "Renditja duhet të jetë numër i plotë pozitiv ose zero.", true);
+      msg("categoryMsg", "Renditja duhet të jetë numër i plotë zero ose më i madh.", true);
       return;
     }
 
-    const button = $("categoryForm").querySelector('[type="submit"]');
+    if (categories.some(c =>
+      c.name.trim().toLowerCase() === name.toLowerCase()
+    )) {
+      msg("categoryMsg", "Ekziston një kategori me këtë emër.", true);
+      return;
+    }
+
+    const form = $("categoryForm");
+    const button = form
+      ? form.querySelector('[type="submit"]')
+      : null;
+
     setButtonBusy(button, true);
 
     try {
@@ -661,26 +812,29 @@
     try {
       msg("bannerMsg", "Po ruhet baneri...");
 
+      const title = $("bannerTitle").value.trim();
+      const sortOrder = Number($("bannerSortOrder").value || 0);
+
+      if (!title) {
+        throw new Error("Shkruaj titullin e banerit.");
+      }
+
+      if (!Number.isInteger(sortOrder) || sortOrder < 0) {
+        throw new Error("Renditja duhet të jetë numër i plotë zero ose më i madh.");
+      }
+
       const file = $("bannerImage").files[0];
       const uploaded = await upload(file, "banners");
 
       const row = {
-        title: $("bannerTitle").value.trim(),
+        title: title,
         subtitle: $("bannerSubtitle").value.trim() || null,
         image_url: uploaded || bannerPhoto || null,
         button_text: $("bannerButtonText").value.trim() || null,
         button_url: $("bannerButtonUrl").value.trim() || "#products",
-        sort_order: Number($("bannerSortOrder").value || 0),
+        sort_order: sortOrder,
         active: $("bannerActive").checked
       };
-
-      if (!row.title) {
-        throw new Error("Shkruaj titullin e banerit.");
-      }
-
-      if (!Number.isInteger(row.sort_order) || row.sort_order < 0) {
-        throw new Error("Renditja duhet të jetë numër i plotë zero ose më i madh.");
-      }
 
       const result = editingBanner
         ? await db.from("site_banners").update(row).eq("id", editingBanner)
@@ -815,7 +969,8 @@
         const target = $(tasks[index][0]);
         if (target) {
           target.textContent =
-            "Gabim: " + (result.reason?.message || "Gabim i panjohur");
+            "Gabim: " +
+            (result.reason?.message || "Gabim i panjohur");
         }
       }
     });
