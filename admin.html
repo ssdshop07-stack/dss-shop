@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>SSD Shop | Admin</title>
+  <title>DSS Shop | Admin</title>
 
   <style>
     * {
@@ -85,6 +85,23 @@
       max-width: 100%;
     }
 
+    .banner-item {
+      border: 1px solid #d0d5dd;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .banner-item img {
+      display: block;
+      width: 100%;
+      max-height: 220px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+
     @media (max-width: 600px) {
       body {
         padding: 8px;
@@ -101,7 +118,7 @@
   <main class="container">
 
     <header class="card">
-      <h1>SSD SHOP</h1>
+      <h1>DSS SHOP</h1>
       <p>Paneli i administrimit</p>
 
       <button
@@ -180,6 +197,78 @@
 
     <section id="panel" hidden>
 
+      <!-- MENAXHIMI I BANERAVE -->
+      <section class="card">
+        <h2>Banerat kryesorë të faqes</h2>
+        <p>Menaxho fotot dhe tekstet që shfaqen në faqen kryesore.</p>
+
+        <button type="button" id="newBannerBtn">
+          + Shto baner
+        </button>
+
+        <div id="bannersAdmin">
+          <p>Banerat do të shfaqen këtu.</p>
+        </div>
+      </section>
+
+      <section id="bannerFormBox" class="card" hidden>
+        <h2 id="bannerFormTitle">Shto baner</h2>
+
+        <form id="bannerForm">
+          <input type="hidden" id="bannerId">
+
+          <label for="bannerTitle">Titulli i banerit</label>
+          <input id="bannerTitle" type="text" required>
+
+          <label for="bannerSubtitle">Përshkrimi</label>
+          <textarea id="bannerSubtitle" rows="3"></textarea>
+
+          <label for="bannerImage">Fotoja e banerit</label>
+          <input id="bannerImage" type="file" accept="image/*">
+
+          <div id="bannerImagePreview"></div>
+
+          <label for="bannerButtonText">Teksti i butonit</label>
+          <input
+            id="bannerButtonText"
+            type="text"
+            placeholder="Shiko produktet"
+          >
+
+          <label for="bannerButtonUrl">Lidhja e butonit</label>
+          <input
+            id="bannerButtonUrl"
+            type="text"
+            value="#products"
+          >
+
+          <label for="bannerSortOrder">Renditja</label>
+          <input
+            id="bannerSortOrder"
+            type="number"
+            min="0"
+            value="0"
+          >
+
+          <label>
+            <input type="checkbox" id="bannerActive" checked>
+            Baner aktiv
+          </label>
+
+          <p id="bannerMsg" class="message" role="status"></p>
+
+          <button type="submit">Ruaj banerin</button>
+
+          <button
+            type="button"
+            id="cancelBanner"
+            class="secondary">
+            Anulo
+          </button>
+        </form>
+      </section>
+
+      <!-- MENAXHIMI I PRODUKTEVE -->
       <section class="card">
         <h2>Produktet</h2>
 
@@ -216,9 +305,7 @@
             required
           >
 
-          <label for="productSalePrice">
-            Çmimi promocional (€)
-          </label>
+          <label for="productSalePrice">Çmimi promocional (€)</label>
           <input
             id="productSalePrice"
             type="number"
@@ -271,6 +358,7 @@
         </form>
       </section>
 
+      <!-- POROSITË -->
       <section class="card">
         <h2>Porositë</h2>
 
@@ -283,8 +371,8 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./config.js?v=100"></script>
-  <script src="./admin.js?v=100"></script>
+  <script src="./config.js?v=101"></script>
+  <script src="./admin.js?v=101"></script>
 
   <script>
     window.addEventListener("error", function(event) {
