@@ -595,7 +595,48 @@ function toast(message) {
    NGARKIMI I PRODUKTEVE NGA SUPABASE
 ========================================= */
 
-async function load() {
+
+async function loadCategoryPhotos() {
+  try {
+    const { data, error } = await db
+      .from("categories")
+      .select("name, image_url");
+
+    if (error) throw error;
+
+    const normalize = (text) =>
+      String(text || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+
+    const photos = new Map(
+      (data || [])
+        .filter(c => c.image_url)
+        .map(c => [normalize(c.name), c.image_url])
+    );
+
+    document.querySelectorAll(".category-btn").forEach(button => {
+      const label = button.querySelector("span");
+      const img = button.querySelector("img");
+
+      if (!label || !img) return;
+
+      const url = photos.get(normalize(label.textContent));
+
+      if (url) {
+        img.src = url;
+      }
+    });
+  } catch (error) {
+    console.error("Gabim gjatë ngarkimit të fotove të kategorive:", error);
+  }
+}
+
+loadCategoryPhotos();
+
   try {
     if (
       window.DSS_SUPABASE_URL &&
