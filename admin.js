@@ -89,7 +89,109 @@
     select.value = current || "";
   }
 
-  async function loadCategories() {
+  
+async function loadCategories() {
+  const el = $("categoriesAdmin");
+  if (el) el.textContent = "Po ngarkohen kategoritë...";
+
+  const { data, error } = await db
+    .from("categories")
+    .select("id, name, sort_order, image_url")
+    .order("sort_order", { ascending: true });
+
+  if (error) throw error;
+
+  categories = data || [];
+  fillCategorySelect();
+
+  if (!el) return;
+
+  if (!categories.length) {
+    el.textContent = "Nuk ka kategori të regjistruara.";
+    return;
+  }
+
+  el.innerHTML = categories.map(c => `
+    <div style="padding:14px 0;border-bottom:1px solid #ddd">
+      <strong>${esc(c.name)}</strong>
+      <div style="margin:8px 0">
+        Renditja: ${Number(c.sort_order || 0)}
+      </div>
+
+      ${c.image_url ? `
+        <img
+          src="${esc(c.image_url)}"
+          alt="${esc(c.name)}"
+          style="width:120px;height:100px;object-fit:cover;border-radius:10px;display:block;margin:8px 0"
+        >
+      ` : `
+        <p>Nuk ka foto të zgjedhur.</p>
+      `}
+
+      <label>Ndrysho foton e kategorisë:</label>
+      <input
+        type="file"
+        accept="image/*"
+        data-category-photo="${esc(c.id)}"
+      >
+
+      <button
+        type="button"
+        data-delete-category="${esc(c.id)}"
+        class="danger"
+        style="margin-top:8px"
+      >Fshi kategorinë</button>
+    </div>
+  `).join("");
+
+  el.querySelectorAll("[data-category-photo]").forEach(input => {
+    input.addEventListener("change", async () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+
+      try {
+        input.disabled = true;
+
+        const url = await upload(file, "categories");
+
+        const { error } = await db
+          .from("categories")
+          .update({ image_url: url })
+          .eq("id", input.dataset.categoryPhoto);
+
+        if (error) throw error;
+
+        const msg = $("categoryMsg");
+        if (msg) msg.textContent = "Fotoja e kategorisë u ruajt me sukses.";
+
+        await loadCategories();
+      } catch (error) {
+        alert("Gabim gjatë ruajtjes së fotos: " + error.message);
+        input.disabled = false;
+      }
+    });
+  });
+
+  el.querySelectorAll("[data-delete-category]").forEach(button => {
+    button.addEventListener("click", async () => {
+      if (!confirm("Dëshiron ta fshish këtë kategori?")) return;
+
+      try {
+        const { error } = await db
+          .from("categories")
+          .delete()
+          .eq("id", button.dataset.deleteCategory);
+
+        if (error) throw error;
+
+        await loadCategories();
+      } catch (error) {
+        alert("Gabim gjatë fshirjes: " + error.message);
+      }
+    });
+  });
+}
+
     const el = $("categoriesAdmin");
     if (el) el.textContent = "Po ngarkohen kategoritë...";
 
