@@ -1,667 +1,486 @@
+
 (function () {
-function startAdmin() {
-"use strict";
+  "use strict";
 
-/* DSS SHOP - ADMIN */
+  const $ = (id) => document.getElementById(id);
+  const BUCKET = "product-image";
+  let db;
+  let editingProduct = null;
+  let editingBanner = null;
+  let productPhoto = "";
+  let bannerPhoto = "";
+  let busy = false;
 
-const $ = (id) => document.getElementById(id);
+  function msg(id, text, error = false) {
+    const el = $(id);
+    if (!el) return;
+    el.textContent = text;
+    el.style.color = error ? "#b42318" : "#067647";
+  }
 
-function message(element, text, error = false) {
-  if (!element) return;
-  element.textContent = text || "";
-  element.style.color = error ? "#b42318" : "#067647";
-}
+  function esc(value) {
+    return String(value ?? "").replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;",
+      '"': "&quot;", "'": "&#39;"
+    })[c]);
+  }
 
-function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  })[char]);
-}
+  function price(value) {
+    return "€" + Number(value || 0).toFixed(2);
+  }
 
-function money(value) {
-  return "€" + Number(value || 0).toFixed(2);
-}
+  function show(id, visible) {
+    if ($(id)) $(id).hidden = !visible;
+  }
 
-/* SUPABASE */
-
-const loginMsg = $("loginMsg");
-
-if (!window.supabase) {
-  message(loginMsg, "Gabim: Supabase nuk u ngarkua.", true);
-  throw new Error("Supabase JS nuk u ngarkua.");
-}
-
-if (!window.DSS_SUPABASE_URL || !window.DSS_SUPABASE_KEY) {
-  message(loginMsg, "Gabim: config.js nuk u ngarkua.", true);
-  throw new Error("Supabase config mungon.");
-}
-
-const dssClient = window.supabase.createClient(
-  window.DSS_SUPABASE_URL,
-  window.DSS_SUPABASE_KEY
-);
-
-const STORAGE_BUCKET = "product-image";
-
-/* ELEMENTET */
-
-const login = $("login");
-const reset = $("reset");
-const panel = $("panel");
-const logout = $("logout");
-
-const loginForm = $("loginForm");
-const forgotBtn = $("forgotBtn");
-const resetForm = $("resetForm");
-
-const productsAdmin = $("productsAdmin");
-const orders = $("orders");
-
-const newBtn = $("newBtn");
-const productFormBox = $("productFormBox");
-const productForm = $("productForm");
-const cancelProduct = $("cancelProduct");
-
-const formTitle = $("formTitle");
-const productMsg = $("productMsg");
-const imagePreview = $("imagePreview");
-
-let editingId = null;
-let currentImageUrl = "";
-let loginInProgress = false;
-let passwordRecovery = new URLSearchParams(window.location.hash.slice(1)).get("type") === "recovery";
-let savingProduct = false;
-
-/* KONTROLLI I ELEMENTEVE */
-
-const requiredElements = [
-  login,
-  reset,
-  panel,
-  logout,
-  loginForm,
-  $("email"),
-  $("password"),
-  forgotBtn,
-  resetForm,
-  productsAdmin,
-  orders,
-  newBtn,
-  productFormBox,
-  productForm,
-  cancelProduct,
-  formTitle,
-  productMsg,
-  imagePreview,
-  $("productImage")
-];
-
-if (requiredElements.some((element) => !element)) {
-  message(
-    loginMsg,
-    "Gabim: Mungon një element në admin.html.",
-    true
-  );
-  throw new Error("Elemente të Admin-it mungojnë: " + requiredElements.map((element, index) => element ? null : index).filter((index) => index !== null).join(", "));
-}
-
-/* HYRJA — PJESA E RREGULLUAR */
-
-loginForm.addEventListener("submit", async function(event) {
-  event.preventDefault();
-
-  if (loginInProgress) return;
-
-  loginInProgress = true;
-
-  const email = $("email").value.trim();
-  const password = $("password").value;
-  const button = loginForm.querySelector('button[type="submit"]');
-
-  if (button) button.disabled = true;
-
-  message(loginMsg, "Po kontrollohen të dhënat...");
-
-  try {
-    const { data, error } =
-      await dssClient.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
-
-    if (error) throw error;
-
-    if (!data?.session) {
-      throw new Error("Hyrja nuk u konfirmua.");
+  async function upload(file, folder) {
+    if (!file) return "";
+    if (!file.type.startsWith("image/")) {
+      throw new Error("Zgjidh një fotografi të vlefshme.");
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      throw new Error("Fotografia duhet të jetë maksimumi 8 MB.");
     }
 
-    message(loginMsg, "Hyrja u krye. Po ngarkohen të dhënat...");
-
-    await showPanel();
-  } catch (error) {
-    message(
-      loginMsg,
-      error.message || "Gabim gjatë hyrjes.",
-      true
-    );
-  } finally {
-    loginInProgress = false;
-    if (button) button.disabled = false;
-  }
-});
-
-/* HARROVA FJALËKALIMIN */
-
-forgotBtn.addEventListener("click", async function() {
-  const email = $("email").value.trim();
-
-  if (!email) {
-    message(loginMsg, "Shkruaj email-in fillimisht.", true);
-    $("email").focus();
-    return;
-  }
-
-  message(loginMsg, "Po dërgohet email-i...");
-
-  try {
-    const { error } = await dssClient.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.href.split("#")[0]
-    });
-
-    if (error) throw error;
-
-    message(
-      loginMsg,
-      "Nëse email-i është i regjistruar, kontrollo kutinë e email-it."
-    );
-  } catch (error) {
-    message(loginMsg, error.message || "Gabim gjatë dërgimit.", true);
-  }
-});
-
-/* NDRYSHIMI I FJALËKALIMIT */
-
-resetForm.addEventListener("submit", async function(event) {
-  event.preventDefault();
-
-  const password = $("newPassword").value;
-  const password2 = $("newPassword2").value;
-  const msg = $("resetMsg");
-
-  if (password.length < 6) {
-    message(msg, "Fjalëkalimi duhet të ketë të paktën 6 karaktere.", true);
-    return;
-  }
-
-  if (password !== password2) {
-    message(msg, "Fjalëkalimet nuk përputhen.", true);
-    return;
-  }
-
-  try {
-    const { error } = await dssClient.auth.updateUser({ password });
-
-    if (error) throw error;
-
-    passwordRecovery = false;
-    message(msg, "Fjalëkalimi u ndryshua me sukses.");
-    resetForm.reset();
-    reset.hidden = true;
-    await showPanel();
-  } catch (error) {
-    message(msg, error.message || "Gabim gjatë ndryshimit.", true);
-  }
-});
-
-/* DALJA */
-
-logout.addEventListener("click", async function() {
-  logout.disabled = true;
-
-  try {
-    const { error } = await dssClient.auth.signOut();
-
-    if (error) throw error;
-
-    login.hidden = false;
-    panel.hidden = true;
-    reset.hidden = true;
-    logout.hidden = true;
-    loginForm.reset();
-
-    message(loginMsg, "Dole nga llogaria.");
-  } catch (error) {
-    alert("Gabim gjatë daljes: " + error.message);
-  } finally {
-    logout.disabled = false;
-  }
-});
-
-/* SESIONI */
-
-dssClient.auth.onAuthStateChange(function(event) {
-  if (event === "PASSWORD_RECOVERY") {
-    passwordRecovery = true;
-    login.hidden = true;
-    panel.hidden = true;
-    logout.hidden = true;
-    reset.hidden = false;
-  }
-
-  if (event === "SIGNED_OUT") {
-    login.hidden = false;
-    panel.hidden = true;
-    reset.hidden = true;
-    logout.hidden = true;
-  }
-});
-
-/* NISJA */
-
-async function init() {
-  login.hidden = false;
-  panel.hidden = true;
-  reset.hidden = true;
-  logout.hidden = true;
-
-  message(loginMsg, "Admin.js u ngarkua.");
-
-  try {
-    const { data, error } = await dssClient.auth.getSession();
-
-    if (error) throw error;
-
-    if (passwordRecovery) {
-      login.hidden = true;
-      reset.hidden = false;
-    } else if (data.session) {
-      await showPanel();
-    }
-  } catch (error) {
-    message(
-      loginMsg,
-      error.message || "Gabim gjatë kontrollit të sesionit.",
-      true
-    );
-  }
-}
-
-/* SHFAQ PANELIN */
-
-async function showPanel() {
-  login.hidden = true;
-  reset.hidden = true;
-  panel.hidden = false;
-  logout.hidden = false;
-
-  await Promise.allSettled([
-    loadProducts(),
-    loadOrders()
-  ]);
-}
-
-/* PRODUKTET */
-
-async function loadProducts() {
-  productsAdmin.textContent = "Duke ngarkuar produktet...";
-
-  try {
-    const { data, error } = await dssClient
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) throw error;
-
-    if (!data || data.length === 0) {
-      productsAdmin.textContent = "Nuk ka produkte.";
-      return;
-    }
-
-    productsAdmin.innerHTML = data.map(function(product) {
-      const image = product.image_url
-        ? `<img src="${escapeHtml(product.image_url)}"
-             alt="${escapeHtml(product.name)}"
-             style="width:80px;height:80px;object-fit:cover;border-radius:8px">`
-        : "";
-
-      return `
-        <div style="display:flex;gap:12px;align-items:center;
-                    padding:12px 0;border-bottom:1px solid #ddd;flex-wrap:wrap">
-          ${image}
-          <div style="flex:1;min-width:140px">
-            <strong>${escapeHtml(product.name)}</strong>
-            <div>${escapeHtml(product.category)}</div>
-            <div>Çmimi: ${money(product.sale_price ?? product.price)}</div>
-            <div>Stoku: ${Number(product.stock || 0)}</div>
-            <div>${product.active ? "Aktiv" : "Joaktiv"}</div>
-          </div>
-          <button type="button"
-            onclick="editProduct('${escapeHtml(product.id)}')">
-            Ndrysho
-          </button>
-          <button type="button" class="danger"
-            onclick="deleteProduct('${escapeHtml(product.id)}')">
-            Fshi
-          </button>
-        </div>`;
-    }).join("");
-  } catch (error) {
-    productsAdmin.textContent = "Gabim te produktet: " + error.message;
-  }
-}
-
-/* SHTO PRODUKT */
-
-newBtn.addEventListener("click", function() {
-  editingId = null;
-  currentImageUrl = "";
-  productForm.reset();
-
-  $("productId").value = "";
-  $("productStock").value = "0";
-  $("productActive").checked = true;
-  $("productFeatured").checked = false;
-
-  formTitle.textContent = "Shto produkt";
-  imagePreview.innerHTML = "";
-  $("productImage").value = "";
-  message(productMsg, "");
-
-  productFormBox.hidden = false;
-  productFormBox.scrollIntoView({ behavior: "smooth" });
-});
-
-/* NDRYSHO PRODUKT */
-
-window.editProduct = async function(id) {
-  try {
-    const { data, error } = await dssClient
-      .from("products")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (error) throw error;
-
-    editingId = data.id;
-    currentImageUrl = data.image_url || "";
-
-    $("productId").value = data.id;
-    $("productName").value = data.name || "";
-    $("productSku").value = data.sku || "";
-    $("productCategory").value = data.category || "";
-    $("productPrice").value = data.price ?? "";
-    $("productSalePrice").value = data.sale_price ?? "";
-    $("productStock").value = data.stock ?? 0;
-    $("productDescription").value = data.description || "";
-    $("productFeatured").checked = !!data.featured;
-    $("productActive").checked = data.active !== false;
-    $("productImage").value = "";
-
-    formTitle.textContent = "Ndrysho produktin";
-
-    imagePreview.innerHTML = currentImageUrl
-      ? `<img src="${escapeHtml(currentImageUrl)}"
-          alt="" style="max-width:180px;border-radius:8px">`
-      : "";
-
-    message(productMsg, "");
-    productFormBox.hidden = false;
-    productFormBox.scrollIntoView({ behavior: "smooth" });
-  } catch (error) {
-    alert("Nuk u gjet produkti: " + error.message);
-  }
-};
-
-/* ANULO */
-
-cancelProduct.addEventListener("click", function() {
-  productFormBox.hidden = true;
-  productForm.reset();
-  $("productImage").value = "";
-  editingId = null;
-  currentImageUrl = "";
-  imagePreview.innerHTML = "";
-  message(productMsg, "");
-});
-
-/* PARAPAMJA E FOTOS */
-
-$("productImage").addEventListener("change", function(event) {
-  const file = event.target.files[0];
-
-  if (!file) return;
-
-  if (!file.type.startsWith("image/")) {
-    message(productMsg, "Zgjidh një foto të vlefshme.", true);
-    event.target.value = "";
-    return;
-  }
-
-  if (file.size > 8 * 1024 * 1024) {
-    message(productMsg, "Fotoja duhet të jetë maksimumi 8 MB.", true);
-    event.target.value = "";
-    return;
-  }
-
-  const objectUrl = URL.createObjectURL(file);
-
-  imagePreview.innerHTML = `
-    <img src="${objectUrl}" alt="Parapamja e fotos"
-         style="max-width:180px;border-radius:8px">`;
-});
-
-/* NGARKO FOTON */
-
-async function uploadProductImage(file) {
-  if (!file) return currentImageUrl || "";
-
-  const extension = (file.name.split(".").pop() || "jpg")
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-
-  const path = "products/" + Date.now() + "-" +
-    Math.random().toString(36).slice(2, 9) + "." + extension;
-
-  const { error } = await dssClient.storage
-    .from(STORAGE_BUCKET)
-    .upload(path, file, {
-      cacheControl: "3600",
+    const ext = (file.name.split(".").pop() || "jpg")
+      .toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+    const path = folder + "/" + Date.now() + "-" +
+      Math.random().toString(36).slice(2, 9) + "." + ext;
+
+    const { error } = await db.storage.from(BUCKET).upload(path, file, {
       upsert: false,
-      contentType: file.type
+      contentType: file.type,
+      cacheControl: "3600"
     });
-
-  if (error) throw error;
-
-  return dssClient.storage
-    .from(STORAGE_BUCKET)
-    .getPublicUrl(path).data.publicUrl;
-}
-
-/* RUAJ PRODUKTIN */
-
-productForm.addEventListener("submit", async function(event) {
-  event.preventDefault();
-
-  if (savingProduct) return;
-  savingProduct = true;
-
-  const button = productForm.querySelector('button[type="submit"]');
-  if (button) button.disabled = true;
-
-  try {
-    message(productMsg, "Po ruhet produkti...");
-
-    const price = Number($("productPrice").value);
-    const saleValue = $("productSalePrice").value;
-    const stock = Number($("productStock").value);
-
-    if (!Number.isFinite(price) || price < 0) {
-      throw new Error("Vendos një çmim të vlefshëm.");
-    }
-
-    if (saleValue !== "" &&
-        (!Number.isFinite(Number(saleValue)) || Number(saleValue) < 0)) {
-      throw new Error("Çmimi promocional nuk është i vlefshëm.");
-    }
-
-    if (!Number.isInteger(stock) || stock < 0) {
-      throw new Error("Stoku duhet të jetë numër i plotë, zero ose më shumë.");
-    }
-
-    const product = {
-      name: $("productName").value.trim(),
-      sku: $("productSku").value.trim() || ("DSS-" + Date.now()),
-      category: $("productCategory").value.trim(),
-      price,
-      sale_price: saleValue === "" ? null : Number(saleValue),
-      stock,
-      description: $("productDescription").value.trim() || null,
-      featured: $("productFeatured").checked,
-      active: $("productActive").checked
-    };
-
-    if (!product.name || !product.category) {
-      throw new Error("Plotëso emrin dhe kategorinë.");
-    }
-
-    const file = $("productImage").files[0];
-    product.image_url = await uploadProductImage(file) || null;
-
-    let result;
-
-    if (editingId !== null) {
-      result = await dssClient
-        .from("products")
-        .update(product)
-        .eq("id", editingId);
-    } else {
-      result = await dssClient
-        .from("products")
-        .insert(product);
-    }
-
-    if (result.error) throw result.error;
-
-    message(productMsg, "Produkti u ruajt me sukses.");
-
-    productForm.reset();
-    $("productImage").value = "";
-    editingId = null;
-    currentImageUrl = "";
-    imagePreview.innerHTML = "";
-    $("productStock").value = "0";
-    $("productActive").checked = true;
-
-    await loadProducts();
-  } catch (error) {
-    message(productMsg, "Gabim: " + error.message, true);
-  } finally {
-    savingProduct = false;
-    if (button) button.disabled = false;
-  }
-});
-
-/* FSHI PRODUKTIN */
-
-window.deleteProduct = async function(id) {
-  if (!confirm("A dëshiron ta fshish këtë produkt?")) return;
-
-  try {
-    const { error } = await dssClient
-      .from("products")
-      .delete()
-      .eq("id", id);
-
     if (error) throw error;
 
-    await loadProducts();
-  } catch (error) {
-    alert("Gabim gjatë fshirjes: " + error.message);
+    return db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
   }
-};
 
-/* POROSITË */
+  function preview(inputId, previewId) {
+    $(inputId).addEventListener("change", function () {
+      const file = this.files && this.files[0];
+      if (!file) return;
+      if (!file.type.startsWith("image/") || file.size > 8 * 1024 * 1024) {
+        msg(inputId === "bannerImage" ? "bannerMsg" : "productMsg",
+          "Zgjidh foto deri në 8 MB.", true);
+        this.value = "";
+        return;
+      }
+      $(previewId).innerHTML =
+        '<img style="max-width:220px;border-radius:8px" src="' +
+        URL.createObjectURL(file) + '" alt="Parapamja">';
+    });
+  }
 
-async function loadOrders() {
-  orders.textContent = "Duke ngarkuar porositë...";
-
-  try {
-    const { data, error } = await dssClient
-      .from("orders")
-      .select("*")
-      .order("created_at", { ascending: false });
-
+  async function loadProducts() {
+    const el = $("productsAdmin");
+    el.textContent = "Po ngarkohen produktet...";
+    const { data, error } = await db.from("products")
+      .select("*").order("created_at", { ascending: false });
     if (error) throw error;
+    if (!data || !data.length) {
+      el.textContent = "Nuk ka produkte.";
+      return;
+    }
+    el.innerHTML = data.map(p => `
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid #ddd">
+        ${p.image_url ? `<img src="${esc(p.image_url)}" alt="" style="width:75px;height:75px;object-fit:cover;border-radius:8px">` : ""}
+        <div style="flex:1;min-width:130px">
+          <strong>${esc(p.name)}</strong>
+          <div>${esc(p.category)}</div>
+          <div>${price(p.sale_price ?? p.price)}</div>
+          <div>Stoku: ${Number(p.stock || 0)} · ${p.active ? "Aktiv" : "Joaktiv"}</div>
+        </div>
+        <button type="button" data-edit-product="${esc(p.id)}">Ndrysho</button>
+        <button type="button" class="danger" data-delete-product="${esc(p.id)}">Fshi</button>
+      </div>`).join("");
 
-    if (!data || data.length === 0) {
-      orders.textContent = "Nuk ka porosi.";
+    el.querySelectorAll("[data-edit-product]").forEach(b =>
+      b.addEventListener("click", () => editProduct(b.dataset.editProduct)));
+    el.querySelectorAll("[data-delete-product]").forEach(b =>
+      b.addEventListener("click", () => deleteProduct(b.dataset.deleteProduct)));
+  }
+
+  async function editProduct(id) {
+    try {
+      const { data, error } = await db.from("products")
+        .select("*").eq("id", id).single();
+      if (error) throw error;
+
+      editingProduct = data.id;
+      productPhoto = data.image_url || "";
+      $("productId").value = data.id;
+      $("productName").value = data.name || "";
+      $("productSku").value = data.sku || "";
+      $("productCategory").value = data.category || "";
+      $("productPrice").value = data.price ?? "";
+      $("productSalePrice").value = data.sale_price ?? "";
+      $("productStock").value = data.stock ?? 0;
+      $("productDescription").value = data.description || "";
+      $("productFeatured").checked = !!data.featured;
+      $("productActive").checked = data.active !== false;
+      $("productImage").value = "";
+      $("imagePreview").innerHTML = productPhoto
+        ? `<img src="${esc(productPhoto)}" alt="" style="max-width:220px">` : "";
+      $("formTitle").textContent = "Ndrysho produktin";
+      msg("productMsg", "");
+      show("productFormBox", true);
+      $("productFormBox").scrollIntoView({ behavior: "smooth" });
+    } catch (e) {
+      alert("Gabim: " + e.message);
+    }
+  }
+
+  async function deleteProduct(id) {
+    if (!confirm("Ta fshijmë këtë produkt?")) return;
+    const { error } = await db.from("products").delete().eq("id", id);
+    if (error) return alert("Gabim: " + error.message);
+    await loadProducts();
+  }
+
+  async function saveProduct(event) {
+    event.preventDefault();
+    if (busy) return;
+    busy = true;
+    const button = $("productForm").querySelector('[type="submit"]');
+    button.disabled = true;
+    try {
+      msg("productMsg", "Po ruhet produkti...");
+      const priceValue = Number($("productPrice").value);
+      const sale = $("productSalePrice").value;
+      const stock = Number($("productStock").value);
+      if (!Number.isFinite(priceValue) || priceValue < 0)
+        throw new Error("Kontrollo çmimin.");
+      if (sale !== "" && (!Number.isFinite(Number(sale)) || Number(sale) < 0))
+        throw new Error("Kontrollo çmimin promocional.");
+      if (!Number.isInteger(stock) || stock < 0)
+        throw new Error("Stoku duhet të jetë numër i plotë pozitiv ose zero.");
+
+      const file = $("productImage").files[0];
+      const uploaded = await upload(file, "products");
+      const row = {
+        name: $("productName").value.trim(),
+        sku: $("productSku").value.trim() || ("DSS-" + Date.now()),
+        category: $("productCategory").value.trim(),
+        price: priceValue,
+        sale_price: sale === "" ? null : Number(sale),
+        stock,
+        description: $("productDescription").value.trim() || null,
+        featured: $("productFeatured").checked,
+        active: $("productActive").checked,
+        image_url: uploaded || productPhoto || null
+      };
+      if (!row.name || !row.category)
+        throw new Error("Plotëso emrin dhe kategorinë.");
+
+      const result = editingProduct
+        ? await db.from("products").update(row).eq("id", editingProduct)
+        : await db.from("products").insert(row);
+      if (result.error) throw result.error;
+
+      msg("productMsg", "Produkti u ruajt!");
+      editingProduct = null;
+      productPhoto = "";
+      $("productForm").reset();
+      $("productStock").value = "0";
+      $("productActive").checked = true;
+      $("imagePreview").innerHTML = "";
+      await loadProducts();
+    } catch (e) {
+      msg("productMsg", "Gabim: " + e.message, true);
+    } finally {
+      busy = false;
+      button.disabled = false;
+    }
+  }
+
+  async function loadBanners() {
+    const el = $("bannersAdmin");
+    el.textContent = "Po ngarkohen banerat...";
+    const { data, error } = await db.from("site_banners")
+      .select("*").order("sort_order", { ascending: true });
+    if (error) throw error;
+    if (!data || !data.length) {
+      el.textContent = "Nuk ka banera. Shtyp “Shto baner”.";
+      return;
+    }
+    el.innerHTML = data.map(b => `
+      <article class="banner-item">
+        <strong>${esc(b.title)}</strong>
+        <p>${esc(b.subtitle || "")}</p>
+        ${b.image_url ? `<img src="${esc(b.image_url)}" alt="">` : ""}
+        <p>Statusi: ${b.active ? "Aktiv" : "Joaktiv"} · Renditja: ${Number(b.sort_order || 0)}</p>
+        <button type="button" data-edit-banner="${esc(b.id)}">Ndrysho</button>
+        <button type="button" class="danger" data-delete-banner="${esc(b.id)}">Fshi</button>
+      </article>`).join("");
+
+    el.querySelectorAll("[data-edit-banner]").forEach(b =>
+      b.addEventListener("click", () => editBanner(b.dataset.editBanner)));
+    el.querySelectorAll("[data-delete-banner]").forEach(b =>
+      b.addEventListener("click", () => deleteBanner(b.dataset.deleteBanner)));
+  }
+
+  function clearBannerForm() {
+    editingBanner = null;
+    bannerPhoto = "";
+    $("bannerForm").reset();
+    $("bannerId").value = "";
+    $("bannerButtonUrl").value = "#products";
+    $("bannerSortOrder").value = "0";
+    $("bannerActive").checked = true;
+    $("bannerImage").value = "";
+    $("bannerImagePreview").innerHTML = "";
+    $("bannerFormTitle").textContent = "Shto baner";
+    msg("bannerMsg", "");
+  }
+
+  async function editBanner(id) {
+    try {
+      const { data, error } = await db.from("site_banners")
+        .select("*").eq("id", id).single();
+      if (error) throw error;
+      editingBanner = data.id;
+      bannerPhoto = data.image_url || "";
+      $("bannerId").value = data.id;
+      $("bannerTitle").value = data.title || "";
+      $("bannerSubtitle").value = data.subtitle || "";
+      $("bannerButtonText").value = data.button_text || "";
+      $("bannerButtonUrl").value = data.button_url || "#products";
+      $("bannerSortOrder").value = data.sort_order ?? 0;
+      $("bannerActive").checked = data.active !== false;
+      $("bannerImage").value = "";
+      $("bannerImagePreview").innerHTML = bannerPhoto
+        ? `<img src="${esc(bannerPhoto)}" alt="" style="max-width:100%;max-height:200px">` : "";
+      $("bannerFormTitle").textContent = "Ndrysho banerin";
+      msg("bannerMsg", "");
+      show("bannerFormBox", true);
+      $("bannerFormBox").scrollIntoView({ behavior: "smooth" });
+    } catch (e) {
+      alert("Gabim: " + e.message);
+    }
+  }
+
+  async function saveBanner(event) {
+    event.preventDefault();
+    if (busy) return;
+    busy = true;
+    const button = $("bannerForm").querySelector('[type="submit"]');
+    button.disabled = true;
+    try {
+      msg("bannerMsg", "Po ruhet baneri...");
+      const file = $("bannerImage").files[0];
+      const uploaded = await upload(file, "banners");
+      const row = {
+        title: $("bannerTitle").value.trim(),
+        subtitle: $("bannerSubtitle").value.trim() || null,
+        image_url: uploaded || bannerPhoto || null,
+        button_text: $("bannerButtonText").value.trim() || null,
+        button_url: $("bannerButtonUrl").value.trim() || "#products",
+        sort_order: Number($("bannerSortOrder").value || 0),
+        active: $("bannerActive").checked
+      };
+      if (!row.title) throw new Error("Shkruaj titullin e banerit.");
+      if (!Number.isInteger(row.sort_order) || row.sort_order < 0)
+        throw new Error("Renditja duhet të jetë numër zero ose më i madh.");
+
+      const result = editingBanner
+        ? await db.from("site_banners").update(row).eq("id", editingBanner)
+        : await db.from("site_banners").insert(row);
+      if (result.error) throw result.error;
+
+      msg("bannerMsg", "Baneri u ruajt me sukses!");
+      clearBannerForm();
+      show("bannerFormBox", false);
+      await loadBanners();
+    } catch (e) {
+      msg("bannerMsg", "Gabim: " + e.message, true);
+    } finally {
+      busy = false;
+      button.disabled = false;
+    }
+  }
+
+  async function deleteBanner(id) {
+    if (!confirm("Ta fshijmë këtë baner?")) return;
+    const { error } = await db.from("site_banners").delete().eq("id", id);
+    if (error) return alert("Gabim: " + error.message);
+    await loadBanners();
+  }
+
+  async function loadOrders() {
+    const el = $("orders");
+    el.textContent = "Po ngarkohen porositë...";
+    const { data, error } = await db.from("orders")
+      .select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    if (!data || !data.length) {
+      el.textContent = "Nuk ka porosi.";
+      return;
+    }
+    const statuses = ["new", "processing", "completed", "cancelled"];
+    el.innerHTML = data.map(o => `
+      <div style="padding:12px 0;border-bottom:1px solid #ddd">
+        <strong>Porosia #${esc(o.id)}</strong>
+        <p>${esc(o.customer_name || "")} · ${esc(o.phone || "")}</p>
+        <p>${esc(o.address || "")}</p>
+        <p>Totali: ${price(o.total)}</p>
+        <label>Statusi:
+          <select data-order="${esc(o.id)}">
+            ${statuses.map(s => `<option value="${s}" ${o.status === s ? "selected" : ""}>${s}</option>`).join("")}
+          </select>
+        </label>
+      </div>`).join("");
+
+    el.querySelectorAll("[data-order]").forEach(select => {
+      select.addEventListener("change", async () => {
+        const { error } = await db.from("orders")
+          .update({ status: select.value }).eq("id", select.dataset.order);
+        if (error) {
+          alert("Gabim: " + error.message);
+          await loadOrders();
+        } else {
+          msg("loginMsg", "Statusi i porosisë u ndryshua.");
+        }
+      });
+    });
+  }
+
+  async function showPanel() {
+    show("login", false);
+    show("reset", false);
+    show("panel", true);
+    show("logout", true);
+    const results = await Promise.allSettled([
+      loadProducts(), loadOrders(), loadBanners()
+    ]);
+    results.forEach((r, i) => {
+      if (r.status === "rejected") {
+        const target = ["productsAdmin", "orders", "bannersAdmin"][i];
+        $(target).textContent = "Gabim: " + r.reason.message;
+      }
+    });
+  }
+
+  function init() {
+    if (!window.supabase || !window.DSS_SUPABASE_URL ||
+        !window.DSS_SUPABASE_KEY) {
+      msg("loginMsg", "Supabase/config.js nuk u ngarkua. Kontrollo config.js.", true);
       return;
     }
 
-    orders.innerHTML = data.map(function(order) {
-      const statuses = ["new", "processing", "completed", "cancelled"];
+    db = window.supabase.createClient(
+      window.DSS_SUPABASE_URL, window.DSS_SUPABASE_KEY
+    );
 
-      return `
-        <div style="padding:12px 0;border-bottom:1px solid #ddd">
-          <strong>Porosia #${escapeHtml(order.id)}</strong>
-          <div>${escapeHtml(order.customer_name || "")}</div>
-          <div>Tel: ${escapeHtml(order.phone || "")}</div>
-          <div>Adresa: ${escapeHtml(order.address || "")}</div>
-          <div>Totali: ${money(order.total)}</div>
-          <label>
-            Statusi:
-            <select
-              onchange="updateOrderStatus('${escapeHtml(order.id)}', this.value)">
-              ${statuses.map(function(status) {
-                return `<option value="${status}"
-                  ${order.status === status ? "selected" : ""}>
-                  ${status}
-                </option>`;
-              }).join("")}
-            </select>
-          </label>
-        </div>`;
-    }).join("");
-  } catch (error) {
-    orders.textContent = "Gabim te porositë: " + error.message;
+    $("loginForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      const button = $("loginForm").querySelector('[type="submit"]');
+      button.disabled = true;
+      msg("loginMsg", "Po kontrollohen të dhënat...");
+      try {
+        const { data, error } = await db.auth.signInWithPassword({
+          email: $("email").value.trim(),
+          password: $("password").value
+        });
+        if (error) throw error;
+        if (!data.session) throw new Error("Sesioni nuk u krijua.");
+        await showPanel();
+      } catch (e) {
+        msg("loginMsg", "Gabim gjatë hyrjes: " + e.message, true);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    $("forgotBtn").addEventListener("click", async () => {
+      const email = $("email").value.trim();
+      if (!email) return msg("loginMsg", "Shkruaj email-in fillimisht.", true);
+      try {
+        const { error } = await db.auth.resetPasswordForEmail(email, {
+          redirectTo: location.href.split("#")[0]
+        });
+        if (error) throw error;
+        msg("loginMsg", "Kontrollo email-in për lidhjen e rikuperimit.");
+      } catch (e) {
+        msg("loginMsg", "Gabim: " + e.message, true);
+      }
+    });
+
+    $("resetForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      const a = $("newPassword").value;
+      const b = $("newPassword2").value;
+      if (a.length < 6) return msg("resetMsg", "Duhet të ketë të paktën 6 karaktere.", true);
+      if (a !== b) return msg("resetMsg", "Fjalëkalimet nuk përputhen.", true);
+      try {
+        const { error } = await db.auth.updateUser({ password: a });
+        if (error) throw error;
+        msg("resetMsg", "Fjalëkalimi u ndryshua.");
+        await showPanel();
+      } catch (e) {
+        msg("resetMsg", "Gabim: " + e.message, true);
+      }
+    });
+
+    $("logout").addEventListener("click", async () => {
+      const { error } = await db.auth.signOut();
+      if (error) return alert(error.message);
+      show("login", true);
+      show("panel", false);
+      show("reset", false);
+      show("logout", false);
+      $("loginForm").reset();
+    });
+
+    $("newBtn").addEventListener("click", () => {
+      editingProduct = null;
+      productPhoto = "";
+      $("productForm").reset();
+      $("productId").value = "";
+      $("productStock").value = "0";
+      $("productActive").checked = true;
+      $("imagePreview").innerHTML = "";
+      $("productImage").value = "";
+      $("formTitle").textContent = "Shto produkt";
+      msg("productMsg", "");
+      show("productFormBox", true);
+    });
+    $("cancelProduct").addEventListener("click", () => {
+      show("productFormBox", false);
+      editingProduct = null;
+      productPhoto = "";
+    });
+    $("productForm").addEventListener("submit", saveProduct);
+
+    $("newBannerBtn").addEventListener("click", () => {
+      clearBannerForm();
+      show("bannerFormBox", true);
+    });
+    $("cancelBanner").addEventListener("click", () => {
+      show("bannerFormBox", false);
+      clearBannerForm();
+    });
+    $("bannerForm").addEventListener("submit", saveBanner);
+
+    preview("productImage", "imagePreview");
+    preview("bannerImage", "bannerImagePreview");
+
+    const recovery = new URLSearchParams(location.hash.slice(1)).get("type") === "recovery";
+    show("login", !recovery);
+    show("reset", recovery);
+    show("panel", false);
+    show("logout", false);
+
+    db.auth.getSession().then(async ({ data, error }) => {
+      if (error) return msg("loginMsg", error.message, true);
+      if (data.session && !recovery) await showPanel();
+    }).catch(e => msg("loginMsg", e.message, true));
   }
-}
 
-/* NDRYSHO STATUSIN E POROSISË */
-
-window.updateOrderStatus = async function(id, status) {
-  const allowed = ["new", "processing", "completed", "cancelled"];
-
-  if (!allowed.includes(status)) return;
-
-  try {
-    const { error } = await dssClient
-      .from("orders")
-      .update({ status })
-      .eq("id", id);
-
-    if (error) throw error;
-
-    message(loginMsg, "Statusi i porosisë u ndryshua.");
-  } catch (error) {
-    alert("Gabim gjatë ndryshimit të statusit: " + error.message);
-    await loadOrders();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
   }
-};
-
-/* NIS ADMIN */
-
-init();
-}
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", startAdmin, { once: true });
-} else {
-  startAdmin();
-}
 })();
