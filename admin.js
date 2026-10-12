@@ -255,7 +255,58 @@ async function loadCategories() {
     });
   }
 
-  async function saveCategory(event) {
+  
+async function saveCategory(event) {
+  event.preventDefault();
+
+  const name = $("categoryName").value.trim();
+  const sortOrder = Number($("categorySort").value || 0);
+  const fileInput = $("categoryImage");
+  const file = fileInput && fileInput.files
+    ? fileInput.files[0]
+    : null;
+  const msg = $("categoryMsg");
+
+  if (!name) {
+    if (msg) msg.textContent = "Shkruaj emrin e kategorisë.";
+    return;
+  }
+
+  try {
+    if (msg) msg.textContent = "Po ruhet kategoria...";
+
+    let imageUrl = "";
+
+    if (file) {
+      if (msg) msg.textContent = "Po ngarkohet fotografia...";
+      imageUrl = await upload(file, "categories");
+    }
+
+    const { error } = await db
+      .from("categories")
+      .insert({
+        name: name,
+        sort_order: sortOrder,
+        image_url: imageUrl || null
+      });
+
+    if (error) throw error;
+
+    $("categoryForm").reset();
+
+    const preview = $("categoryImagePreview");
+    if (preview) preview.innerHTML = "";
+
+    if (msg) msg.textContent = "Kategoria u ruajt me sukses!";
+
+    await loadCategories();
+  } catch (error) {
+    if (msg) {
+      msg.textContent = "Gabim: " + error.message;
+    }
+  }
+}
+
     event.preventDefault();
 
     if (busy) return;
