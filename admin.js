@@ -309,47 +309,7 @@ async function saveCategory(event) {
 
     event.preventDefault();
 
-    if (busy) return;
-
-    const name = $("categoryName").value.trim();
-    const sortOrder = Number($("categorySort").value || 0);
-
-    if (!name) {
-      msg("categoryMsg", "Shkruaj emrin e kategorisë.", true);
-      return;
-    }
-
-    if (!Number.isInteger(sortOrder) || sortOrder < 0) {
-      msg("categoryMsg", "Renditja duhet të jetë numër i plotë zero ose më i madh.", true);
-      return;
-    }
-
-    busy = true;
-    const button = $("categoryForm").querySelector('[type="submit"]');
-    setButtonBusy(button, true);
-
-    try {
-      msg("categoryMsg", "Po ruhet kategoria...");
-
-      const { error } = await db.from("categories").insert({
-        name: name,
-        sort_order: sortOrder
-      });
-
-      if (error) throw error;
-
-      $("categoryForm").reset();
-      $("categorySort").value = "10";
-
-      await loadCategories();
-      msg("categoryMsg", "Kategoria u ruajt me sukses!");
-    } catch (e) {
-      msg("categoryMsg", "Gabim: " + e.message, true);
-    } finally {
-      busy = false;
-      setButtonBusy(button, false);
-    }
-  }
+    
 
   /* FOTO UPLOAD */
 
