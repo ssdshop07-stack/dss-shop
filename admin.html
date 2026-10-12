@@ -196,6 +196,33 @@
     </section>
 
     <section id="panel" hidden>
+<section class="card" id="categoryManager">
+  <h2>Menaxhimi i kategorive</h2>
+
+  <form id="categoryForm">
+    <label for="categoryName">Emri i kategorisë</label>
+    <input
+      id="categoryName"
+      type="text"
+      placeholder="P.sh. Kamera IP"
+      required
+    >
+
+    <label for="categorySort">Renditja</label>
+    <input
+      id="categorySort"
+      type="number"
+      min="0"
+      value="10"
+    >
+
+    <button type="submit">Shto kategorinë</button>
+  </form>
+
+  <p id="categoryMsg" class="message" role="status"></p>
+  <div id="categoriesAdmin">Po ngarkohen kategoritë...</div>
+</section>
+
 
       <!-- MENAXHIMI I BANERAVE -->
       <section class="card">
