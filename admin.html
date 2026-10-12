@@ -216,6 +216,46 @@
       value="10"
     >
 
+    <label for="categoryImage">Fotoja e kategorisë</label>
+    <input
+      id="categoryImage"
+      type="file"
+      accept="image/*"
+    >
+
+    <div id="categoryImagePreview"></div>
+
+    <button type="submit">Shto kategorinë</button>
+  </form>
+
+  <p id="categoryMsg" class="message" role="status"></p>
+
+  <h3>Kategoritë ekzistuese</h3>
+  <p>Zgjidh një foto te kategoria që dëshiron të ndryshosh.</p>
+
+  <div id="categoriesAdmin">
+    Po ngarkohen kategoritë...
+  </div>
+</section>
+  <h2>Menaxhimi i kategorive</h2>
+
+  <form id="categoryForm">
+    <label for="categoryName">Emri i kategorisë</label>
+    <input
+      id="categoryName"
+      type="text"
+      placeholder="P.sh. Kamera IP"
+      required
+    >
+
+    <label for="categorySort">Renditja</label>
+    <input
+      id="categorySort"
+      type="number"
+      min="0"
+      value="10"
+    >
+
     <button type="submit">Shto kategorinë</button>
   </form>
 
