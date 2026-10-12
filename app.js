@@ -982,5 +982,49 @@ if (orderForm) {
    NISJA E FAQES
 ========================================= */
 
+async function loadBanners() {
+const section = document.getElementById("dssBanner");
+if (!section) return;
+
+try {
+const { data, error } = await sb
+.from("site_banners")
+.select("*")
+.eq("active", true)
+.order("sort_order", { ascending: true });
+
+if (error) throw error;
+
+if (!data || data.length === 0) {
+  section.style.display = "none";
+  return;
+}
+
+const b = data[0];
+
+document.getElementById("dssBannerTitle").textContent = b.title || "";
+document.getElementById("dssBannerSubtitle").textContent = b.subtitle || "";
+
+const img = document.getElementById("dssBannerImage");
+if (b.image_url) {
+  img.src = b.image_url;
+  img.style.display = "block";
+}
+
+const button = document.getElementById("dssBannerButton");
+if (b.button_text) {
+  button.textContent = b.button_text;
+  button.href = b.button_url || "#products";
+  button.style.display = "inline-block";
+}
+
+section.style.display = "block";
+
+} catch (error) {
+console.error("Gabim me banerin DSS:", error);
+}
+}
+
 applyLanguage();
 load();
+loadBanners();
