@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const $ = (id) => document.getElementById(id);
+  const $ = id => document.getElementById(id);
   const BUCKET = "product-image";
 
   let db;
@@ -42,6 +42,92 @@
     if (button) button.disabled = value;
   }
 
+  function listen(id, event, callback) {
+    const el = $(id);
+    if (!el) {
+      console.error("Mungon elementi HTML:", id);
+      return;
+    }
+    el.addEventListener(event, callback);
+  }
+
+  /* FOTO UPLOAD */
+
+  async function upload(file, folder) {
+    if (!file) return "";
+
+    if (!file.type.startsWith("image/")) {
+      throw new Error("Zgjidh një fotografi të vlefshme.");
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      throw new Error("Fotografia duhet të jetë maksimumi 8 MB.");
+    }
+
+    const ext = (file.name.split(".").pop() || "jpg")
+      .toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+
+    const path = folder + "/" + Date.now() + "-" +
+      Math.random().toString(36).slice(2, 9) + "." + ext;
+
+    const { error } = await db.storage.from(BUCKET).upload(
+      path,
+      file,
+      {
+        upsert: false,
+        contentType: file.type,
+        cacheControl: "3600"
+      }
+    );
+
+    if (error) {
+      if (/bucket not found/i.test(error.message)) {
+        throw new Error(
+          'Nuk ekziston bucket "product-image". Kontrollo emrin te Supabase Storage.'
+        );
+      }
+      throw error;
+    }
+
+    const result = db.storage.from(BUCKET).getPublicUrl(path);
+    return result.data.publicUrl;
+  }
+
+  function preview(inputId, previewId, messageId) {
+    listen(inputId, "change", function () {
+      const input = $(inputId);
+      const file = input.files && input.files[0];
+      const target = $(previewId);
+
+      if (!file) return;
+
+      if (!file.type.startsWith("image/") ||
+          file.size > 8 * 1024 * 1024) {
+        msg(messageId, "Zgjidh një foto të vlefshme deri në 8 MB.", true);
+        input.value = "";
+        if (target) target.innerHTML = "";
+        return;
+      }
+
+      if (target) {
+        const url = URL.createObjectURL(file);
+        target.innerHTML = "";
+
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "Parapamja e fotos";
+        img.style.maxWidth = "220px";
+        img.style.maxHeight = "220px";
+        img.style.objectFit = "contain";
+        img.style.borderRadius = "8px";
+
+        target.appendChild(img);
+      }
+
+      msg(messageId, "");
+    });
+  }
+
   /* KATEGORITE */
 
   function prepareCategorySelect() {
@@ -50,14 +136,17 @@
 
     const select = document.createElement("select");
     select.id = "productCategory";
+    select.name = old.name || "category";
     select.required = true;
     select.setAttribute("aria-label", "Kategoria e produktit");
 
-    const label = document.querySelector('label[for="productCategory"]');
+    const label = document.querySelector(
+      'label[for="productCategory"]'
+    );
+
     if (label) label.textContent = "Kategoria";
 
     old.replaceWith(select);
-    fillCategorySelect("");
   }
 
   function fillCategorySelect(selectedName) {
@@ -65,11 +154,15 @@
     if (!select) return;
 
     const current = selectedName !== undefined
-      ? String(selectedName)
+      ? String(selectedName || "")
       : select.value;
 
-    select.innerHTML =
-      '<option value="">Zgjidh kategorinë</option>';
+    select.innerHTML = "";
+
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Zgjidh kategorinë";
+    select.appendChild(placeholder);
 
     categories.forEach(category => {
       const option = document.createElement("option");
@@ -78,7 +171,6 @@
       select.appendChild(option);
     });
 
-    // Ruaj kategorinë e vjetër të produktit nëse nuk ekziston më.
     if (current && !categories.some(c => c.name === current)) {
       const option = document.createElement("option");
       option.value = current;
@@ -86,118 +178,16 @@
       select.appendChild(option);
     }
 
-    select.value = current || "";
+    select.value = current;
   }
 
-  
-async function loadCategories() {
-  const el = $("categoriesAdmin");
-  if (el) el.textContent = "Po ngarkohen kategoritë...";
-
-  const { data, error } = await db
-    .from("categories")
-    .select("id, name, sort_order, image_url")
-    .order("sort_order", { ascending: true });
-
-  if (error) throw error;
-
-  categories = data || [];
-  fillCategorySelect();
-
-  if (!el) return;
-
-  if (!categories.length) {
-    el.textContent = "Nuk ka kategori të regjistruara.";
-    return;
-  }
-
-  el.innerHTML = categories.map(c => `
-    <div style="padding:14px 0;border-bottom:1px solid #ddd">
-      <strong>${esc(c.name)}</strong>
-      <div style="margin:8px 0">
-        Renditja: ${Number(c.sort_order || 0)}
-      </div>
-
-      ${c.image_url ? `
-        <img
-          src="${esc(c.image_url)}"
-          alt="${esc(c.name)}"
-          style="width:120px;height:100px;object-fit:cover;border-radius:10px;display:block;margin:8px 0"
-        >
-      ` : `
-        <p>Nuk ka foto të zgjedhur.</p>
-      `}
-
-      <label>Ndrysho foton e kategorisë:</label>
-      <input
-        type="file"
-        accept="image/*"
-        data-category-photo="${esc(c.id)}"
-      >
-
-      <button
-        type="button"
-        data-delete-category="${esc(c.id)}"
-        class="danger"
-        style="margin-top:8px"
-      >Fshi kategorinë</button>
-    </div>
-  `).join("");
-
-  el.querySelectorAll("[data-category-photo]").forEach(input => {
-    input.addEventListener("change", async () => {
-      const file = input.files && input.files[0];
-      if (!file) return;
-
-      try {
-        input.disabled = true;
-
-        const url = await upload(file, "categories");
-
-        const { error } = await db
-          .from("categories")
-          .update({ image_url: url })
-          .eq("id", input.dataset.categoryPhoto);
-
-        if (error) throw error;
-
-        const msg = $("categoryMsg");
-        if (msg) msg.textContent = "Fotoja e kategorisë u ruajt me sukses.";
-
-        await loadCategories();
-      } catch (error) {
-        alert("Gabim gjatë ruajtjes së fotos: " + error.message);
-        input.disabled = false;
-      }
-    });
-  });
-
-  el.querySelectorAll("[data-delete-category]").forEach(button => {
-    button.addEventListener("click", async () => {
-      if (!confirm("Dëshiron ta fshish këtë kategori?")) return;
-
-      try {
-        const { error } = await db
-          .from("categories")
-          .delete()
-          .eq("id", button.dataset.deleteCategory);
-
-        if (error) throw error;
-
-        await loadCategories();
-      } catch (error) {
-        alert("Gabim gjatë fshirjes: " + error.message);
-      }
-    });
-  });
-}
-
+  async function loadCategories() {
     const el = $("categoriesAdmin");
     if (el) el.textContent = "Po ngarkohen kategoritë...";
 
     const { data, error } = await db
       .from("categories")
-      .select("id, name, sort_order")
+      .select("id, name, sort_order, image_url")
       .order("sort_order", { ascending: true });
 
     if (error) throw error;
@@ -208,31 +198,74 @@ async function loadCategories() {
     if (!el) return;
 
     if (!categories.length) {
-      el.textContent = "Nuk ka kategori. Shto kategorinë e parë më sipër.";
+      el.textContent = "Nuk ka kategori të regjistruara.";
       return;
     }
 
     el.innerHTML = categories.map(c => `
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid #ddd">
-        <div style="flex:1;min-width:130px">
-          <strong>${esc(c.name)}</strong>
-          <div>Renditja: ${Number(c.sort_order || 0)}</div>
-        </div>
+      <article style="padding:14px 0;border-bottom:1px solid #ddd">
+        <strong>${esc(c.name)}</strong>
+        <p>Renditja: ${Number(c.sort_order || 0)}</p>
+
+        ${c.image_url ? `
+          <img src="${esc(c.image_url)}"
+               alt="${esc(c.name)}"
+               style="width:120px;height:100px;object-fit:cover;border-radius:10px;display:block;margin:8px 0">
+        ` : "<p>Nuk ka foto të kategorisë.</p>"}
+
+        <label>
+          Ndrysho foton:
+          <input type="file"
+                 accept="image/*"
+                 data-category-photo="${esc(c.id)}">
+        </label>
+
         <button type="button"
-          data-delete-category="${esc(c.id)}"
-          class="danger">Fshi</button>
-      </div>
+                data-delete-category="${esc(c.id)}"
+                class="danger"
+                style="margin-top:8px">
+          Fshi kategorinë
+        </button>
+      </article>
     `).join("");
 
+    el.querySelectorAll("[data-category-photo]").forEach(input => {
+      input.addEventListener("change", async function () {
+        const file = input.files && input.files[0];
+        if (!file) return;
+
+        try {
+          input.disabled = true;
+          msg("categoryMsg", "Po ngarkohet fotoja...");
+
+          const url = await upload(file, "categories");
+
+          const { error } = await db
+            .from("categories")
+            .update({ image_url: url })
+            .eq("id", input.dataset.categoryPhoto);
+
+          if (error) throw error;
+
+          msg("categoryMsg", "Fotoja e kategorisë u ruajt.");
+          await loadCategories();
+        } catch (e) {
+          msg("categoryMsg", "Gabim: " + e.message, true);
+          input.disabled = false;
+        }
+      });
+    });
+
     el.querySelectorAll("[data-delete-category]").forEach(button => {
-      button.addEventListener("click", async () => {
+      button.addEventListener("click", async function () {
         const category = categories.find(
           c => String(c.id) === button.dataset.deleteCategory
         );
+
         if (!category) return;
 
         if (!confirm(
-          'Ta fshijmë kategorinë "' + category.name + '"?'
+          'Dëshiron të fshish kategorinë "' + category.name + '"?'
         )) return;
 
         setButtonBusy(button, true);
@@ -255,125 +288,71 @@ async function loadCategories() {
     });
   }
 
-  
-async function saveCategory(event) {
-  event.preventDefault();
+  async function saveCategory(event) {
+    event.preventDefault();
 
-  const name = $("categoryName").value.trim();
-  const sortOrder = Number($("categorySort").value || 0);
-  const fileInput = $("categoryImage");
-  const file = fileInput && fileInput.files
-    ? fileInput.files[0]
-    : null;
-  const msg = $("categoryMsg");
+    const name = $("categoryName").value.trim();
+    const sortOrder = Number($("categorySort").value || 0);
+    const fileInput = $("categoryImage");
+    const file = fileInput && fileInput.files
+      ? fileInput.files[0]
+      : null;
 
-  if (!name) {
-    if (msg) msg.textContent = "Shkruaj emrin e kategorisë.";
-    return;
-  }
-
-  try {
-    if (msg) msg.textContent = "Po ruhet kategoria...";
-
-    let imageUrl = "";
-
-    if (file) {
-      if (msg) msg.textContent = "Po ngarkohet fotografia...";
-      imageUrl = await upload(file, "categories");
+    if (!name) {
+      msg("categoryMsg", "Shkruaj emrin e kategorisë.", true);
+      return;
     }
 
-    const { error } = await db
-      .from("categories")
-      .insert({
+    if (!Number.isInteger(sortOrder) || sortOrder < 0) {
+      msg("categoryMsg", "Renditja duhet të jetë numër i plotë pozitiv ose zero.", true);
+      return;
+    }
+
+    const button = $("categoryForm").querySelector('[type="submit"]');
+    setButtonBusy(button, true);
+
+    try {
+      msg("categoryMsg", "Po ruhet kategoria...");
+
+      let imageUrl = "";
+
+      if (file) {
+        imageUrl = await upload(file, "categories");
+      }
+
+      const { error } = await db.from("categories").insert({
         name: name,
         sort_order: sortOrder,
         image_url: imageUrl || null
       });
 
-    if (error) throw error;
+      if (error) throw error;
 
-    $("categoryForm").reset();
+      $("categoryForm").reset();
 
-    const preview = $("categoryImagePreview");
-    if (preview) preview.innerHTML = "";
-
-    if (msg) msg.textContent = "Kategoria u ruajt me sukses!";
-
-    await loadCategories();
-  } catch (error) {
-    if (msg) {
-      msg.textContent = "Gabim: " + error.message;
-    }
-  }
-}
-
-    event.preventDefault();
-
-    
-
-  /* FOTO UPLOAD */
-
-  async function upload(file, folder) {
-    if (!file) return "";
-
-    if (!file.type.startsWith("image/")) {
-      throw new Error("Zgjidh një fotografi të vlefshme.");
-    }
-
-    if (file.size > 8 * 1024 * 1024) {
-      throw new Error("Fotografia duhet të jetë maksimumi 8 MB.");
-    }
-
-    const ext = (file.name.split(".").pop() || "jpg")
-      .toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
-
-    const path = folder + "/" + Date.now() + "-" +
-      Math.random().toString(36).slice(2, 9) + "." + ext;
-
-    const { error } = await db.storage.from(BUCKET).upload(path, file, {
-      upsert: false,
-      contentType: file.type,
-      cacheControl: "3600"
-    });
-
-    if (error) throw error;
-
-    return db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
-  }
-
-  function preview(inputId, previewId) {
-    const input = $(inputId);
-    if (!input) return;
-
-    input.addEventListener("change", function () {
-      const file = this.files && this.files[0];
-      if (!file) return;
-
-      if (!file.type.startsWith("image/") ||
-          file.size > 8 * 1024 * 1024) {
-        msg(
-          inputId === "bannerImage" ? "bannerMsg" : "productMsg",
-          "Zgjidh foto të vlefshme deri në 8 MB.",
-          true
-        );
-        this.value = "";
-        return;
+      if ($("categoryImagePreview")) {
+        $("categoryImagePreview").innerHTML = "";
       }
 
-      const url = URL.createObjectURL(file);
-      $(previewId).innerHTML =
-        '<img style="max-width:220px;max-height:220px;object-fit:contain;border-radius:8px" src="' +
-        url + '" alt="Parapamja">';
-    });
+      await loadCategories();
+      msg("categoryMsg", "Kategoria u ruajt me sukses!");
+    } catch (e) {
+      msg("categoryMsg", "Gabim: " + e.message, true);
+    } finally {
+      setButtonBusy(button, false);
+    }
   }
 
   /* PRODUKTET */
 
   async function loadProducts() {
     const el = $("productsAdmin");
+    if (!el) return;
+
     el.textContent = "Po ngarkohen produktet...";
 
-    const { data, error } = await db.from("products")
+    const { data, error } = await db
+      .from("products")
       .select("*")
       .order("created_at", { ascending: false });
 
@@ -385,17 +364,30 @@ async function saveCategory(event) {
     }
 
     el.innerHTML = data.map(p => `
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid #ddd">
-        ${p.image_url ? `<img src="${esc(p.image_url)}" alt="" style="width:75px;height:75px;object-fit:cover;border-radius:8px">` : ""}
+      <article style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid #ddd">
+        ${p.image_url ? `
+          <img src="${esc(p.image_url)}"
+               alt="${esc(p.name)}"
+               style="width:75px;height:75px;object-fit:cover;border-radius:8px">
+        ` : ""}
+
         <div style="flex:1;min-width:130px">
           <strong>${esc(p.name)}</strong>
           <div>Kategoria: ${esc(p.category)}</div>
           <div>Çmimi: ${price(p.sale_price ?? p.price)}</div>
-          <div>Stoku: ${Number(p.stock || 0)} · ${p.active ? "Aktiv" : "Joaktiv"}</div>
+          <div>Stoku: ${Number(p.stock || 0)}</div>
+          <div>Statusi: ${p.active ? "Aktiv" : "Joaktiv"}</div>
         </div>
-        <button type="button" data-edit-product="${esc(p.id)}">Ndrysho</button>
-        <button type="button" class="danger" data-delete-product="${esc(p.id)}">Fshi</button>
-      </div>
+
+        <button type="button" data-edit-product="${esc(p.id)}">
+          Ndrysho
+        </button>
+
+        <button type="button" class="danger"
+                data-delete-product="${esc(p.id)}">
+          Fshi
+        </button>
+      </article>
     `).join("");
 
     el.querySelectorAll("[data-edit-product]").forEach(button => {
@@ -413,8 +405,11 @@ async function saveCategory(event) {
 
   async function editProduct(id) {
     try {
-      const { data, error } = await db.from("products")
-        .select("*").eq("id", id).single();
+      const { data, error } = await db
+        .from("products")
+        .select("*")
+        .eq("id", id)
+        .single();
 
       if (error) throw error;
 
@@ -426,7 +421,6 @@ async function saveCategory(event) {
       $("productSku").value = data.sku || "";
 
       fillCategorySelect(data.category || "");
-      $("productCategory").value = data.category || "";
 
       $("productPrice").value = data.price ?? "";
       $("productSalePrice").value = data.sale_price ?? "";
@@ -437,7 +431,8 @@ async function saveCategory(event) {
       $("productImage").value = "";
 
       $("imagePreview").innerHTML = productPhoto
-        ? `<img src="${esc(productPhoto)}" alt="" style="max-width:220px;max-height:220px">`
+        ? `<img src="${esc(productPhoto)}" alt=""
+               style="max-width:220px;max-height:220px;object-fit:contain">`
         : "";
 
       $("formTitle").textContent = "Ndrysho produktin";
@@ -445,23 +440,25 @@ async function saveCategory(event) {
       show("productFormBox", true);
       $("productFormBox").scrollIntoView({ behavior: "smooth" });
     } catch (e) {
-      alert("Gabim: " + e.message);
+      alert("Gabim gjatë hapjes së produktit: " + e.message);
     }
   }
 
   async function deleteProduct(id) {
-    if (!confirm("Ta fshijmë këtë produkt?")) return;
+    if (!confirm("Dëshiron ta fshish këtë produkt?")) return;
 
     try {
-      const { error } = await db.from("products")
-        .delete().eq("id", id);
+      const { error } = await db
+        .from("products")
+        .delete()
+        .eq("id", id);
 
       if (error) throw error;
 
       await loadProducts();
       msg("productMsg", "Produkti u fshi.");
     } catch (e) {
-      alert("Gabim: " + e.message);
+      alert("Gabim gjatë fshirjes: " + e.message);
     }
   }
 
@@ -471,19 +468,26 @@ async function saveCategory(event) {
 
     busy = true;
 
-    const button = $("productForm").querySelector('[type="submit"]');
+    const form = $("productForm");
+    const button = form.querySelector('[type="submit"]');
     setButtonBusy(button, true);
 
     try {
       msg("productMsg", "Po ruhet produkti...");
 
-      const priceValue = Number($("productPrice").value);
-      const sale = $("productSalePrice").value;
-      const stock = Number($("productStock").value);
+      const name = $("productName").value.trim();
       const category = $("productCategory").value;
+      const priceValue = Number($("productPrice").value);
+      const sale = $("productSalePrice").value.trim();
+      const stock = Number($("productStock").value);
 
-      if (!Number.isFinite(priceValue) || priceValue < 0) {
-        throw new Error("Kontrollo çmimin.");
+      if (!name || !category) {
+        throw new Error("Plotëso emrin dhe zgjidh kategorinë.");
+      }
+
+      if ($("productPrice").value.trim() === "" ||
+          !Number.isFinite(priceValue) || priceValue < 0) {
+        throw new Error("Shkruaj një çmim të vlefshëm.");
       }
 
       if (sale !== "" &&
@@ -495,15 +499,11 @@ async function saveCategory(event) {
         throw new Error("Stoku duhet të jetë numër i plotë zero ose më i madh.");
       }
 
-      if (!$("productName").value.trim() || !category) {
-        throw new Error("Plotëso emrin dhe zgjidh kategorinë.");
-      }
-
       const file = $("productImage").files[0];
       const uploaded = await upload(file, "products");
 
       const row = {
-        name: $("productName").value.trim(),
+        name: name,
         sku: $("productSku").value.trim() || ("DSS-" + Date.now()),
         category: category,
         price: priceValue,
@@ -524,13 +524,16 @@ async function saveCategory(event) {
       editingProduct = null;
       productPhoto = "";
 
-      $("productForm").reset();
+      form.reset();
+      $("productId").value = "";
       $("productStock").value = "0";
       $("productActive").checked = true;
       $("imagePreview").innerHTML = "";
       fillCategorySelect("");
 
+      show("productFormBox", false);
       msg("productMsg", "Produkti u ruajt me sukses!");
+
       await loadProducts();
     } catch (e) {
       msg("productMsg", "Gabim: " + e.message, true);
@@ -544,9 +547,12 @@ async function saveCategory(event) {
 
   async function loadBanners() {
     const el = $("bannersAdmin");
+    if (!el) return;
+
     el.textContent = "Po ngarkohen banerat...";
 
-    const { data, error } = await db.from("site_banners")
+    const { data, error } = await db
+      .from("site_banners")
       .select("*")
       .order("sort_order", { ascending: true });
 
@@ -561,10 +567,20 @@ async function saveCategory(event) {
       <article class="banner-item">
         <strong>${esc(b.title)}</strong>
         <p>${esc(b.subtitle || "")}</p>
-        ${b.image_url ? `<img src="${esc(b.image_url)}" alt="">` : ""}
-        <p>Statusi: ${b.active ? "Aktiv" : "Joaktiv"} · Renditja: ${Number(b.sort_order || 0)}</p>
-        <button type="button" data-edit-banner="${esc(b.id)}">Ndrysho</button>
-        <button type="button" class="danger" data-delete-banner="${esc(b.id)}">Fshi</button>
+        ${b.image_url ? `
+          <img src="${esc(b.image_url)}" alt="${esc(b.title)}"
+               style="max-width:100%;max-height:200px;object-fit:contain">
+        ` : ""}
+        <p>Statusi: ${b.active ? "Aktiv" : "Joaktiv"}
+           · Renditja: ${Number(b.sort_order || 0)}</p>
+
+        <button type="button" data-edit-banner="${esc(b.id)}">
+          Ndrysho
+        </button>
+        <button type="button" class="danger"
+                data-delete-banner="${esc(b.id)}">
+          Fshi
+        </button>
       </article>
     `).join("");
 
@@ -599,8 +615,11 @@ async function saveCategory(event) {
 
   async function editBanner(id) {
     try {
-      const { data, error } = await db.from("site_banners")
-        .select("*").eq("id", id).single();
+      const { data, error } = await db
+        .from("site_banners")
+        .select("*")
+        .eq("id", id)
+        .single();
 
       if (error) throw error;
 
@@ -617,7 +636,8 @@ async function saveCategory(event) {
       $("bannerImage").value = "";
 
       $("bannerImagePreview").innerHTML = bannerPhoto
-        ? `<img src="${esc(bannerPhoto)}" alt="" style="max-width:100%;max-height:200px">`
+        ? `<img src="${esc(bannerPhoto)}" alt=""
+               style="max-width:100%;max-height:200px">`
         : "";
 
       $("bannerFormTitle").textContent = "Ndrysho banerin";
@@ -625,7 +645,7 @@ async function saveCategory(event) {
       show("bannerFormBox", true);
       $("bannerFormBox").scrollIntoView({ behavior: "smooth" });
     } catch (e) {
-      alert("Gabim: " + e.message);
+      alert("Gabim gjatë hapjes së banerit: " + e.message);
     }
   }
 
@@ -654,7 +674,9 @@ async function saveCategory(event) {
         active: $("bannerActive").checked
       };
 
-      if (!row.title) throw new Error("Shkruaj titullin e banerit.");
+      if (!row.title) {
+        throw new Error("Shkruaj titullin e banerit.");
+      }
 
       if (!Number.isInteger(row.sort_order) || row.sort_order < 0) {
         throw new Error("Renditja duhet të jetë numër i plotë zero ose më i madh.");
@@ -668,8 +690,8 @@ async function saveCategory(event) {
 
       clearBannerForm();
       show("bannerFormBox", false);
-      await loadBanners();
 
+      await loadBanners();
       msg("bannerMsg", "Baneri u ruajt me sukses!");
     } catch (e) {
       msg("bannerMsg", "Gabim: " + e.message, true);
@@ -680,18 +702,20 @@ async function saveCategory(event) {
   }
 
   async function deleteBanner(id) {
-    if (!confirm("Ta fshijmë këtë baner?")) return;
+    if (!confirm("Dëshiron ta fshish këtë baner?")) return;
 
     try {
-      const { error } = await db.from("site_banners")
-        .delete().eq("id", id);
+      const { error } = await db
+        .from("site_banners")
+        .delete()
+        .eq("id", id);
 
       if (error) throw error;
 
       await loadBanners();
       msg("bannerMsg", "Baneri u fshi.");
     } catch (e) {
-      alert("Gabim: " + e.message);
+      alert("Gabim gjatë fshirjes së banerit: " + e.message);
     }
   }
 
@@ -699,9 +723,12 @@ async function saveCategory(event) {
 
   async function loadOrders() {
     const el = $("orders");
+    if (!el) return;
+
     el.textContent = "Po ngarkohen porositë...";
 
-    const { data, error } = await db.from("orders")
+    const { data, error } = await db
+      .from("orders")
       .select("*")
       .order("created_at", { ascending: false });
 
@@ -712,28 +739,43 @@ async function saveCategory(event) {
       return;
     }
 
-    const statuses = ["new", "processing", "completed", "cancelled"];
+    const statuses = [
+      ["new", "E re"],
+      ["processing", "Në përpunim"],
+      ["completed", "Përfunduar"],
+      ["cancelled", "Anuluar"]
+    ];
 
     el.innerHTML = data.map(o => `
-      <div style="padding:12px 0;border-bottom:1px solid #ddd">
+      <article style="padding:12px 0;border-bottom:1px solid #ddd">
         <strong>Porosia #${esc(o.id)}</strong>
         <p>${esc(o.customer_name || "")} · ${esc(o.phone || "")}</p>
         <p>${esc(o.address || "")}</p>
         <p>Totali: ${price(o.total)}</p>
-        <label>Statusi:
+
+        <label>
+          Statusi:
           <select data-order="${esc(o.id)}">
-            ${statuses.map(s =>
-              `<option value="${s}" ${o.status === s ? "selected" : ""}>${s}</option>`
-            ).join("")}
+            ${statuses.map(([value, label]) => `
+              <option value="${value}"
+                ${o.status === value ? "selected" : ""}>
+                ${label}
+              </option>
+            `).join("")}
           </select>
         </label>
-      </div>
+      </article>
     `).join("");
 
     el.querySelectorAll("[data-order]").forEach(select => {
-      select.addEventListener("change", async () => {
+      select.addEventListener("change", async function () {
+        const previous = data.find(
+          o => String(o.id) === select.dataset.order
+        );
+
         try {
-          const { error } = await db.from("orders")
+          const { error } = await db
+            .from("orders")
             .update({ status: select.value })
             .eq("id", select.dataset.order);
 
@@ -741,8 +783,9 @@ async function saveCategory(event) {
 
           msg("loginMsg", "Statusi i porosisë u ndryshua.");
         } catch (e) {
-          alert("Gabim: " + e.message);
-          await loadOrders();
+          alert("Gabim gjatë ndryshimit të statusit: " + e.message);
+
+          if (previous) select.value = previous.status;
         }
       });
     });
@@ -757,21 +800,22 @@ async function saveCategory(event) {
     show("logout", true);
 
     const tasks = [
-      { id: "productsAdmin", fn: loadProducts },
-      { id: "orders", fn: loadOrders },
-      { id: "bannersAdmin", fn: loadBanners },
-      { id: "categoriesAdmin", fn: loadCategories }
+      ["productsAdmin", loadProducts],
+      ["orders", loadOrders],
+      ["bannersAdmin", loadBanners],
+      ["categoriesAdmin", loadCategories]
     ];
 
     const results = await Promise.allSettled(
-      tasks.map(task => task.fn())
+      tasks.map(([, fn]) => fn())
     );
 
     results.forEach((result, index) => {
       if (result.status === "rejected") {
-        const target = $(tasks[index].id);
+        const target = $(tasks[index][0]);
         if (target) {
-          target.textContent = "Gabim: " + result.reason.message;
+          target.textContent =
+            "Gabim: " + (result.reason?.message || "Gabim i panjohur");
         }
       }
     });
@@ -798,9 +842,9 @@ async function saveCategory(event) {
 
     prepareCategorySelect();
 
-    $("categoryForm").addEventListener("submit", saveCategory);
+    listen("categoryForm", "submit", saveCategory);
 
-    $("loginForm").addEventListener("submit", async event => {
+    listen("loginForm", "submit", async function (event) {
       event.preventDefault();
 
       const button = $("loginForm").querySelector('[type="submit"]');
@@ -808,13 +852,18 @@ async function saveCategory(event) {
       msg("loginMsg", "Po kontrollohen të dhënat...");
 
       try {
+        const email = $("email").value.trim();
+        const password = $("password").value;
+
         const { data, error } = await db.auth.signInWithPassword({
-          email: $("email").value.trim(),
-          password: $("password").value
+          email,
+          password
         });
 
         if (error) throw error;
-        if (!data.session) throw new Error("Sesioni nuk u krijua.");
+        if (!data.session) {
+          throw new Error("Sesioni nuk u krijua.");
+        }
 
         await showPanel();
       } catch (e) {
@@ -824,7 +873,7 @@ async function saveCategory(event) {
       }
     });
 
-    $("forgotBtn").addEventListener("click", async () => {
+    listen("forgotBtn", "click", async function () {
       const email = $("email").value.trim();
 
       if (!email) {
@@ -845,14 +894,14 @@ async function saveCategory(event) {
       }
     });
 
-    $("resetForm").addEventListener("submit", async event => {
+    listen("resetForm", "submit", async function (event) {
       event.preventDefault();
 
       const a = $("newPassword").value;
       const b = $("newPassword2").value;
 
       if (a.length < 6) {
-        msg("resetMsg", "Duhet të ketë të paktën 6 karaktere.", true);
+        msg("resetMsg", "Fjalëkalimi duhet të ketë të paktën 6 karaktere.", true);
         return;
       }
 
@@ -872,7 +921,7 @@ async function saveCategory(event) {
       }
     });
 
-    $("logout").addEventListener("click", async () => {
+    listen("logout", "click", async function () {
       const { error } = await db.auth.signOut();
 
       if (error) {
@@ -884,10 +933,12 @@ async function saveCategory(event) {
       show("panel", false);
       show("reset", false);
       show("logout", false);
+
       $("loginForm").reset();
+      msg("loginMsg", "Ke dalë nga llogaria.");
     });
 
-    $("newBtn").addEventListener("click", () => {
+    listen("newBtn", "click", function () {
       editingProduct = null;
       productPhoto = "";
 
@@ -905,29 +956,30 @@ async function saveCategory(event) {
       $("productFormBox").scrollIntoView({ behavior: "smooth" });
     });
 
-    $("cancelProduct").addEventListener("click", () => {
+    listen("cancelProduct", "click", function () {
       show("productFormBox", false);
       editingProduct = null;
       productPhoto = "";
     });
 
-    $("productForm").addEventListener("submit", saveProduct);
+    listen("productForm", "submit", saveProduct);
 
-    $("newBannerBtn").addEventListener("click", () => {
+    listen("newBannerBtn", "click", function () {
       clearBannerForm();
       show("bannerFormBox", true);
       $("bannerFormBox").scrollIntoView({ behavior: "smooth" });
     });
 
-    $("cancelBanner").addEventListener("click", () => {
+    listen("cancelBanner", "click", function () {
       show("bannerFormBox", false);
       clearBannerForm();
     });
 
-    $("bannerForm").addEventListener("submit", saveBanner);
+    listen("bannerForm", "submit", saveBanner);
 
-    preview("productImage", "imagePreview");
-    preview("bannerImage", "bannerImagePreview");
+    preview("productImage", "imagePreview", "productMsg");
+    preview("bannerImage", "bannerImagePreview", "bannerMsg");
+    preview("categoryImage", "categoryImagePreview", "categoryMsg");
 
     const recovery =
       new URLSearchParams(location.hash.slice(1)).get("type") === "recovery";
@@ -946,7 +998,9 @@ async function saveCategory(event) {
       if (data.session && !recovery) {
         await showPanel();
       }
-    }).catch(e => msg("loginMsg", e.message, true));
+    }).catch(e => {
+      msg("loginMsg", e.message, true);
+    });
   }
 
   if (document.readyState === "loading") {
