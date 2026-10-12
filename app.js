@@ -598,7 +598,7 @@ function toast(message) {
 
 async function loadCategoryPhotos() {
   try {
-    const { data, error } = await db
+    const { data, error } = await sb
       .from("categories")
       .select("name, image_url");
 
