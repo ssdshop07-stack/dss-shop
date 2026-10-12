@@ -635,7 +635,8 @@ async function loadCategoryPhotos() {
   }
 }
 
-loadCategoryPhotos();
+async function load() {
+  await loadCategoryPhotos();
 
   try {
     if (
