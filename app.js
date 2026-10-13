@@ -1,9 +1,10 @@
+
 "use strict";
 
 /* =========================================
    DSS SHOP — APP.JS
    Supabase, produktet, kategorite, shporta,
-   llogaria e klientit dhe porosite.
+   llogaria e klientit, porosite dhe detajet.
 ========================================= */
 
 const sb = window.supabase.createClient(
@@ -77,7 +78,13 @@ const translations = {
     unknown: "Gabim i panjohur",
     registerError: "Gabim: ",
     accountMissing: "Nuk u gjet formulari i llogarisë në index.html.",
-    discount: "ulje klienti: 10%"
+    discount: "ulje klienti: 10%",
+    details: "Shiko përshkrimin",
+    description: "Përshkrimi",
+    noDescription: "Për këtë produkt nuk është shtuar ende përshkrimi.",
+    stock: "Stoku: ",
+    noStock: "I papërcaktuar",
+    closeDetails: "Mbyll"
   },
 
   en: {
@@ -132,7 +139,13 @@ const translations = {
     unknown: "Unknown error",
     registerError: "Error: ",
     accountMissing: "Account form not found in index.html.",
-    discount: "customer discount: 10%"
+    discount: "customer discount: 10%",
+    details: "View details",
+    description: "Description",
+    noDescription: "No description has been added for this product yet.",
+    stock: "Stock: ",
+    noStock: "Not specified",
+    closeDetails: "Close"
   }
 };
 
@@ -143,9 +156,6 @@ const t = (key) =>
 
 /* =========================================
    NORMALIZIMI I KATEGORIVE
-
-   Ketu rregullohen emrat qe shkruhen
-   ndryshe ne Admin dhe ne faqen kryesore.
 ========================================= */
 
 function normalizeCategory(value) {
@@ -162,59 +172,59 @@ function normalizeCategory(value) {
     .replace(/[^a-z0-9]/g, "");
 
   const aliases = {
-    "all": "all",
-    "tegjitha": "all",
-    "allproducts": "all",
+    all: "all",
+    tegjitha: "all",
+    allproducts: "all",
 
-    "kamerawifi": "kamerawifi",
-    "wificamera": "kamerawifi",
-    "wificameras": "kamerawifi",
-    "kamerawireless": "kamerawifi",
+    kamerawifi: "kamerawifi",
+    wificamera: "kamerawifi",
+    wificameras: "kamerawifi",
+    kamerawireless: "kamerawifi",
 
-    "kameraip": "kameraip",
-    "ipkamera": "kameraip",
-    "ipcameras": "kameraip",
-    "ipcamera": "kameraip",
+    kameraip: "kameraip",
+    ipkamera: "kameraip",
+    ipcameras: "kameraip",
+    ipcamera: "kameraip",
 
-    "kameranaloge": "kameranaloge",
-    "kameraanaloge": "kameranaloge",
-    "analogkamera": "kameranaloge",
-    "analogcamera": "kameranaloge",
-    "analogcameras": "kameranaloge",
+    kameranaloge: "kameranaloge",
+    kameraanaloge: "kameranaloge",
+    analogkamera: "kameranaloge",
+    analogcamera: "kameranaloge",
+    analogcameras: "kameranaloge",
 
-    "dvrxvr": "dvrxvr",
-    "xvrdvr": "dvrxvr",
-    "xvr": "dvrxvr",
-    "dvr": "dvrxvr",
+    dvrxvr: "dvrxvr",
+    xvrdvr: "dvrxvr",
+    xvr: "dvrxvr",
+    dvr: "dvrxvr",
 
-    "nvr": "nvr",
+    nvr: "nvr",
 
-    "kompletekamerash": "kompletekamerash",
-    "kompletkamerash": "kompletekamerash",
-    "kamerakit": "kompletekamerash",
-    "camerakits": "kompletekamerash",
+    kompletekamerash: "kompletekamerash",
+    kompletkamerash: "kompletekamerash",
+    kamerakit: "kompletekamerash",
+    camerakits: "kompletekamerash",
 
-    "alarme": "alarme",
-    "alarm": "alarme",
-    "alarms": "alarme",
+    alarme: "alarme",
+    alarm: "alarme",
+    alarms: "alarme",
 
-    "kontrollaksesi": "kontrollaksesi",
-    "akseskontroll": "kontrollaksesi",
-    "accesscontrol": "kontrollaksesi",
+    kontrollaksesi: "kontrollaksesi",
+    akseskontroll: "kontrollaksesi",
+    accesscontrol: "kontrollaksesi",
 
-    "interfone": "interfone",
-    "interfon": "interfone",
-    "intercom": "interfone",
-    "intercoms": "interfone",
+    interfone: "interfone",
+    interfon: "interfone",
+    intercom: "interfone",
+    intercoms: "interfone",
 
-    "pajisjerrjeti": "pajisjerrjeti",
-    "pajisjerrjetit": "pajisjerrjeti",
-    "rrjeti": "pajisjerrjeti",
-    "networkdevices": "pajisjerrjeti",
+    pajisjerrjeti: "pajisjerrjeti",
+    pajisjerrjetit: "pajisjerrjeti",
+    rrjeti: "pajisjerrjeti",
+    networkdevices: "pajisjerrjeti",
 
-    "aksesore": "aksesore",
-    "aksesori": "aksesore",
-    "accessories": "aksesore"
+    aksesore: "aksesore",
+    aksesori: "aksesore",
+    accessories: "aksesore"
   };
 
   return aliases[c] || c;
@@ -240,14 +250,17 @@ function applyLanguage() {
   setText("#orderSubmit", t("order"));
   setText("#accountTitle", t("account"));
   setText("#accountClose", t("closeAccount"));
+
   setText(
     "#accountSubmit",
     accountMode === "signup" ? t("signup") : t("login")
   );
+
   setText(
     "#accountSwitch",
     accountMode === "signup" ? t("switchLogin") : t("switchSignup")
   );
+
   setText("#accountLogout", t("logout"));
   setText("#homeLabel", t("home"));
   setText("#bottomCartLabel", t("cart"));
@@ -440,22 +453,146 @@ window.change = (i, d) => {
 };
 
 /* =========================================
-   SHFAQJA E PRODUKTEVE
+   DETAJET E PRODUKTIT
+========================================= */
 
-   Ndryshimi kryesor:
-   Kategorite krahasohen pas normalizimit,
-   jo me emrin e shkruar fjale per fjale.
+window.openProductDetails = function (p) {
+  if (!p) return;
+
+  let modal = document.getElementById("productDetailsModal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "productDetailsModal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      zIndex: "99999",
+      background: "rgba(0,0,0,0.88)",
+      display: "none",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "16px",
+      overflowY: "auto",
+      boxSizing: "border-box"
+    });
+
+    modal.innerHTML = `
+      <div style="
+        background:#171717;
+        color:#fff;
+        width:100%;
+        max-width:520px;
+        max-height:90vh;
+        overflow-y:auto;
+        border:1px solid #444;
+        border-radius:14px;
+        padding:18px;
+        box-sizing:border-box;
+      ">
+        <button id="detailsClose" type="button"
+          style="float:right;padding:8px 12px;cursor:pointer">
+          ✕
+        </button>
+
+        <img id="detailsImage" alt=""
+          style="width:100%;max-height:280px;object-fit:contain;
+          border-radius:10px;display:none;margin:12px 0">
+
+        <div id="detailsCategory"
+          style="color:#ff4545;margin-top:12px"></div>
+
+        <h2 id="detailsName"></h2>
+
+        <div id="detailsPrice"
+          style="font-size:23px;font-weight:bold;margin:12px 0"></div>
+
+        <p id="detailsStock"></p>
+
+        <h3 id="detailsDescriptionTitle"></h3>
+
+        <p id="detailsDescription"
+          style="white-space:pre-wrap;line-height:1.6"></p>
+
+        <button id="detailsAdd" type="button"
+          style="width:100%;padding:13px;background:#e32636;
+          color:#fff;border:0;border-radius:8px;font-weight:bold;
+          cursor:pointer">
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#detailsClose").onclick = () => {
+      modal.style.display = "none";
+    };
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        modal.style.display = "none";
+      }
+    });
+  }
+
+  const image = modal.querySelector("#detailsImage");
+  const description = String(p.description || "").trim();
+
+  image.style.display = p.image_url ? "block" : "none";
+  image.src = p.image_url || "";
+  image.alt = p.name || "DSS";
+
+  modal.querySelector("#detailsCategory").textContent =
+    p.category || "";
+
+  modal.querySelector("#detailsName").textContent =
+    p.name || "";
+
+  modal.querySelector("#detailsPrice").textContent =
+    currentUser
+      ? money(basePrice(p)) + " → " +
+        money(customerPrice(basePrice(p))) + " (-10%)"
+      : money(basePrice(p));
+
+  modal.querySelector("#detailsStock").textContent =
+    t("stock") + (p.stock ?? t("noStock"));
+
+  modal.querySelector("#detailsDescriptionTitle").textContent =
+    t("description");
+
+  modal.querySelector("#detailsDescription").textContent =
+    description || t("noDescription");
+
+  modal.querySelector("#detailsAdd").textContent = t("add");
+
+  modal.querySelector("#detailsAdd").onclick = () => {
+    window.add(p);
+    modal.style.display = "none";
+  };
+
+  modal.style.display = "flex";
+};
+
+/* =========================================
+   SHFAQJA E PRODUKTEVE
 ========================================= */
 
 function render() {
   const searchEl = $("#search");
   const q = (searchEl?.value || "").toLowerCase().trim();
-
   const normalizedSearch = normalizeCategory(q);
 
   let a = products.filter((p) => {
     const name = String(p.name || "").toLowerCase();
     const categoryText = String(p.category || "").toLowerCase();
+    const description = String(p.description || "").toLowerCase();
 
     const category = normalizeCategory(p.category);
     const selected = normalizeCategory(selectedCategory);
@@ -464,7 +601,8 @@ function render() {
       !q ||
       name.includes(q) ||
       categoryText.includes(q) ||
-      category.includes(normalizedSearch);
+      category.includes(normalizedSearch) ||
+      description.includes(q);
 
     const matchesCategory =
       selected === "all" || category === selected;
@@ -483,7 +621,6 @@ function render() {
   }
 
   const grid = $("#grid");
-
   if (!grid) return;
 
   grid.innerHTML = a.map((p) => {
@@ -519,6 +656,12 @@ function render() {
         <h3>${esc(p.name)}</h3>
 
         ${priceHtml}
+
+        <button type="button"
+          onclick='window.openProductDetails(${encodedProduct})'
+          style="width:100%;margin-bottom:8px">
+          ${t("details")}
+        </button>
 
         <button type="button"
           onclick='add(${encodedProduct})'>
@@ -580,7 +723,6 @@ window.add = (p) => {
 
 function toast(message) {
   const el = $("#toast");
-
   if (!el) return;
 
   el.textContent = message;
@@ -592,9 +734,8 @@ function toast(message) {
 }
 
 /* =========================================
-   NGARKIMI I PRODUKTEVE NGA SUPABASE
+   FOTOT E KATEGORIVE
 ========================================= */
-
 
 async function loadCategoryPhotos() {
   try {
@@ -614,11 +755,11 @@ async function loadCategoryPhotos() {
 
     const photos = new Map(
       (data || [])
-        .filter(c => c.image_url)
-        .map(c => [normalize(c.name), c.image_url])
+        .filter((c) => c.image_url)
+        .map((c) => [normalize(c.name), c.image_url])
     );
 
-    document.querySelectorAll(".category-btn").forEach(button => {
+    document.querySelectorAll(".category-btn").forEach((button) => {
       const label = button.querySelector("span");
       const img = button.querySelector("img");
 
@@ -626,14 +767,19 @@ async function loadCategoryPhotos() {
 
       const url = photos.get(normalize(label.textContent));
 
-      if (url) {
-        img.src = url;
-      }
+      if (url) img.src = url;
     });
   } catch (error) {
-    console.error("Gabim gjatë ngarkimit të fotove të kategorive:", error);
+    console.error(
+      "Gabim gjatë ngarkimit të fotove të kategorive:",
+      error
+    );
   }
 }
+
+/* =========================================
+   NGARKIMI I PRODUKTEVE NGA SUPABASE
+========================================= */
 
 async function load() {
   await loadCategoryPhotos();
@@ -696,7 +842,6 @@ function openAccount() {
 
 function closeAccount() {
   const box = $("#accountBox");
-
   if (!box) return;
 
   box.style.display = "none";
@@ -1021,51 +1166,57 @@ if (orderForm) {
 }
 
 /* =========================================
-   NISJA E FAQES
+   BANERET
 ========================================= */
 
 async function loadBanners() {
-const section = document.getElementById("dssBanner");
-if (!section) return;
+  const section = document.getElementById("dssBanner");
+  if (!section) return;
 
-try {
-const { data, error } = await sb
-.from("site_banners")
-.select("*")
-.eq("active", true)
-.order("sort_order", { ascending: true });
+  try {
+    const { data, error } = await sb
+      .from("site_banners")
+      .select("*")
+      .eq("active", true)
+      .order("sort_order", { ascending: true });
 
-if (error) throw error;
+    if (error) throw error;
 
-if (!data || data.length === 0) {
-  section.style.display = "none";
-  return;
+    if (!data || data.length === 0) {
+      section.style.display = "none";
+      return;
+    }
+
+    const b = data[0];
+
+    const title = document.getElementById("dssBannerTitle");
+    const subtitle = document.getElementById("dssBannerSubtitle");
+    const img = document.getElementById("dssBannerImage");
+    const button = document.getElementById("dssBannerButton");
+
+    if (title) title.textContent = b.title || "";
+    if (subtitle) subtitle.textContent = b.subtitle || "";
+
+    if (img && b.image_url) {
+      img.src = b.image_url;
+      img.style.display = "block";
+    }
+
+    if (button && b.button_text) {
+      button.textContent = b.button_text;
+      button.href = b.button_url || "#products";
+      button.style.display = "inline-block";
+    }
+
+    section.style.display = "block";
+  } catch (error) {
+    console.error("Gabim me banerin DSS:", error);
+  }
 }
 
-const b = data[0];
-
-document.getElementById("dssBannerTitle").textContent = b.title || "";
-document.getElementById("dssBannerSubtitle").textContent = b.subtitle || "";
-
-const img = document.getElementById("dssBannerImage");
-if (b.image_url) {
-  img.src = b.image_url;
-  img.style.display = "block";
-}
-
-const button = document.getElementById("dssBannerButton");
-if (b.button_text) {
-  button.textContent = b.button_text;
-  button.href = b.button_url || "#products";
-  button.style.display = "inline-block";
-}
-
-section.style.display = "block";
-
-} catch (error) {
-console.error("Gabim me banerin DSS:", error);
-}
-}
+/* =========================================
+   NISJA E FAQES
+========================================= */
 
 applyLanguage();
 load();
