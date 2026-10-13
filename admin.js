@@ -50,9 +50,7 @@
     if (button) button.disabled = value;
   }
 
-  /* =====================================
-     FOTO UPLOAD
-  ===================================== */
+  /* FOTO UPLOAD */
 
   async function upload(file, folder) {
     if (!file) return "";
@@ -132,10 +130,7 @@
     });
   }
 
-  /* =====================================
-     KATEGORITE
-     Kolonat: id, name, active, sort_order
-  ===================================== */
+  /* KATEGORITE */
 
   function prepareCategorySelect() {
     const old = $("productCategory");
@@ -179,7 +174,6 @@
         option.textContent = category.active === false
           ? category.name + " (joaktive)"
           : category.name;
-
         select.appendChild(option);
       });
 
@@ -200,7 +194,7 @@
 
     const { data, error } = await db
       .from("categories")
-      .select("id, name, active, sort_order")
+      .select("id, name, image_url, active, sort_order")
       .order("sort_order", { ascending: true });
 
     if (error) throw error;
@@ -219,30 +213,38 @@
       <article class="category-item">
         <strong>${esc(c.name)}</strong>
 
+        ${c.image_url ? `
+          <img src="${esc(c.image_url)}"
+            alt="${esc(c.name)}"
+            style="display:block;width:120px;height:90px;object-fit:contain;border-radius:8px;margin:8px 0">
+        ` : ""}
+
+        <label>
+          Fotoja e kategorisë (opsionale)
+          <input type="file" accept="image/*"
+            data-category-image="${esc(c.id)}">
+        </label>
+
+        <div data-category-preview="${esc(c.id)}"></div>
+
         <label>
           Emri i kategorisë
-          <input
-            type="text"
+          <input type="text"
             data-category-name="${esc(c.id)}"
             value="${esc(c.name)}"
-            maxlength="100"
-            required>
+            maxlength="100" required>
         </label>
 
         <label>
           Renditja
-          <input
-            type="number"
+          <input type="number"
             data-category-order="${esc(c.id)}"
             value="${Number(c.sort_order || 0)}"
-            min="0"
-            step="1"
-            required>
+            min="0" step="1" required>
         </label>
 
         <label>
-          <input
-            type="checkbox"
+          <input type="checkbox"
             data-category-active="${esc(c.id)}"
             ${c.active !== false ? "checked" : ""}>
           Kategoria aktive
@@ -252,22 +254,19 @@
           c.active !== false ? "Aktive" : "Joaktive"
         }</strong></p>
 
-        <button
-          type="button"
+        <button type="button"
           data-save-category="${esc(c.id)}">
           Ruaj ndryshimet
         </button>
 
-        <button
-          type="button"
-          class="danger"
+        <button type="button" class="danger"
           data-delete-category="${esc(c.id)}">
           Fshi kategorinë
         </button>
       </article>
     `).join("");
 
-    /* RUAJTJA E KATEGORISE */
+    /* RUAJTJA E KATEGORIVE EKZISTUESE */
 
     el.querySelectorAll("[data-save-category]").forEach(button => {
       button.addEventListener("click", async function () {
@@ -283,13 +282,14 @@
         const nameInput = el.querySelector(
           `[data-category-name="${id}"]`
         );
-
         const orderInput = el.querySelector(
           `[data-category-order="${id}"]`
         );
-
         const activeInput = el.querySelector(
           `[data-category-active="${id}"]`
+        );
+        const imageInput = el.querySelector(
+          `[data-category-image="${id}"]`
         );
 
         const name = nameInput.value.trim();
@@ -306,7 +306,11 @@
           !Number.isInteger(order) ||
           order < 0
         ) {
-          msg("categoryMsg", "Renditja duhet të jetë numër i plotë zero ose më i madh.", true);
+          msg(
+            "categoryMsg",
+            "Renditja duhet të jetë numër i plotë zero ose më i madh.",
+            true
+          );
           orderInput.focus();
           return;
         }
@@ -337,10 +341,20 @@
             if (productError) throw productError;
           }
 
+          let imageUrl = original.image_url || null;
+          const imageFile = imageInput && imageInput.files
+            ? imageInput.files[0]
+            : null;
+
+          if (imageFile) {
+            imageUrl = await upload(imageFile, "categories");
+          }
+
           const { error } = await db
             .from("categories")
             .update({
               name: name,
+              image_url: imageUrl,
               sort_order: order,
               active: activeInput.checked
             })
@@ -361,7 +375,7 @@
       });
     });
 
-    /* FSHIRJA E KATEGORISE */
+    /* FSHIRJA E KATEGORIVE */
 
     el.querySelectorAll("[data-delete-category]").forEach(button => {
       button.addEventListener("click", async function () {
@@ -430,7 +444,11 @@
     }
 
     if (!Number.isInteger(sortOrder) || sortOrder < 0) {
-      msg("categoryMsg", "Renditja duhet të jetë numër i plotë zero ose më i madh.", true);
+      msg(
+        "categoryMsg",
+        "Renditja duhet të jetë numër i plotë zero ose më i madh.",
+        true
+      );
       return;
     }
 
@@ -450,10 +468,20 @@
     try {
       msg("categoryMsg", "Po ruhet kategoria...");
 
+      const imageFile = $("categoryImage") &&
+        $("categoryImage").files
+        ? $("categoryImage").files[0]
+        : null;
+
+      const imageUrl = imageFile
+        ? await upload(imageFile, "categories")
+        : null;
+
       const { error } = await db
         .from("categories")
         .insert({
           name: name,
+          image_url: imageUrl,
           sort_order: sortOrder,
           active: true
         });
@@ -472,7 +500,6 @@
       }
 
       await loadCategories();
-
       msg("categoryMsg", "Kategoria u shtua me sukses.");
     } catch (e) {
       msg("categoryMsg", "Gabim: " + e.message, true);
@@ -482,9 +509,7 @@
     }
   }
 
-  /* =====================================
-     PRODUKTET
-  ===================================== */
+  /* PRODUKTET */
 
   async function loadProducts() {
     const el = $("productsAdmin");
@@ -507,8 +532,7 @@
     el.innerHTML = data.map(p => `
       <article style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid #ddd">
         ${p.image_url ? `
-          <img
-            src="${esc(p.image_url)}"
+          <img src="${esc(p.image_url)}"
             alt="${esc(p.name)}"
             style="width:75px;height:75px;object-fit:cover;border-radius:8px">
         ` : ""}
@@ -689,9 +713,7 @@
     }
   }
 
-  /* =====================================
-     BANERAT
-  ===================================== */
+  /* BANERAT */
 
   async function loadBanners() {
     const el = $("bannersAdmin");
@@ -874,9 +896,7 @@
     }
   }
 
-  /* =====================================
-     POROSITE
-  ===================================== */
+  /* POROSITE */
 
   async function loadOrders() {
     const el = $("orders");
@@ -947,9 +967,7 @@
     });
   }
 
-  /* =====================================
-     PANELI
-  ===================================== */
+  /* PANELI */
 
   async function showPanel() {
     show("login", false);
@@ -981,9 +999,7 @@
     });
   }
 
-  /* =====================================
-     HYRJA, RIKUPERIMI DHE INIT
-  ===================================== */
+  /* HYRJA, RIKUPERIMI DHE INIT */
 
   function init() {
     if (
@@ -1145,6 +1161,7 @@
 
     preview("productImage", "imagePreview", "productMsg");
     preview("bannerImage", "bannerImagePreview", "bannerMsg");
+    preview("categoryImage", "categoryImagePreview", "categoryMsg");
 
     const recovery =
       new URLSearchParams(location.hash.slice(1)).get("type") === "recovery";
