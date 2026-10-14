@@ -755,35 +755,25 @@ async function loadCategoriesUI() {
       .trim();
 
     const rows = data || [];
-    const allRow = rows.find((category) =>
-      ["te gjitha", "te gjitha produktet", "all"].includes(normalize(category.name))
-    );
-    const allImage = allRow && allRow.image_url
-      ? allRow.image_url
-      : "https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=400&q=80";
-
     const activeCategories = rows.filter((category) =>
       category.active !== false &&
       String(category.name || "").trim() &&
       !["te gjitha", "te gjitha produktet", "all"].includes(normalize(category.name))
     );
 
-    container.innerHTML = `
-      <button type="button" class="category-btn active" data-category="all">
-        <img src="${esc(allImage)}" alt="Të gjitha produktet">
-        <span>${t("all")}</span>
-      </button>
-      ${activeCategories.map((category) => {
-        const name = String(category.name || "").trim();
-        const image = category.image_url || allImage;
-        return `<button type="button" class="category-btn" data-category="${esc(name)}">
-          <img src="${esc(image)}" alt="${esc(name)}" loading="lazy">
-          <span>${esc(name)}</span>
-        </button>`;
-      }).join("")}
-    `;
+    container.innerHTML = activeCategories.map((category, index) => {
+      const name = String(category.name || "").trim();
+      return `<button type="button" class="category-btn${index === 0 ? " active" : ""}" data-category="${esc(name)}">
+        ${category.image_url ? `<img src="${esc(category.image_url)}" alt="${esc(name)}" loading="lazy">` : ""}
+        <span>${esc(name)}</span>
+      </button>`;
+    }).join("");
 
+    // Shfaq të gjitha produktet në hapjen e faqes, pa një kartë "Të gjitha".
     selectedCategory = "all";
+    container.querySelectorAll(".category-btn").forEach((button) => {
+      button.classList.remove("active");
+    });
   } catch (error) {
     console.error("Kategoritë nuk u ngarkuan nga Supabase:", error);
   }
