@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="sq">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080808">
+<title>Llogaria ime | DSS Shop</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./config.js"></script>
+<style>
+:root{color-scheme:dark;--red:#e50914;--bg:#080808;--panel:#171717;--line:#333;--muted:#aaa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f5f5f5;font-family:Arial,sans-serif}header{border-bottom:1px solid var(--line);padding:16px 5%;display:flex;justify-content:space-between;align-items:center;gap:12px}header a{color:white;text-decoration:none}header strong{font-size:22px;color:var(--red)}main{width:min(900px,94%);margin:28px auto 70px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:18px}h1,h2{margin-top:0}p{line-height:1.5;color:#ddd}.muted{color:var(--muted);font-size:14px}label{display:block;font-size:14px;margin:12px 0 6px}input{width:100%;min-height:46px;padding:12px;border:1px solid #444;border-radius:8px;background:#0d0d0d;color:white}button,.btn{display:inline-block;border:0;border-radius:8px;padding:12px 16px;background:var(--red);color:white;font-weight:bold;text-decoration:none;cursor:pointer}button:disabled{opacity:.6;cursor:wait}.secondary{background:#292929;border:1px solid #444}.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1}.message{padding:12px;background:#252525;border-radius:8px;overflow-wrap:anywhere;margin:12px 0}.error{color:#ff9ca2}.success{color:#a9f0bb}[hidden]{display:none!important}.order{border-top:1px solid var(--line);padding:13px 0;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.pill{background:#292929;border-radius:20px;padding:5px 9px;font-size:12px}
+</style>
+</head>
+<body>
+<header><a href="./"><strong>DSS</strong> <span>SECURITY &amp; TECHNOLOGY</span></a><a class="btn secondary" href="./">← Kthehu te dyqani</a></header>
+<main>
+<section id="authPanel" class="panel">
+<h1>Llogaria ime</h1><p>Krijo llogarinë tënde DSS, konfirmo email-in dhe menaxho të dhënat e porositë.</p>
+<div class="row"><button id="signupTab" type="button">Krijo llogari</button><button id="loginTab" type="button" class="secondary">Hyr në llogari</button></div>
+<div id="notice" class="message" role="status" hidden></div>
+<form id="authForm">
+<label for="email">Email-i</label><input id="email" type="email" autocomplete="email" required>
+<label for="password">Fjalëkalimi (minimumi 6 karaktere)</label><input id="password" type="password" minlength="6" autocomplete="current-password" required>
+<button id="submitAuth" type="submit" style="margin-top:16px;width:100%">Krijo llogari</button>
+</form>
+<button id="forgot" class="secondary" type="button" style="margin-top:10px;width:100%">Harrova fjalëkalimin</button>
+</section>
+<section id="profilePanel" hidden>
+<div class="panel"><h1>Profili im</h1><p id="signedEmail" class="muted"></p><div id="profileNotice" class="message" hidden></div>
+<form id="profileForm">
+<div class="row"><div><label for="fullName">Emri dhe mbiemri</label><input id="fullName" autocomplete="name" required></div><div><label for="phone">Telefoni</label><input id="phone" type="tel" autocomplete="tel" required></div></div>
+<label for="address">Adresa e dorëzimit</label><input id="address" autocomplete="street-address" required>
+<button type="submit" style="margin-top:14px">Ruaj të dhënat</button>
+</form><div class="row" style="margin-top:16px"><button id="reloadOrders" class="secondary" type="button">Rifresko porositë</button><button id="logout" class="secondary" type="button">Dil nga llogaria</button></div></div>
+<div class="panel"><h2>Porositë e mia</h2><p class="muted">Këtu shfaqen porositë e bëra pasi je kyçur në llogarinë tënde.</p><div id="orders"><p class="muted">Po ngarkohen porositë…</p></div></div>
+</section>
+</main>
+<script>
+(function(){
+"use strict";
+const sb=window.supabase.createClient(window.DSS_SUPABASE_URL,window.DSS_SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+let mode="signup",user=null;
+function notice(message,kind=""){const n=$("notice");n.hidden=!message;n.className="message "+kind;n.textContent=message||""}
+function profileNotice(message,kind=""){const n=$("profileNotice");n.hidden=!message;n.className="message "+kind;n.textContent=message||""}
+function setMode(next){mode=next;$("signupTab").className=mode==="signup"?"":"secondary";$("loginTab").className=mode==="login"?"":"secondary";$("submitAuth").textContent=mode==="signup"?"Krijo llogari":"Hyr";$("password").autocomplete=mode==="signup"?"new-password":"current-password";notice("")}
+function showUser(){ $("authPanel").hidden=!!user;$("profilePanel").hidden=!user;if(user){$("signedEmail").textContent="E kyçur si: "+user.email;loadProfile();loadOrders();}}
+async function loadProfile(){const {data,error}=await sb.from("profiles").select("full_name,phone,address").eq("id",user.id).maybeSingle();if(error){profileNotice("Nuk u lexuan të dhënat: "+error.message,"error");return}if(data){$("fullName").value=data.full_name||"";$("phone").value=data.phone||"";$("address").value=data.address||""}}
+async function loadOrders(){const box=$("orders");box.innerHTML="<p class='muted'>Po ngarkohen porositë…</p>";const {data,error}=await sb.from("orders").select("id,created_at,total,status").eq("user_id",user.id).order("created_at",{ascending:false});if(error){box.innerHTML="<p class='error'>Nuk u lexuan porositë: "+escapeHtml(error.message)+"</p>";return}if(!data||!data.length){box.innerHTML="<p class='muted'>Nuk ke ende porosi të lidhura me këtë llogari.</p>";return}box.innerHTML=data.map(o=>'<div class="order"><div><strong>Porosia #'+escapeHtml(o.id)+'</strong><div class="muted">'+escapeHtml(new Date(o.created_at).toLocaleString("sq-AL"))+'</div></div><div><strong>€'+Number(o.total||0).toFixed(2)+'</strong><div class="pill">'+escapeHtml(o.status||"Në proces")+'</div></div></div>').join("")}
+function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+$("signupTab").onclick=()=>setMode("signup");$("loginTab").onclick=()=>setMode("login");
+$("authForm").addEventListener("submit",async e=>{e.preventDefault();const btn=$("submitAuth");btn.disabled=true;notice("Po përpunohet…");try{const email=$("email").value.trim(),password=$("password").value;if(mode==="signup"){const {data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}});if(error)throw error;if(data.session&&data.user){user=data.user;notice("Llogaria u krijua dhe u kyçe.","success");showUser()}else{setMode("login");notice("Regjistrimi u krye. Kontrollo email-in dhe shtyp lidhjen e konfirmimit para se të hysh.","success")}}else{const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;user=data.user;notice("Hyrja u krye me sukses.","success");showUser()}}catch(err){notice(err.message||"Ndodhi një gabim.","error")}finally{btn.disabled=false}});
+$("forgot").onclick=async()=>{const email=$("email").value.trim();if(!email){notice("Shkruaj email-in tënd më sipër dhe provo përsëri.","error");return}const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});notice(error?error.message:"Nëse ky email është i regjistruar, do të marrësh një lidhje për rivendosjen e fjalëkalimit.","success")};
+$("profileForm").addEventListener("submit",async e=>{e.preventDefault();if(!user)return;const payload={id:user.id,full_name:$("fullName").value.trim(),phone:$("phone").value.trim(),address:$("address").value.trim(),updated_at:new Date().toISOString()};const {error}=await sb.from("profiles").upsert(payload,{onConflict:"id"});profileNotice(error?"Nuk u ruajtën të dhënat: "+error.message:"Të dhënat u ruajtën me sukses.",""+(error?"error":"success"))});
+$("reloadOrders").onclick=loadOrders;
+$("logout").onclick=async()=>{const {error}=await sb.auth.signOut();if(error){profileNotice(error.message,"error");return}user=null;showUser();setMode("login");notice("Dole nga llogaria.","success")};
+sb.auth.getSession().then(({data})=>{user=data.session?.user||null;showUser()});
+sb.auth.onAuthStateChange((_event,session)=>{user=session?.user||null;showUser()});
+const hash=new URLSearchParams(location.hash.slice(1));if(hash.get("type")==="recovery"){setMode("login");notice("Konfirmimi/rikuperimi u hap. Mund të hysh përsëri ose të përdorësh Harrova fjalëkalimin.","success")}
+})();
+</script>
+</body>
+</html>
