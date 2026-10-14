@@ -167,7 +167,7 @@
     select.appendChild(placeholder);
 
     categories
-      .filter(c => c.active !== false || c.name === current)
+      .filter(c => !["te gjitha", "te gjitha produktet", "all"].includes(String(c.name || "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().trim()) && (c.active !== false || c.name === current))
       .forEach(category => {
         const option = document.createElement("option");
         option.value = category.name;
@@ -177,7 +177,7 @@
         select.appendChild(option);
       });
 
-    if (current && !categories.some(c => c.name === current)) {
+    if (current && !["te gjitha", "te gjitha produktet", "all"].includes(String(current).normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().trim()) && !categories.some(c => c.name === current)) {
       const option = document.createElement("option");
       option.value = current;
       option.textContent = current + " (kategori ekzistuese)";
