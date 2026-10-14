@@ -750,14 +750,29 @@ async function loadCategoriesUI() {
 
     if (error) throw error;
 
-    const activeCategories = (data || []).filter((category) =>
-      category.active !== false && String(category.name || "").trim()
+    const normalize = (value) => String(value || "")
+      .normalize("NFD")
+      .replace(/[\\u0300-\\u036f]/g, "")
+      .toLowerCase()
+      .trim();
+
+    const rows = data || [];
+    const allRow = rows.find((category) =>
+      ["te gjitha", "te gjitha produktet", "all"].includes(normalize(category.name))
+    );
+    const allImage = allRow && allRow.image_url
+      ? allRow.image_url
+      : "https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=400&q=80";
+
+    const activeCategories = rows.filter((category) =>
+      category.active !== false &&
+      String(category.name || "").trim() &&
+      !["te gjitha", "te gjitha produktet", "all"].includes(normalize(category.name))
     );
 
-    const allImage = "https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=400&q=80";
     container.innerHTML = `
       <button type="button" class="category-btn active" data-category="all">
-        <img src="${allImage}" alt="Të gjitha produktet">
+        <img src="${esc(allImage)}" alt="Të gjitha produktet">
         <span>${t("all")}</span>
       </button>
       ${activeCategories.map((category) => {
@@ -773,7 +788,6 @@ async function loadCategoriesUI() {
     selectedCategory = "all";
   } catch (error) {
     console.error("Kategoritë nuk u ngarkuan nga Supabase:", error);
-    // Mbaj kategoritë ekzistuese HTML nëse tabela nuk mund të lexohet.
   }
 }
 
