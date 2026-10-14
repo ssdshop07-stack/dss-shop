@@ -643,7 +643,11 @@ function render() {
       .replace(/'/g, "&#39;");
 
     return `
-      <article class="card">
+      <article class="card" role="button" tabindex="0"
+        aria-label="${esc(p.name)} — ${t("details")}"
+        onclick='window.openProductDetails(${encodedProduct})'
+        onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.openProductDetails(${encodedProduct})}"
+        style="cursor:pointer">
         <div class="pic">
           ${p.image_url
             ? `<img src="${esc(p.image_url)}"
@@ -658,13 +662,7 @@ function render() {
         ${priceHtml}
 
         <button type="button"
-          onclick='window.openProductDetails(${encodedProduct})'
-          style="width:100%;margin-bottom:8px">
-          ${t("details")}
-        </button>
-
-        <button type="button"
-          onclick='add(${encodedProduct})'>
+          onclick='event.stopPropagation();add(${encodedProduct})'>
           ${t("add")}
         </button>
       </article>
