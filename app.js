@@ -676,17 +676,18 @@ function render() {
    KLIKIMI I KATEGORIVE
 ========================================= */
 
-document.querySelectorAll(".category-btn").forEach((button) => {
-  button.addEventListener("click", () => {
+const categoryContainer = document.querySelector("#categories");
+if (categoryContainer) {
+  categoryContainer.addEventListener("click", (event) => {
+    const button = event.target.closest(".category-btn");
+    if (!button || !categoryContainer.contains(button)) return;
     selectedCategory = button.dataset.category || "all";
-
-    document.querySelectorAll(".category-btn").forEach((b) => {
+    categoryContainer.querySelectorAll(".category-btn").forEach((b) => {
       b.classList.toggle("active", b === button);
     });
-
     render();
   });
-});
+}
 
 /* =========================================
    SHTO NE SHPORTE
@@ -737,43 +738,42 @@ function toast(message) {
    FOTOT E KATEGORIVE
 ========================================= */
 
-async function loadCategoryPhotos() {
+async function loadCategoriesUI() {
+  const container = document.querySelector("#categories");
+  if (!container) return;
+
   try {
     const { data, error } = await sb
       .from("categories")
-      .select("name, image_url");
+      .select("name, image_url, active, sort_order")
+      .order("sort_order", { ascending: true });
 
     if (error) throw error;
 
-    const normalize = (text) =>
-      String(text || "")
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]+/g, " ")
-        .trim();
-
-    const photos = new Map(
-      (data || [])
-        .filter((c) => c.image_url)
-        .map((c) => [normalize(c.name), c.image_url])
+    const activeCategories = (data || []).filter((category) =>
+      category.active !== false && String(category.name || "").trim()
     );
 
-    document.querySelectorAll(".category-btn").forEach((button) => {
-      const label = button.querySelector("span");
-      const img = button.querySelector("img");
+    const allImage = "https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=400&q=80";
+    container.innerHTML = `
+      <button type="button" class="category-btn active" data-category="all">
+        <img src="${allImage}" alt="Të gjitha produktet">
+        <span>${t("all")}</span>
+      </button>
+      ${activeCategories.map((category) => {
+        const name = String(category.name || "").trim();
+        const image = category.image_url || allImage;
+        return `<button type="button" class="category-btn" data-category="${esc(name)}">
+          <img src="${esc(image)}" alt="${esc(name)}" loading="lazy">
+          <span>${esc(name)}</span>
+        </button>`;
+      }).join("")}
+    `;
 
-      if (!label || !img) return;
-
-      const url = photos.get(normalize(label.textContent));
-
-      if (url) img.src = url;
-    });
+    selectedCategory = "all";
   } catch (error) {
-    console.error(
-      "Gabim gjatë ngarkimit të fotove të kategorive:",
-      error
-    );
+    console.error("Kategoritë nuk u ngarkuan nga Supabase:", error);
+    // Mbaj kategoritë ekzistuese HTML nëse tabela nuk mund të lexohet.
   }
 }
 
@@ -782,7 +782,7 @@ async function loadCategoryPhotos() {
 ========================================= */
 
 async function load() {
-  await loadCategoryPhotos();
+  await loadCategoriesUI();
 
   try {
     if (
