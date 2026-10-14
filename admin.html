@@ -270,6 +270,16 @@
       </form>
     </section>
 
+    <!-- TRAFIKU I FAQES -->
+    <section class="card" id="trafficManager">
+      <h2>Statistikat e vizitorëve</h2>
+      <p>Shiko vizitat dhe pajisjet e përdorura. Nuk ruhen IP-të apo të dhënat personale.</p>
+      <button type="button" id="refreshTraffic" class="secondary">Rifresko statistikat</button>
+      <div id="trafficStats" aria-live="polite">Statistikat do të shfaqen këtu.</div>
+      <h3>Vizitat e fundit</h3>
+      <div id="trafficRecent">Vizitat do të shfaqen këtu.</div>
+    </section>
+
     <!-- POROSITE -->
     <section class="card">
       <h2>Porositë</h2>
@@ -281,7 +291,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./config.js?v=106"></script>
-<script src="./admin.js?v=106"></script>
+<script src="./admin.js?v=107"></script>
 
 <script>
   window.addEventListener("error", function(event) {
