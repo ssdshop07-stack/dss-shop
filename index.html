@@ -93,8 +93,8 @@
     </section>
     <section id="products" class="wrap">
       <div class="toolbar"><h2 id="productsTitle">Produktet</h2>
-        <input id="search" type="search" placeholder="Kërko produkt..." aria-label="Kërko produkt">
-        <select id="sort" aria-label="Sort products"><option value="default">Renditja</option><option value="low">Çmimi: ulët → lart</option><option value="high">Çmimi: lart → ulët</option></select>
+        <input id="search" type="search" placeholder="Kërko produkt..." aria-label="Kërko produkt" hidden>
+        <select id="sort" aria-label="Sort products" hidden><option value="default">Renditja</option><option value="low">Çmimi: ulët → lart</option><option value="high">Çmimi: lart → ulët</option></select>
       </div>
       <div id="grid" class="grid"></div>
     </section>
@@ -137,6 +137,9 @@
   <script>
     function focusSearch() {
       const search = document.getElementById("search");
+      search.hidden = false;
+      search.style.display = "block";
+      search.style.width = "100%";
       search.scrollIntoView({behavior:"smooth", block:"center"});
       setTimeout(() => search.focus(), 350);
     }
