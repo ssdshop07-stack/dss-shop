@@ -1040,15 +1040,29 @@
           password: password
         });
 
-        if (error) throw error;
+        if (error) {
+          const message = String(error.message || "");
+          if (/email not confirmed/i.test(message)) {
+            throw new Error("Email-i nuk është verifikuar. Hap email-in nga Supabase dhe kliko lidhjen e verifikimit.");
+          }
+          if (/invalid login credentials/i.test(message)) {
+            throw new Error("Email-i ose fjalëkalimi nuk është i saktë.");
+          }
+          throw error;
+        }
 
         if (!data.session) {
-          throw new Error("Sesioni nuk u krijua.");
+          throw new Error("Supabase nuk krijoi sesion. Provo përsëri.");
+        }
+
+        if (data.user && !data.user.email_confirmed_at) {
+          await db.auth.signOut();
+          throw new Error("Email-i nuk është verifikuar. Kontrollo kutinë hyrëse dhe Spam.");
         }
 
         await showPanel();
       } catch (e) {
-        msg("loginMsg", "Gabim gjatë hyrjes: " + e.message, true);
+        msg("loginMsg", "Gabim gjatë hyrjes: " + (e.message || "Gabim i panjohur"), true);
       } finally {
         setButtonBusy(button, false);
       }
@@ -1062,6 +1076,8 @@
         return;
       }
 
+      const button = $("forgotBtn");
+      setButtonBusy(button, true);
       try {
         const { error } = await db.auth.resetPasswordForEmail(email, {
           redirectTo: location.href.split("#")[0]
@@ -1069,9 +1085,11 @@
 
         if (error) throw error;
 
-        msg("loginMsg", "Kontrollo email-in për lidhjen e rikuperimit.");
+        msg("loginMsg", "Nëse ky email është i regjistruar, do të marrësh një lidhje rikuperimi. Kontrollo edhe Spam.");
       } catch (e) {
-        msg("loginMsg", "Gabim: " + e.message, true);
+        msg("loginMsg", "Gabim gjatë rikuperimit: " + (e.message || "Gabim i panjohur"), true);
+      } finally {
+        setButtonBusy(button, false);
       }
     });
 
