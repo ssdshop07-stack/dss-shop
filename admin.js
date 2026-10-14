@@ -529,31 +529,49 @@
       return;
     }
 
-    el.innerHTML = data.map(p => `
-      <article style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid #ddd">
-        ${p.image_url ? `
-          <img src="${esc(p.image_url)}"
-            alt="${esc(p.name)}"
-            style="width:75px;height:75px;object-fit:cover;border-radius:8px">
-        ` : ""}
+    // Grupojmë produktet sipas kategorisë që kanë në databazë.
+    const groups = new Map();
+    data.forEach(product => {
+      const categoryName = String(product.category || "Pa kategori").trim() || "Pa kategori";
+      if (!groups.has(categoryName)) groups.set(categoryName, []);
+      groups.get(categoryName).push(product);
+    });
 
-        <div style="flex:1;min-width:130px">
-          <strong>${esc(p.name)}</strong>
-          <div>Kategoria: ${esc(p.category)}</div>
-          <div>Çmimi: ${price(p.sale_price ?? p.price)}</div>
-          <div>Stoku: ${Number(p.stock || 0)}</div>
-          <div>Statusi: ${p.active ? "Aktiv" : "Joaktiv"}</div>
+    const categoryOrder = new Map(
+      categories.map((category, index) => [String(category.name || "").toLowerCase(), index])
+    );
+    const sortedGroups = Array.from(groups.entries()).sort((a, b) => {
+      const ai = categoryOrder.has(a[0].toLowerCase()) ? categoryOrder.get(a[0].toLowerCase()) : 99999;
+      const bi = categoryOrder.has(b[0].toLowerCase()) ? categoryOrder.get(b[0].toLowerCase()) : 99999;
+      return ai - bi || a[0].localeCompare(b[0], "sq");
+    });
+
+    el.innerHTML = sortedGroups.map(([categoryName, products]) => `
+      <section class="product-category-group" style="border:1px solid #d0d5dd;border-radius:12px;margin:14px 0;overflow:hidden">
+        <h3 style="margin:0;padding:13px;background:#eef2f6;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+          <span>${esc(categoryName)}</span>
+          <span style="font-size:14px;font-weight:normal">${products.length} produkt(e)</span>
+        </h3>
+        <div style="padding:0 12px">
+          ${products.map(p => `
+            <article style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid #eee">
+              ${p.image_url ? `
+                <img src="${esc(p.image_url)}" alt="${esc(p.name)}"
+                  style="width:75px;height:75px;object-fit:cover;border-radius:8px">
+              ` : ""}
+              <div style="flex:1;min-width:130px">
+                <strong>${esc(p.name)}</strong>
+                <div>SKU: ${esc(p.sku || "—")}</div>
+                <div>Çmimi: ${price(p.sale_price ?? p.price)}</div>
+                <div>Stoku: ${Number(p.stock || 0)}</div>
+                <div>Statusi: ${p.active ? "Aktiv" : "Joaktiv"}</div>
+              </div>
+              <button type="button" data-edit-product="${esc(p.id)}">Ndrysho</button>
+              <button type="button" class="danger" data-delete-product="${esc(p.id)}">Fshi</button>
+            </article>
+          `).join("")}
         </div>
-
-        <button type="button" data-edit-product="${esc(p.id)}">
-          Ndrysho
-        </button>
-
-        <button type="button" class="danger"
-          data-delete-product="${esc(p.id)}">
-          Fshi
-        </button>
-      </article>
+      </section>
     `).join("");
 
     el.querySelectorAll("[data-edit-product]").forEach(button => {
