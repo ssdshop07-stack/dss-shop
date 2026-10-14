@@ -164,52 +164,6 @@
       <div id="categoriesAdmin">Kategoritë do të shfaqen këtu.</div>
     </section>
 
-    <!-- BANERAT -->
-    <section class="card">
-      <h2>Banerat kryesorë të faqes</h2>
-      <p>Menaxho fotot dhe tekstet e faqes kryesore.</p>
-      <button type="button" id="newBannerBtn">+ Shto baner</button>
-      <div id="bannersAdmin">Banerat do të shfaqen këtu.</div>
-    </section>
-
-    <section id="bannerFormBox" class="card" hidden>
-      <h2 id="bannerFormTitle">Shto baner</h2>
-      <form id="bannerForm">
-        <input type="hidden" id="bannerId">
-
-        <label for="bannerTitle">Titulli i banerit</label>
-        <input id="bannerTitle" type="text" required>
-
-        <label for="bannerSubtitle">Përshkrimi</label>
-        <textarea id="bannerSubtitle" rows="3"></textarea>
-
-        <label for="bannerImage">Fotoja e banerit</label>
-        <input id="bannerImage" type="file" accept="image/*">
-        <div id="bannerImagePreview"></div>
-
-        <label for="bannerButtonText">Teksti i butonit</label>
-        <input id="bannerButtonText" type="text"
-               placeholder="Shiko produktet">
-
-        <label for="bannerButtonUrl">Lidhja e butonit</label>
-        <input id="bannerButtonUrl" type="text" value="#products">
-
-        <label for="bannerSortOrder">Renditja</label>
-        <input id="bannerSortOrder" type="number" min="0" value="0">
-
-        <label>
-          <input type="checkbox" id="bannerActive" checked>
-          Baner aktiv
-        </label>
-
-        <p id="bannerMsg" class="message" role="status"></p>
-        <button type="submit">Ruaj banerin</button>
-        <button type="button" id="cancelBanner" class="secondary">
-          Anulo
-        </button>
-      </form>
-    </section>
-
     <!-- PRODUKTET -->
     <section class="card">
       <h2>Produktet</h2>
