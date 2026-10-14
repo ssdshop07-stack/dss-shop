@@ -1232,6 +1232,27 @@ async function loadBanners() {
    NISJA E FAQES
 ========================================= */
 
+/* REGJISTRIMI I VIZITAVE — pa ruajtur IP ose të dhëna personale */
+(function trackDssVisit() {
+  try {
+    const ua = navigator.userAgent || "";
+    const device = /ipad|tablet/i.test(ua) ? "tablet" :
+      /mobile|android|iphone/i.test(ua) ? "mobile" :
+      /windows|macintosh|linux/i.test(ua) ? "desktop" : "unknown";
+    let referrerHost = null;
+    try { referrerHost = document.referrer ? new URL(document.referrer).hostname : null; } catch (_) {}
+    sb.from("site_visits").insert({
+      page_path: location.pathname,
+      referrer_host: referrerHost,
+      device_type: device
+    }).then(({ error }) => {
+      if (error) console.warn("Vizita nuk u regjistrua:", error.message);
+    });
+  } catch (error) {
+    console.warn("Gabim gjatë regjistrimit të vizitës:", error);
+  }
+})();
+
 applyLanguage();
 load();
 loadBanners();
