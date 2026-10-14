@@ -1023,6 +1023,51 @@
     });
   }
 
+  /* MIRATIMI I LLOGARIVE TE KLIENTEVE */
+
+  async function loadCustomerApprovals() {
+    const el = $("customerApprovals");
+    if (!el) return;
+    el.textContent = "Po ngarkohen kërkesat...";
+    const { data, error } = await db
+      .from("customer_approvals")
+      .select("user_id,email,status,created_at")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    if (!data || !data.length) {
+      el.textContent = "Nuk ka kërkesa për llogari.";
+      return;
+    }
+    el.innerHTML = data.map(item => `
+      <article style="padding:12px 0;border-bottom:1px solid #ddd">
+        <strong>${esc(item.email)}</strong>
+        <p>Statusi: <strong>${esc(item.status)}</strong> · Regjistruar: ${esc(item.created_at ? new Date(item.created_at).toLocaleString("sq-AL") : "—")}</p>
+        ${item.status === "pending" ? `
+          <button type="button" data-approval="${esc(item.user_id)}" data-status="approved">Aprovo llogarinë</button>
+          <button type="button" class="danger" data-approval="${esc(item.user_id)}" data-status="rejected">Refuzo</button>
+        ` : ""}
+      </article>
+    `).join("");
+    el.querySelectorAll("[data-approval]").forEach(button => {
+      button.addEventListener("click", async () => {
+        const id = button.dataset.approval;
+        const status = button.dataset.status;
+        button.disabled = true;
+        try {
+          const { error } = await db.from("customer_approvals")
+            .update({ status, reviewed_at: new Date().toISOString() })
+            .eq("user_id", id);
+          if (error) throw error;
+          msg("loginMsg", status === "approved" ? "Llogaria e klientit u aprovua." : "Kërkesa e klientit u refuzua.");
+          await loadCustomerApprovals();
+        } catch (e) {
+          alert("Nuk u ndryshua statusi: " + (e.message || "Gabim"));
+          button.disabled = false;
+        }
+      });
+    });
+  }
+
   /* PANELI */
 
   async function showPanel() {
@@ -1036,7 +1081,8 @@
       ["orders", loadOrders],
       ["bannersAdmin", loadBanners],
       ["categoriesAdmin", loadCategories],
-      ["trafficStats", loadTraffic]
+      ["trafficStats", loadTraffic],
+      ["customerApprovals", loadCustomerApprovals]
     ];
 
     const results = await Promise.allSettled(
@@ -1082,6 +1128,9 @@
     listen("categoryForm", "submit", saveCategory);
     listen("refreshTraffic", "click", async function () {
       try { await loadTraffic(); } catch (e) { console.error(e); }
+    });
+    listen("refreshApprovals", "click", async function () {
+      try { await loadCustomerApprovals(); } catch (e) { msg("loginMsg", "Gabim gjatë ngarkimit të kërkesave: " + e.message, true); }
     });
 
     listen("loginForm", "submit", async function (event) {
