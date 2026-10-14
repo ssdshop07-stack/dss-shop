@@ -920,7 +920,10 @@ if (accountForm) {
       if (accountMode === "signup") {
         const { data, error } = await sb.auth.signUp({
           email,
-          password
+          password,
+          options: {
+            emailRedirectTo: window.location.origin + window.location.pathname.replace(/[^/]*$/, "account.html")
+          }
         });
 
         if (error) throw error;
@@ -1006,7 +1009,9 @@ if (accountBox) {
 const profileBtn = $("#profileBtn");
 
 if (profileBtn) {
-  profileBtn.onclick = openAccount;
+  profileBtn.onclick = () => {
+    window.location.href = "./account.html";
+  };
 }
 
 /* =========================================
