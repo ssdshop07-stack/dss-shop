@@ -896,6 +896,44 @@
     }
   }
 
+  /* TRAFIKU I VIZITOREVE */
+
+  async function loadTraffic() {
+    const stats = $("trafficStats");
+    const recent = $("trafficRecent");
+    if (!stats || !recent) return;
+    stats.textContent = "Po ngarkohen statistikat...";
+    recent.textContent = "Po ngarkohen vizitat...";
+    const { data, error } = await db.from("site_visits")
+      .select("id, visited_at, page_path, referrer_host, device_type")
+      .order("visited_at", { ascending: false }).limit(500);
+    if (error) {
+      stats.textContent = "Gabim gjatë ngarkimit: " + error.message;
+      recent.textContent = "Kontrollo lejet e Supabase.";
+      throw error;
+    }
+    const visits = data || [];
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const today = visits.filter(v => String(v.visited_at || "").slice(0, 10) === todayKey).length;
+    const mobile = visits.filter(v => v.device_type === "mobile").length;
+    const desktop = visits.filter(v => v.device_type === "desktop").length;
+    const tablet = visits.filter(v => v.device_type === "tablet").length;
+    stats.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px;margin:12px 0">
+      <div style="padding:12px;background:#eef4ff;border-radius:10px">Vizita të ruajtura<h2>${visits.length}</h2><small>Maksimumi 500 të fundit</small></div>
+      <div style="padding:12px;background:#ecfdf3;border-radius:10px">Vizita sot (UTC)<h2>${today}</h2></div>
+      <div style="padding:12px;background:#f2f4f7;border-radius:10px">Telefon<h2>${mobile}</h2></div>
+      <div style="padding:12px;background:#f2f4f7;border-radius:10px">Kompjuter<h2>${desktop}</h2></div>
+      <div style="padding:12px;background:#f2f4f7;border-radius:10px">Tablet<h2>${tablet}</h2></div></div>`;
+    if (!visits.length) {
+      recent.textContent = "Nuk ka vizita ende. Hap faqen publike që të regjistrohet vizita e parë.";
+      return;
+    }
+    recent.innerHTML = visits.slice(0, 50).map(v => `<article style="padding:10px 0;border-bottom:1px solid #eaecf0">
+      <strong>${esc(v.page_path || "/")}</strong>
+      <p>Koha: ${esc(v.visited_at ? new Date(v.visited_at).toLocaleString("sq-AL") : "—")}</p>
+      <small>Pajisja: ${esc(v.device_type || "unknown")} · Burimi: ${esc(v.referrer_host || "Direkt")}</small></article>`).join("");
+  }
+
   /* POROSITE */
 
   async function loadOrders() {
@@ -979,7 +1017,8 @@
       ["productsAdmin", loadProducts],
       ["orders", loadOrders],
       ["bannersAdmin", loadBanners],
-      ["categoriesAdmin", loadCategories]
+      ["categoriesAdmin", loadCategories],
+      ["trafficStats", loadTraffic]
     ];
 
     const results = await Promise.allSettled(
@@ -1023,6 +1062,9 @@
     prepareCategorySelect();
 
     listen("categoryForm", "submit", saveCategory);
+    listen("refreshTraffic", "click", async function () {
+      try { await loadTraffic(); } catch (e) { console.error(e); }
+    });
 
     listen("loginForm", "submit", async function (event) {
       event.preventDefault();
