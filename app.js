@@ -498,7 +498,7 @@ window.openProductDetails = function (p) {
       #productDetailsModal #detailsName{font-size:clamp(22px,3vw,30px);line-height:1.25;letter-spacing:-.4px;margin:0 44px 14px 0;overflow-wrap:anywhere}
       #productDetailsModal #detailsPrice{font-size:28px;font-weight:800;color:#fff;margin:12px 0 16px}
       #productDetailsModal .dss-detail-meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
-      #productDetailsModal .dss-detail-meta p{margin:0;background:#202127;border:1px solid #34353d;border-radius:8px;padding:9px 11px;color:#d4d5da;font-size:12px}
+      #productDetailsModal .dss-detail-meta p{margin:0;background:#202127;border:1px solid #34353d;border-radius:8px;padding:9px 11px;color:#d4d5da;font-size:12px}\n      #productDetailsModal #detailsStock{background:#12351f;border-color:#247442;color:#75e69a;font-weight:800}
       #productDetailsModal #detailsDescriptionTitle{font-size:16px;margin:20px 0 8px}
       #productDetailsModal #detailsDescription{white-space:pre-wrap;line-height:1.7;color:#c9cad0;font-size:14px;margin:0 0 20px;overflow-wrap:anywhere}
       #productDetailsModal #detailsAdd{width:100%;min-height:48px;padding:14px;background:#e32636;color:#fff;border:0;border-radius:9px;font-weight:bold;font-size:15px;cursor:pointer}
