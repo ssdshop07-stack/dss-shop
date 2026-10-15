@@ -171,29 +171,33 @@
 
 
     <!-- KATEGORITE -->
-    <section class="card" id="categoryManager">
-      <h2>Menaxhimi i kategorive</h2>
-      <p>Kategoritë ruhen në tabelën ekzistuese categories.</p>
+    <section class="card" id="categoryManager" style="padding:0;overflow:hidden">
+      <details>
+        <summary style="cursor:pointer;padding:18px;font-size:18px;font-weight:bold">📁 Menaxhimi i kategorive</summary>
+        <div style="padding:0 18px 18px">
+          <p>Kategoritë ruhen në tabelën ekzistuese categories.</p>
 
-      <form id="categoryForm">
-        <label for="categoryName">Emri i kategorisë</label>
-        <input id="categoryName" type="text"
-               placeholder="P.sh. Kamera IP" maxlength="100" required>
+          <form id="categoryForm">
+            <label for="categoryName">Emri i kategorisë</label>
+            <input id="categoryName" type="text"
+                   placeholder="P.sh. Kamera IP" maxlength="100" required>
 
-        <label for="categorySort">Renditja</label>
-        <input id="categorySort" type="number"
-               min="0" step="1" value="10" required>
+            <label for="categorySort">Renditja</label>
+            <input id="categorySort" type="number"
+                   min="0" step="1" value="10" required>
 
-        <label for="categoryImage">Fotoja e kategorisë (opsionale)</label>
-        <input id="categoryImage" type="file" accept="image/*">
-        <div id="categoryImagePreview"></div>
+            <label for="categoryImage">Fotoja e kategorisë (opsionale)</label>
+            <input id="categoryImage" type="file" accept="image/*">
+            <div id="categoryImagePreview"></div>
 
-        <button type="submit">Shto kategorinë</button>
-      </form>
+            <button type="submit">Shto kategorinë</button>
+          </form>
 
-      <p id="categoryMsg" class="message" role="status"></p>
-      <h3>Kategoritë ekzistuese</h3>
-      <div id="categoriesAdmin">Kategoritë do të shfaqen këtu.</div>
+          <p id="categoryMsg" class="message" role="status"></p>
+          <h3>Kategoritë ekzistuese</h3>
+          <div id="categoriesAdmin">Kategoritë do të shfaqen këtu.</div>
+        </div>
+      </details>
     </section>
 
 
