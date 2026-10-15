@@ -16,6 +16,7 @@ let products = [];
 let cart = JSON.parse(localStorage.getItem("dss_cart") || "[]");
 let selectedCategory = "all";
 let currentUser = null;
+let customerApproved = false;
 let accountMode = "signup";
 let language = localStorage.getItem("dss_language") || "sq";
 
@@ -43,7 +44,7 @@ const translations = {
     address: "Adresa",
     order: "Porosit",
     account: "Llogaria DSS",
-    accountIntro: "Regjistrohu ose hyr për të përfituar 10% ulje.",
+    accountIntro: "Krijo llogari ose hyr në llogarinë tënde.",
     email: "Email-i",
     password: "Fjalëkalimi (minimumi 6 karaktere)",
     signup: "Regjistrohu",
@@ -60,14 +61,14 @@ const translations = {
     added: "U shtua në shportë",
     emptyNotice: "Shporta është bosh",
     loggedIn: "Je i/e kyçur si",
-    discountAll: ". Përfiton 10% ulje në të gjitha produktet.",
-    signupIntro: "Krijo llogari për të përfituar 10% ulje në të gjitha produktet.",
-    loginIntro: "Hyr në llogarinë tënde për të përfituar 10% ulje.",
+    discountAll: ".",
+    signupIntro: "Krijo llogari. Ulja shfaqet vetëm pasi administratori të miratojë llogarinë.",
+    loginIntro: "Hyr në llogarinë tënde. Ulja aktivizohet pas miratimit nga administratori.",
     enterBoth: "Shkruaj email-in dhe fjalëkalimin.",
     wait: "Prit...",
     registered: "Regjistrimi u krye. Kontrollo email-in për konfirmim, pastaj hyr në llogari.",
-    signupSuccess: "Llogaria u krijua me sukses! Ke 10% ulje.",
-    loginSuccess: "U kyçe me sukses! Tani ke 10% ulje.",
+    signupSuccess: "Llogaria u krijua. Prit miratimin e administratorit për të aktivizuar uljen.",
+    loginSuccess: "U kyçe me sukses.",
     loggedOut: "Dole nga llogaria. Çmimet tani janë pa ulje.",
     logoutError: "Gabim gjatë daljes: ",
     orderSuccess: "Porosia u regjistrua! Nr. ",
@@ -104,7 +105,7 @@ const translations = {
     address: "Address",
     order: "Place order",
     account: "DSS Account",
-    accountIntro: "Register or sign in to get 10% off.",
+    accountIntro: "Create an account or sign in.",
     email: "Email",
     password: "Password (minimum 6 characters)",
     signup: "Register",
@@ -121,14 +122,14 @@ const translations = {
     added: "Added to cart",
     emptyNotice: "Your cart is empty",
     loggedIn: "Signed in as",
-    discountAll: ". You get 10% off all products.",
-    signupIntro: "Create an account to get 10% off all products.",
-    loginIntro: "Sign in to your account to get 10% off.",
+    discountAll: ".",
+    signupIntro: "Create an account. The discount appears only after admin approval.",
+    loginIntro: "Sign in. The discount activates after admin approval.",
     enterBoth: "Enter your email and password.",
     wait: "Please wait...",
     registered: "Registration complete. Check your email to confirm, then sign in.",
-    signupSuccess: "Account created successfully! You get 10% off.",
-    loginSuccess: "Signed in successfully! You now get 10% off.",
+    signupSuccess: "Account created. Wait for admin approval to activate the discount.",
+    loginSuccess: "Signed in successfully.",
     loggedOut: "You signed out. Prices are now shown without the discount.",
     logoutError: "Sign-out error: ",
     orderSuccess: "Order registered! No. ",
@@ -369,9 +370,25 @@ function basePrice(p) {
 }
 
 function customerPrice(price) {
-  return currentUser
+  return customerApproved
     ? Math.round(Number(price) * 90) / 100
     : Number(price);
+}
+
+async function checkCustomerApproval(user) {
+  customerApproved = false;
+  if (!user?.id) return false;
+  const { data, error } = await sb
+    .from("customer_approvals")
+    .select("status")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (error) {
+    console.error("DSS approval check failed:", error.message);
+    return false;
+  }
+  customerApproved = data?.status === "approved";
+  return customerApproved;
 }
 
 function save() {
@@ -556,7 +573,7 @@ window.openProductDetails = function (p) {
     p.name || "";
 
   modal.querySelector("#detailsPrice").textContent =
-    currentUser
+    customerApproved
       ? money(basePrice(p)) + " → " +
         money(customerPrice(basePrice(p))) + " (-10%)"
       : money(basePrice(p));
@@ -627,7 +644,7 @@ function render() {
     const price = basePrice(p);
     const discounted = customerPrice(price);
 
-    const priceHtml = currentUser
+    const priceHtml = customerApproved
       ? `<div class="price">
           <span style="color:#aaa;text-decoration:line-through;font-size:14px">
             ${money(price)}
@@ -930,9 +947,10 @@ if (accountForm) {
 
         if (data.session && data.user) {
           currentUser = data.user;
+          await checkCustomerApproval(currentUser);
           refreshCartPrices();
           render();
-          updateAccountUI(t("signupSuccess"));
+          updateAccountUI(customerApproved ? t("signupSuccess") : "Llogaria u krijua. Prit miratimin e administratorit për të aktivizuar uljen.");
         } else {
           accountMode = "login";
           updateAccountUI(t("registered"));
@@ -946,9 +964,10 @@ if (accountForm) {
         if (error) throw error;
 
         currentUser = data.user;
+        await checkCustomerApproval(currentUser);
         refreshCartPrices();
         render();
-        updateAccountUI(t("loginSuccess"));
+        updateAccountUI(customerApproved ? t("loginSuccess") : "U kyçe, por llogaria është ende në pritje të miratimit. Çmimet mbeten pa ulje.");
       }
     } catch (error) {
       updateAccountUI(
@@ -986,6 +1005,7 @@ if (accountLogout) {
     }
 
     currentUser = null;
+    customerApproved = false;
     refreshCartPrices();
     render();
     updateAccountUI(t("loggedOut"));
@@ -1018,19 +1038,19 @@ if (profileBtn) {
    SESIONI I KLIENTIT
 ========================================= */
 
-sb.auth.getSession().then(({ data, error }) => {
+sb.auth.getSession().then(async ({ data, error }) => {
   if (error) console.error("Session check error:", error);
 
   currentUser = data?.session?.user || null;
-
+  await checkCustomerApproval(currentUser);
   refreshCartPrices();
   render();
   updateAccountUI();
 });
 
-sb.auth.onAuthStateChange((_event, session) => {
+sb.auth.onAuthStateChange(async (_event, session) => {
   currentUser = session?.user || null;
-
+  await checkCustomerApproval(currentUser);
   refreshCartPrices();
   render();
   updateAccountUI();
