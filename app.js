@@ -663,7 +663,7 @@ window.openProductDetails = function (p) {
 
   modal.querySelector("#shareFacebook").onclick = () => {
     window.open(
-      "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(shareUrl),
+      "https://www.facebook.com/share/1HYfafBQqb/",
       "_blank",
       "noopener,noreferrer"
     );
