@@ -537,6 +537,21 @@ window.openProductDetails = function (p) {
         <div id="detailsPrice"
           style="font-size:23px;font-weight:bold;margin:12px 0"></div>
 
+        <div id="detailsShare" style="display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px">
+          <button id="shareFacebook" type="button"
+            style="flex:1;min-width:130px;padding:12px;background:#1877f2;color:#fff;border:0;border-radius:8px;font-weight:bold;cursor:pointer">
+            Facebook
+          </button>
+          <button id="shareInstagram" type="button"
+            style="flex:1;min-width:130px;padding:12px;background:linear-gradient(115deg,#833ab4,#fd1d1d,#fcb045);color:#fff;border:0;border-radius:8px;font-weight:bold;cursor:pointer">
+            Instagram
+          </button>
+          <button id="shareCopy" type="button"
+            style="flex:1;min-width:130px;padding:12px;background:#292929;color:#fff;border:1px solid #555;border-radius:8px;font-weight:bold;cursor:pointer">
+            ${language === "sq" ? "Kopjo linkun" : "Copy link"}
+          </button>
+        </div>
+
         <p id="detailsCondition"></p>
         <p id="detailsStock"></p>
 
@@ -640,6 +655,46 @@ window.openProductDetails = function (p) {
 
   modal.querySelector("#detailsDescription").textContent =
     description || t("noDescription");
+
+  const shareUrl = window.location.href.split("#")[0] +
+    "#product-" + encodeURIComponent(String(p.id ?? p.name ?? ""));
+  const shareText = (p.name || "DSS Shop") + " — " + (p.category || "") +
+    " | " + money(basePrice(p)) + " | DSS Shop";
+
+  modal.querySelector("#shareFacebook").onclick = () => {
+    window.open(
+      "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(shareUrl),
+      "_blank",
+      "noopener,noreferrer"
+    );
+  };
+
+  modal.querySelector("#shareInstagram").onclick = async () => {
+    const instagramUrl = "https://www.instagram.com/";
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: p.name || "DSS Shop", text: shareText, url: shareUrl });
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareText + "\\n" + shareUrl);
+        alert(language === "sq"
+          ? "Linku dhe teksti u kopjuan. Hape Instagram dhe ngjiti në postim ose mesazh."
+          : "Link and text copied. Open Instagram and paste them into a post or message.");
+      } else {
+        window.open(instagramUrl, "_blank", "noopener,noreferrer");
+      }
+    } catch (error) {
+      if (error?.name !== "AbortError") window.open(instagramUrl, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  modal.querySelector("#shareCopy").onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(shareText + "\\n" + shareUrl);
+      alert(language === "sq" ? "Linku i produktit u kopjua." : "Product link copied.");
+    } catch (_) {
+      window.prompt(language === "sq" ? "Kopjo linkun e produktit:" : "Copy product link:", shareUrl);
+    }
+  };
 
   modal.querySelector("#detailsAdd").textContent = t("add");
 
