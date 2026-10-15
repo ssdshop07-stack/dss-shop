@@ -562,6 +562,7 @@
               <div style="flex:1;min-width:130px">
                 <strong>${esc(p.name)}</strong>
                 <div>SKU: ${esc(p.sku || "—")}</div>
+                <div>Gjendja: ${p.product_condition === "used" ? "E përdorur" : "E re"}</div>
                 <div>Çmimi: ${price(p.sale_price ?? p.price)}</div>
                 <div>Stoku: ${Number(p.stock || 0)}</div>
                 <div>Statusi: ${p.active ? "Aktiv" : "Joaktiv"}</div>
@@ -608,6 +609,7 @@
 
       $("productPrice").value = data.price ?? "";
       $("productSalePrice").value = data.sale_price ?? "";
+      $("productCondition").value = data.product_condition === "used" ? "used" : "new";
       $("productStock").value = data.stock ?? 0;
       $("productDescription").value = data.description || "";
       $("productFeatured").checked = !!data.featured;
@@ -694,6 +696,7 @@
         name: name,
         sku: $("productSku").value.trim() || ("DSS-" + Date.now()),
         category: category,
+        product_condition: $("productCondition").value === "used" ? "used" : "new",
         price: priceValue,
         sale_price: sale === "" ? null : Number(sale),
         stock: stock,
