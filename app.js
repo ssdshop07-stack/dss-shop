@@ -82,6 +82,9 @@ const translations = {
     discount: "ulje klienti: 10%",
     details: "Shiko përshkrimin",
     description: "Përshkrimi",
+    condition: "Gjendja",
+    newCondition: "E re",
+    usedCondition: "E përdorur",
     noDescription: "Për këtë produkt nuk është shtuar ende përshkrimi.",
     stock: "Stoku: ",
     noStock: "I papërcaktuar",
@@ -143,6 +146,9 @@ const translations = {
     discount: "customer discount: 10%",
     details: "View details",
     description: "Description",
+    condition: "Condition",
+    newCondition: "New",
+    usedCondition: "Used",
     noDescription: "No description has been added for this product yet.",
     stock: "Stock: ",
     noStock: "Not specified",
@@ -525,6 +531,7 @@ window.openProductDetails = function (p) {
         <div id="detailsPrice"
           style="font-size:23px;font-weight:bold;margin:12px 0"></div>
 
+        <p id="detailsCondition"></p>
         <p id="detailsStock"></p>
 
         <h3 id="detailsDescriptionTitle"></h3>
@@ -577,6 +584,10 @@ window.openProductDetails = function (p) {
       ? money(basePrice(p)) + " → " +
         money(customerPrice(basePrice(p))) + " (-10%)"
       : money(basePrice(p));
+
+  modal.querySelector("#detailsCondition").textContent =
+    t("condition") + ": " +
+    (p.product_condition === "used" ? t("usedCondition") : t("newCondition"));
 
   modal.querySelector("#detailsStock").textContent =
     t("stock") + (p.stock ?? t("noStock"));
@@ -674,6 +685,7 @@ function render() {
         </div>
 
         <div class="cat">${esc(p.category || "")}</div>
+        <div style="display:inline-block;margin:5px 0 2px;padding:4px 7px;border-radius:5px;font-size:11px;font-weight:bold;background:${p.product_condition === "used" ? "#5a421b" : "#173e2b"};color:${p.product_condition === "used" ? "#ffd27a" : "#8ff0b0"}">${p.product_condition === "used" ? t("usedCondition") : t("newCondition")}</div>
         <h3>${esc(p.name)}</h3>
 
         ${priceHtml}
