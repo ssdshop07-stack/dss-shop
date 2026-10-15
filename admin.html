@@ -138,6 +138,25 @@
 
   <section id="panel" hidden>
 
+<!-- TRAFIKU I FAQES -->
+    <section class="card" id="trafficManager" style="padding:0;overflow:hidden">
+      <details>
+        <summary style="cursor:pointer;padding:18px;font-size:18px;font-weight:bold">📁 Statistikat e vizitorëve — burimi i trafikut</summary>
+        <div style="padding:0 18px 18px">
+      <p>Kontrollo burimin që dërgoi vizitorin, faqen e vizituar, pajisjen dhe kohën. Burimi shfaqet vetëm kur shfletuesi e dërgon; vizitat direkte mund të shfaqen si “Direkt / i panjohur”. Nuk ruajmë IP.</p>
+      <button type="button" id="refreshTraffic" class="secondary">Rifresko statistikat</button>
+      <div id="trafficStats" aria-live="polite">Statistikat do të shfaqen këtu.</div>
+      <h3>Burimet kryesore të trafikut</h3>
+      <div id="trafficSources">Burimet do të shfaqen këtu.</div>
+      <h3>Faqet më të vizituara</h3>
+      <div id="trafficPages">Faqet do të shfaqen këtu.</div>
+      <h3>Vizitat e fundit</h3>
+      <div id="trafficRecent">Vizitat do të shfaqen këtu.</div>
+            </div>
+      </details>
+    </section>
+
+
     <!-- MIRATIMET: vendosur ne fillim te panelit -->
     <section class="card" id="customerApprovalManager">
       <h2>📁 Miratimet e klientëve</h2>
@@ -233,16 +252,6 @@
           Anulo
         </button>
       </form>
-    </section>
-
-    <!-- TRAFIKU I FAQES -->
-    <section class="card" id="trafficManager">
-      <h2>Statistikat e vizitorëve</h2>
-      <p>Shiko vizitat dhe pajisjet e përdorura. Nuk ruhen IP-të apo të dhënat personale.</p>
-      <button type="button" id="refreshTraffic" class="secondary">Rifresko statistikat</button>
-      <div id="trafficStats" aria-live="polite">Statistikat do të shfaqen këtu.</div>
-      <h3>Vizitat e fundit</h3>
-      <div id="trafficRecent">Vizitat do të shfaqen këtu.</div>
     </section>
 
     <!-- POROSITE -->
