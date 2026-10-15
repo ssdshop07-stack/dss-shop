@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#101b2d"/><stop offset="1" stop-color="#243b55"/></linearGradient><linearGradient id="red" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff4545"/><stop offset="1" stop-color="#c91425"/></linearGradient></defs>
+<rect width="800" height="600" rx="36" fill="url(#bg)"/>
+<circle cx="400" cy="240" r="145" fill="#ffffff" opacity=".07"/>
+<g stroke="#fff" stroke-width="13" stroke-linejoin="round" stroke-linecap="round" fill="none">
+<rect x="230" y="170" width="260" height="160" rx="24" fill="#dbe5f0"/>
+<circle cx="360" cy="250" r="62" fill="#243b55" stroke="#243b55"/>
+<circle cx="360" cy="250" r="43" fill="#111827" stroke="#ff4545" stroke-width="10"/>
+<circle cx="360" cy="250" r="20" fill="#5bb8ff" stroke="#dbe5f0" stroke-width="6"/>
+<path d="M490 210 L555 180 L555 320 L490 290 Z" fill="url(#red)" stroke="#fff"/>
+<rect x="250" y="145" width="90" height="28" rx="8" fill="#ff4545"/>
+<path d="M550 365 L585 365 L610 390 L610 420 L550 420 Z" fill="#dbe5f0"/>
+<path d="M210 365 L280 365 L280 420 L210 420 Z" fill="#dbe5f0"/>
+<path d="M330 365 L430 365 L430 420 L330 420 Z" fill="#dbe5f0"/>
+</g>
+<text x="400" y="492" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="800" text-anchor="middle" fill="#fff">AKSESORË</text>
+<rect x="260" y="516" width="280" height="7" rx="3.5" fill="url(#red)"/>
+<text x="400" y="555" font-family="Arial, Helvetica, sans-serif" font-size="19" letter-spacing="5" text-anchor="middle" fill="#dbe5f0">DSS SECURITY &amp; TECHNOLOGY</text>
+</svg>
