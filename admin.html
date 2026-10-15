@@ -158,11 +158,15 @@
 
 
     <!-- MIRATIMET: vendosur ne fillim te panelit -->
-    <section class="card" id="customerApprovalManager">
-      <h2>📁 Miratimet e klientëve</h2>
-      <p>Klientët e rinj duhet të konfirmojnë email-in. Pastaj miratoji këtu që të mund të hyjnë në llogari.</p>
-      <button type="button" id="refreshApprovals" class="secondary">Rifresko kërkesat</button>
-      <div id="customerApprovals" aria-live="polite">Kërkesat do të shfaqen këtu.</div>
+    <section class="card" id="customerApprovalManager" style="padding:0;overflow:hidden">
+      <details>
+        <summary style="cursor:pointer;padding:18px;font-size:18px;font-weight:bold">📁 Miratimet e klientëve</summary>
+        <div style="padding:0 18px 18px">
+          <p>Klientët e rinj duhet të konfirmojnë email-in. Pastaj miratoji këtu që të mund të hyjnë në llogari.</p>
+          <button type="button" id="refreshApprovals" class="secondary">Rifresko kërkesat</button>
+          <div id="customerApprovals" aria-live="polite">Kërkesat do të shfaqen këtu.</div>
+        </div>
+      </details>
     </section>
 
 
