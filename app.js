@@ -514,7 +514,7 @@ window.openProductDetails = function (p) {
         #productDetailsModal .dss-detail-photo{min-height:0;height:min(38vh,330px);border-radius:11px}
         #productDetailsModal #detailsImage{min-height:0;height:100%;max-height:100%}
         #productDetailsModal #detailsName{font-size:23px;margin-right:42px}
-        #productDetailsModal #detailsPrice{font-size:25px;margin:10px 0 13px}
+        #productDetailsModal #detailsPrice{font-size:25px}\n        #productDetailsModal #detailsStock{font-size:11px;padding:8px 9px}\n        #productDetailsModal #detailsPersonalDiscount{font-size:13px}
         #productDetailsModal #detailsDescription{font-size:13px}
         #productDetailsModal .dss-detail-close{top:12px;right:12px}
       }
@@ -534,8 +534,9 @@ window.openProductDetails = function (p) {
           <section class="dss-detail-info">
             <div id="detailsCategory"></div>
             <h2 id="detailsName"></h2>
-            <div id="detailsPrice"></div>
-            <div class="dss-detail-meta"><p id="detailsCondition"></p><p id="detailsStock"></p></div>
+            <div class="dss-price-stock-row"><div id="detailsPrice"></div><p id="detailsStock"></p></div>
+            <div id="detailsPersonalDiscount"></div>
+            <div class="dss-detail-meta"><p id="detailsCondition"></p></div>
             <h3 id="detailsDescriptionTitle"></h3>
             <p id="detailsDescription"></p>
             <button id="detailsAdd" type="button"></button>
@@ -599,6 +600,9 @@ window.openProductDetails = function (p) {
   modal.querySelector("#detailsCondition").textContent = t("condition") + ": " +
     (p.product_condition === "used" ? t("usedCondition") : t("newCondition"));
   modal.querySelector("#detailsStock").textContent = t("stock") + " " + (p.stock ?? t("noStock"));
+  const personalDiscount = modal.querySelector("#detailsPersonalDiscount");
+  personalDiscount.textContent = language === "sq" ? "Keni zbritje personale 10%" : "You have a personal 10% discount";
+  personalDiscount.style.display = customerApproved ? "block" : "none";
   modal.querySelector("#detailsDescriptionTitle").textContent = t("description");
   modal.querySelector("#detailsDescription").textContent = description || t("noDescription");
   modal.querySelector("#shareCopy").textContent = language === "sq" ? "Kopjo linkun" : "Copy link";
