@@ -669,22 +669,12 @@ window.openProductDetails = function (p) {
     );
   };
 
-  modal.querySelector("#shareInstagram").onclick = async () => {
-    const instagramUrl = "https://www.instagram.com/";
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: p.name || "DSS Shop", text: shareText, url: shareUrl });
-      } else if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(shareText + "\\n" + shareUrl);
-        alert(language === "sq"
-          ? "Linku dhe teksti u kopjuan. Hape Instagram dhe ngjiti në postim ose mesazh."
-          : "Link and text copied. Open Instagram and paste them into a post or message.");
-      } else {
-        window.open(instagramUrl, "_blank", "noopener,noreferrer");
-      }
-    } catch (error) {
-      if (error?.name !== "AbortError") window.open(instagramUrl, "_blank", "noopener,noreferrer");
-    }
+  modal.querySelector("#shareInstagram").onclick = () => {
+    window.open(
+      "https://www.instagram.com/pro.security.golem/",
+      "_blank",
+      "noopener,noreferrer"
+    );
   };
 
   modal.querySelector("#shareCopy").onclick = async () => {
