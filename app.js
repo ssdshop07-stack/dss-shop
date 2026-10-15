@@ -483,107 +483,78 @@ window.openProductDetails = function (p) {
   if (!p) return;
 
   let modal = document.getElementById("productDetailsModal");
+  if (!document.getElementById("dssProductDetailsStyles")) {
+    const style = document.createElement("style");
+    style.id = "dssProductDetailsStyles";
+    style.textContent = `
+      #productDetailsModal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.82);backdrop-filter:blur(5px);overflow-y:auto;box-sizing:border-box}
+      #productDetailsModal .dss-detail-panel{position:relative;width:min(100%,1000px);max-height:92vh;overflow:auto;background:#111217;color:#f7f7f8;border:1px solid #34353d;border-radius:18px;box-shadow:0 24px 80px #000b;padding:22px;box-sizing:border-box}
+      #productDetailsModal .dss-detail-close{position:absolute;top:14px;right:14px;width:40px;height:40px;border:1px solid #45464e;border-radius:50%;background:#24252c;color:white;font-size:22px;z-index:2}
+      #productDetailsModal #detailsBreadcrumb{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding-right:48px;font-size:12px;line-height:1.5;margin:3px 0 18px}
+      #productDetailsModal .dss-detail-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}
+      #productDetailsModal .dss-detail-photo{display:flex;align-items:center;justify-content:center;min-height:300px;background:#f6f6f6;border-radius:13px;overflow:hidden}
+      #productDetailsModal #detailsImage{display:block;width:100%;height:100%;max-height:470px;min-height:260px;object-fit:contain;margin:0}
+      #productDetailsModal #detailsCategory{display:inline-block;color:#ff626b;background:#30171b;border:1px solid #52242c;border-radius:20px;padding:6px 10px;font-size:11px;font-weight:bold;margin:2px 0 10px}
+      #productDetailsModal #detailsName{font-size:clamp(22px,3vw,30px);line-height:1.25;letter-spacing:-.4px;margin:0 44px 14px 0;overflow-wrap:anywhere}
+      #productDetailsModal #detailsPrice{font-size:28px;font-weight:800;color:#fff;margin:12px 0 16px}
+      #productDetailsModal .dss-detail-meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+      #productDetailsModal .dss-detail-meta p{margin:0;background:#202127;border:1px solid #34353d;border-radius:8px;padding:9px 11px;color:#d4d5da;font-size:12px}
+      #productDetailsModal #detailsDescriptionTitle{font-size:16px;margin:20px 0 8px}
+      #productDetailsModal #detailsDescription{white-space:pre-wrap;line-height:1.7;color:#c9cad0;font-size:14px;margin:0 0 20px;overflow-wrap:anywhere}
+      #productDetailsModal #detailsAdd{width:100%;min-height:48px;padding:14px;background:#e32636;color:#fff;border:0;border-radius:9px;font-weight:bold;font-size:15px;cursor:pointer}
+      #productDetailsModal #detailsShare{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
+      #productDetailsModal #detailsShare button{flex:1;min-width:95px;min-height:40px;padding:10px;background:#24252c;color:#fff;border:1px solid #41424a;border-radius:8px;font-size:12px;font-weight:bold;cursor:pointer}
+      #productDetailsModal #shareFacebook{background:#173b72;border-color:#24539a}
+      #productDetailsModal #shareInstagram{background:#482044;border-color:#74305f}
+      @media(max-width:650px){
+        #productDetailsModal{padding:0;align-items:stretch}
+        #productDetailsModal .dss-detail-panel{width:100%;max-height:none;min-height:100%;border:0;border-radius:0;padding:16px 15px 28px}
+        #productDetailsModal #detailsBreadcrumb{margin:4px 0 14px;font-size:11px}
+        #productDetailsModal .dss-detail-layout{grid-template-columns:minmax(0,1fr);gap:18px}
+        #productDetailsModal .dss-detail-photo{min-height:0;height:min(38vh,330px);border-radius:11px}
+        #productDetailsModal #detailsImage{min-height:0;height:100%;max-height:100%}
+        #productDetailsModal #detailsName{font-size:23px;margin-right:42px}
+        #productDetailsModal #detailsPrice{font-size:25px;margin:10px 0 13px}
+        #productDetailsModal #detailsDescription{font-size:13px}
+        #productDetailsModal .dss-detail-close{top:12px;right:12px}
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
   if (!modal) {
     modal = document.createElement("div");
     modal.id = "productDetailsModal";
-
-    Object.assign(modal.style, {
-      position: "fixed",
-      inset: "0",
-      zIndex: "99999",
-      background: "#080808",
-      display: "none",
-      alignItems: "stretch",
-      justifyContent: "stretch",
-      padding: "0",
-      overflowY: "auto",
-      boxSizing: "border-box"
-    });
-
     modal.innerHTML = `
-      <div style="
-        background:#080808;
-        color:#fff;
-        width:100%;
-        max-width:none;
-        min-height:100%;
-        max-height:none;
-        overflow-y:visible;
-        border:0;
-        border-radius:0;
-        padding:20px max(16px, calc((100% - 1000px) / 2));
-        box-sizing:border-box;
-      ">
-        <button id="detailsClose" type="button"
-          style="float:right;padding:8px 12px;cursor:pointer">
-          ✕
-        </button>
-
-        <nav id="detailsBreadcrumb" aria-label="Breadcrumb"
-          style="display:flex;flex-wrap:wrap;align-items:center;gap:7px;
-          font-size:13px;line-height:1.5;margin:8px 0 14px;clear:both">
-        </nav>
-
-        <img id="detailsImage" alt=""
-          style="width:100%;max-height:55vh;object-fit:contain;
-          border-radius:10px;display:none;margin:12px 0">
-
-        <div id="detailsCategory"
-          style="color:#ff4545;margin-top:12px"></div>
-
-        <h2 id="detailsName"></h2>
-
-        <div id="detailsPrice"
-          style="font-size:23px;font-weight:bold;margin:12px 0"></div>
-
-        <div id="detailsShare" style="display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px">
-          <button id="shareFacebook" type="button"
-            style="flex:1;min-width:130px;padding:12px;background:#1877f2;color:#fff;border:0;border-radius:8px;font-weight:bold;cursor:pointer">
-            Facebook
-          </button>
-          <button id="shareInstagram" type="button"
-            style="flex:1;min-width:130px;padding:12px;background:linear-gradient(115deg,#833ab4,#fd1d1d,#fcb045);color:#fff;border:0;border-radius:8px;font-weight:bold;cursor:pointer">
-            Instagram
-          </button>
-          <button id="shareCopy" type="button"
-            style="flex:1;min-width:130px;padding:12px;background:#292929;color:#fff;border:1px solid #555;border-radius:8px;font-weight:bold;cursor:pointer">
-            ${language === "sq" ? "Kopjo linkun" : "Copy link"}
-          </button>
+      <div class="dss-detail-panel" role="dialog" aria-modal="true" aria-label="Product details">
+        <button id="detailsClose" class="dss-detail-close" type="button" aria-label="Close">×</button>
+        <nav id="detailsBreadcrumb" aria-label="Breadcrumb"></nav>
+        <div class="dss-detail-layout">
+          <div class="dss-detail-photo"><img id="detailsImage" alt=""></div>
+          <section class="dss-detail-info">
+            <div id="detailsCategory"></div>
+            <h2 id="detailsName"></h2>
+            <div id="detailsPrice"></div>
+            <div class="dss-detail-meta"><p id="detailsCondition"></p><p id="detailsStock"></p></div>
+            <h3 id="detailsDescriptionTitle"></h3>
+            <p id="detailsDescription"></p>
+            <button id="detailsAdd" type="button"></button>
+            <div id="detailsShare">
+              <button id="shareFacebook" type="button">Facebook</button>
+              <button id="shareInstagram" type="button">Instagram</button>
+              <button id="shareCopy" type="button"></button>
+            </div>
+          </section>
         </div>
-
-        <p id="detailsCondition"></p>
-        <p id="detailsStock"></p>
-
-        <h3 id="detailsDescriptionTitle"></h3>
-
-        <p id="detailsDescription"
-          style="white-space:pre-wrap;line-height:1.6"></p>
-
-        <button id="detailsAdd" type="button"
-          style="width:100%;padding:13px;background:#e32636;
-          color:#fff;border:0;border-radius:8px;font-weight:bold;
-          cursor:pointer">
-        </button>
-      </div>
-    `;
-
+      </div>`;
     document.body.appendChild(modal);
 
-    modal.querySelector("#detailsClose").onclick = () => {
-      modal.style.display = "none";
-    };
-
+    modal.querySelector("#detailsClose").onclick = () => { modal.style.display = "none"; };
     modal.addEventListener("click", (e) => {
-      if (e.target === modal) {
-        modal.style.display = "none";
-      }
+      if (e.target === modal) modal.style.display = "none";
     });
-
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        modal.style.display = "none";
-      }
+      if (e.key === "Escape") modal.style.display = "none";
     });
   }
 
@@ -592,23 +563,16 @@ window.openProductDetails = function (p) {
   const breadcrumb = modal.querySelector("#detailsBreadcrumb");
 
   breadcrumb.innerHTML = `
-    <button type="button" onclick="window.dssBreadcrumbHome()"
-      style="border:0;background:transparent;color:#fff;padding:0;
-      text-decoration:underline;cursor:pointer">${t("home")}</button>
+    <button type="button" onclick="window.dssBreadcrumbHome()" style="border:0;background:transparent;color:#fff;padding:0;text-decoration:underline;cursor:pointer">${t("home")}</button>
     <span style="color:#777">›</span>
-    <button type="button" onclick="window.dssBreadcrumbCategory()"
-      style="border:0;background:transparent;color:#ff535b;padding:0;
-      text-decoration:underline;cursor:pointer">${esc(p.category || t("categories"))}</button>
+    <button type="button" onclick="window.dssBreadcrumbCategory()" style="border:0;background:transparent;color:#ff626b;padding:0;text-decoration:underline;cursor:pointer">${esc(p.category || t("categories"))}</button>
     <span style="color:#777">›</span>
-    <span style="color:#bbb;overflow-wrap:anywhere">${esc(p.name || "")}</span>
-  `;
+    <span style="color:#bbb;overflow-wrap:anywhere">${esc(p.name || "")}</span>`;
 
   window.dssBreadcrumbHome = () => {
     modal.style.display = "none";
     selectedCategory = "all";
-    document.querySelectorAll("#categories .category-btn").forEach((button) => {
-      button.classList.remove("active");
-    });
+    document.querySelectorAll("#categories .category-btn").forEach(button => button.classList.remove("active"));
     render();
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -616,78 +580,43 @@ window.openProductDetails = function (p) {
   window.dssBreadcrumbCategory = () => {
     modal.style.display = "none";
     selectedCategory = p.category || "all";
-    document.querySelectorAll("#categories .category-btn").forEach((button) => {
-      button.classList.toggle(
-        "active",
-        normalizeCategory(button.dataset.category) === normalizeCategory(selectedCategory)
-      );
+    document.querySelectorAll("#categories .category-btn").forEach(button => {
+      button.classList.toggle("active", normalizeCategory(button.dataset.category) === normalizeCategory(selectedCategory));
     });
     render();
     const productsSection = document.getElementById("products");
     if (productsSection) productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  image.style.display = p.image_url ? "block" : "none";
   image.src = p.image_url || "";
-  image.alt = p.name || "DSS";
-
-  modal.querySelector("#detailsCategory").textContent =
-    p.category || "";
-
-  modal.querySelector("#detailsName").textContent =
-    p.name || "";
-
-  modal.querySelector("#detailsPrice").textContent =
-    customerApproved
-      ? money(basePrice(p)) + " → " +
-        money(customerPrice(basePrice(p))) + " (-10%)"
-      : money(basePrice(p));
-
-  modal.querySelector("#detailsCondition").textContent =
-    t("condition") + ": " +
+  image.alt = p.name || "DSS Shop";
+  image.parentElement.style.display = p.image_url ? "flex" : "none";
+  modal.querySelector("#detailsCategory").textContent = p.category || t("categories");
+  modal.querySelector("#detailsName").textContent = p.name || "";
+  modal.querySelector("#detailsPrice").textContent = customerApproved
+    ? money(basePrice(p)) + " → " + money(customerPrice(basePrice(p))) + " (-10%)"
+    : money(basePrice(p));
+  modal.querySelector("#detailsCondition").textContent = t("condition") + ": " +
     (p.product_condition === "used" ? t("usedCondition") : t("newCondition"));
+  modal.querySelector("#detailsStock").textContent = t("stock") + " " + (p.stock ?? t("noStock"));
+  modal.querySelector("#detailsDescriptionTitle").textContent = t("description");
+  modal.querySelector("#detailsDescription").textContent = description || t("noDescription");
+  modal.querySelector("#shareCopy").textContent = language === "sq" ? "Kopjo linkun" : "Copy link";
+  modal.querySelector("#detailsAdd").textContent = t("add");
 
-  modal.querySelector("#detailsStock").textContent =
-    t("stock") + (p.stock ?? t("noStock"));
+  const shareUrl = window.location.href.split("#")[0] + "#product-" + encodeURIComponent(String(p.id ?? p.name ?? ""));
+  const shareText = (p.name || "DSS Shop") + " — " + (p.category || "") + " | " + money(basePrice(p)) + " | DSS Shop";
 
-  modal.querySelector("#detailsDescriptionTitle").textContent =
-    t("description");
-
-  modal.querySelector("#detailsDescription").textContent =
-    description || t("noDescription");
-
-  const shareUrl = window.location.href.split("#")[0] +
-    "#product-" + encodeURIComponent(String(p.id ?? p.name ?? ""));
-  const shareText = (p.name || "DSS Shop") + " — " + (p.category || "") +
-    " | " + money(basePrice(p)) + " | DSS Shop";
-
-  modal.querySelector("#shareFacebook").onclick = () => {
-    window.open(
-      "https://www.facebook.com/share/1HYfafBQqb/",
-      "_blank",
-      "noopener,noreferrer"
-    );
-  };
-
-  modal.querySelector("#shareInstagram").onclick = () => {
-    window.open(
-      "https://www.instagram.com/pro.security.golem/",
-      "_blank",
-      "noopener,noreferrer"
-    );
-  };
-
+  modal.querySelector("#shareFacebook").onclick = () => window.open("https://www.facebook.com/share/1HYfafBQqb/", "_blank", "noopener,noreferrer");
+  modal.querySelector("#shareInstagram").onclick = () => window.open("https://www.instagram.com/pro.security.golem/", "_blank", "noopener,noreferrer");
   modal.querySelector("#shareCopy").onclick = async () => {
     try {
-      await navigator.clipboard.writeText(shareText + "\\n" + shareUrl);
+      await navigator.clipboard.writeText(shareText + "\n" + shareUrl);
       alert(language === "sq" ? "Linku i produktit u kopjua." : "Product link copied.");
     } catch (_) {
       window.prompt(language === "sq" ? "Kopjo linkun e produktit:" : "Copy product link:", shareUrl);
     }
   };
-
-  modal.querySelector("#detailsAdd").textContent = t("add");
-
   modal.querySelector("#detailsAdd").onclick = () => {
     window.add(p);
     modal.style.display = "none";
@@ -695,7 +624,6 @@ window.openProductDetails = function (p) {
 
   modal.style.display = "flex";
 };
-
 /* =========================================
    SHFAQJA E PRODUKTEVE
 ========================================= */
