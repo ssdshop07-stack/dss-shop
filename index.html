@@ -42,80 +42,55 @@
     @media(max-width:390px){.brand span{display:none}.nav{gap:5px}nav{gap:6px}.header-actions button{padding:6px}.main-cart-btn{font-size:11px!important}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.category-btn,.category-btn img{width:135px}.category-btn{flex-basis:135px}.category-btn img{height:135px}.pic{height:135px}}
     @media(min-width:651px){.search-float{display:none!important}}
 
-    /* DSS PREMIUM STOREFRONT */
+    /* DSS SALES-FIRST STOREFRONT */
     body{background:#090a0d;color:#f7f7f8}
-    header{background:rgba(8,9,12,.96);backdrop-filter:blur(16px);border-bottom:1px solid #292b31}
-    .dss-hero{position:relative;overflow:hidden;background:radial-gradient(ellipse at 78% 45%,rgba(196,17,32,.19),transparent 35%),linear-gradient(115deg,#090a0d 0%,#101116 57%,#180d11 100%);border-bottom:1px solid #292b31}
-    .dss-hero:before{content:"";position:absolute;inset:0;opacity:.14;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(90deg,#000,transparent)}
-    .dss-hero-inner{position:relative;z-index:1;width:min(1200px,94%);margin:auto;min-height:475px;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:32px;padding:54px 0 48px}
-    .dss-kicker{font-size:11px;font-weight:800;letter-spacing:2px;color:#f0a4aa;display:flex;align-items:center;gap:10px;margin-bottom:22px}
-    .dss-kicker span{width:26px;height:2px;background:#e32636;display:inline-block}
-    .dss-hero h1{font-size:clamp(36px,5.2vw,64px);line-height:1.04;letter-spacing:-2px;margin:0 0 20px;max-width:700px}
-    .dss-hero h1 em{font-style:normal;color:#ff3545}
-    .dss-hero-copy>p{color:#b9bbc4;font-size:16px;line-height:1.8;max-width:550px;margin:0 0 26px}
-    .dss-hero-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-    .dss-primary-cta,.dss-secondary-cta{display:inline-flex;align-items:center;justify-content:center;gap:14px;min-height:48px;padding:0 19px;border-radius:8px;text-decoration:none;font-weight:800;font-size:13px;transition:transform .2s,background .2s}
-    .dss-primary-cta{background:#e32636;color:#fff;box-shadow:0 9px 28px #e326362c}
-    .dss-primary-cta:hover{background:#f13a49;transform:translateY(-2px)}
-    .dss-secondary-cta{border:1px solid #484951;color:#eee;background:#ffffff05}
-    .dss-hero-points{display:flex;gap:16px;flex-wrap:wrap;margin-top:24px;color:#c4c5cc;font-size:11px}
-    .dss-hero-points span: first-letter{color:#ff3545}
-    .dss-hero-visual{position:relative;min-height:330px;display:flex;align-items:center;justify-content:center}
-    .dss-hero-visual>img{position:relative;z-index:1;width:min(100%,470px);height:330px;object-fit:cover;border-radius:18px;border:1px solid #ffffff20;box-shadow:0 25px 65px #0009;filter:saturate(.85)}
-    .dss-hero-glow{position:absolute;width:75%;height:75%;border-radius:50%;background:#e3263629;filter:blur(65px)}
-    .dss-visual-tag{position:absolute;z-index:2;left:0;bottom:20px;display:flex;align-items:center;gap:10px;padding:13px 16px;background:#101116eF;border:1px solid #ffffff25;border-radius:11px;box-shadow:0 10px 30px #0007}
-    .dss-live-dot{width:9px;height:9px;border-radius:50%;background:#45d483;box-shadow:0 0 0 5px #45d48320}
-    .dss-visual-tag b,.dss-visual-tag small{display:block}.dss-visual-tag b{font-size:11px;letter-spacing:.7px}.dss-visual-tag small{font-size:10px;color:#aeb0b8;margin-top:4px}
-    .dss-visual-corner{position:absolute;z-index:2;right:12px;top:12px;background:#08090dcf;padding:10px 12px;border-radius:7px;font-size:16px;font-weight:900;letter-spacing:2px}
-    .dss-visual-corner span{display:block;font-size:7px;letter-spacing:1.2px;color:#c7c8ce;margin-top:3px}
-    .dss-benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:22px;margin-bottom:18px;border:1px solid #2a2c33;background:linear-gradient(120deg,#111217,#0d0e12);border-radius:13px;overflow:hidden}
-    .dss-benefits>div{display:flex;align-items:center;gap:13px;padding:18px 22px;border-right:1px solid #2a2c33}.dss-benefits>div:last-child{border-right:0}
-    .dss-benefit-icon{display:flex;align-items:center;justify-content:center;width:42px;height:42px;flex-shrink:0;border-radius:10px;background:#e3263619;border:1px solid #e3263645;color:#ff4b59;font-size:24px}
-    .dss-benefits p{margin:0}.dss-benefits b,.dss-benefits small{display:block}.dss-benefits b{font-size:12px}.dss-benefits small{font-size:11px;color:#9b9da6;margin-top:5px}
-    .categories-section{padding-top:34px;padding-bottom:24px}.categories-section h2{font-size:26px;letter-spacing:-.5px;margin:8px 0 18px}
-    .categories{gap:14px;padding:5px 0 15px}
-    .category-btn{flex-basis:132px;gap:10px;padding:8px;border:1px solid #292b32;border-radius:12px;background:#111217;transition:border-color .2s,transform .2s,background .2s}
-    .category-btn:hover{transform:translateY(-3px);border-color:#8d2933;background:#171218}
-    .category-btn img{width:100%;height:100px;border-radius:8px;border:0;filter:saturate(.82)}
-    .category-btn span{font-size:12px;min-height:34px;padding:0 3px}
+    header{background:rgba(8,9,12,.97);backdrop-filter:blur(14px);border-bottom:1px solid #292b31}
+    .dss-sales-strip{background:linear-gradient(100deg,#190d10,#211014 55%,#100e12);border-bottom:1px solid #482129}
+    .dss-sales-inner{width:min(1200px,94%);margin:auto;min-height:100px;display:flex;align-items:center;gap:18px;padding:17px 0}
+    .dss-sales-label{flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#e32636;color:#fff;font-size:12px;font-weight:900;letter-spacing:1px;border-radius:7px;padding:12px}
+    .dss-sales-inner>div{flex:1;min-width:0}
+    .dss-sales-inner strong{display:block;font-size:clamp(18px,2.5vw,27px);letter-spacing:-.5px;line-height:1.2}
+    .dss-sales-inner small{display:block;margin-top:7px;color:#bdb5ba;font-size:12px}
+    .dss-sales-inner>a{display:inline-flex;align-items:center;justify-content:center;gap:12px;background:#e32636;color:white;text-decoration:none;font-weight:bold;font-size:13px;border-radius:7px;padding:13px 17px;white-space:nowrap}
+    .categories-section{padding-top:27px;padding-bottom:20px}.categories-section h2{font-size:25px;letter-spacing:-.5px;margin:8px 0 17px}
+    .categories{gap:13px;padding:5px 0 14px}
+    .category-btn{flex:0 0 130px;gap:9px;padding:8px;border:1px solid #292b32;border-radius:11px;background:#111217;transition:border-color .2s,transform .2s,background .2s}
+    .category-btn:hover{transform:translateY(-2px);border-color:#74313a;background:#171218}
+    .category-btn img{width:100%;height:92px;border-radius:7px;border:0;filter:saturate(.82)}
+    .category-btn span{font-size:12px;min-height:32px;padding:0 2px}
     .category-btn.active{border:1px solid #e32636;background:#1a1115;color:#fff}.category-btn.active img{border:0}
-    #products{padding-top:16px;padding-bottom:110px}
-    .toolbar{padding:18px 0 16px;border-bottom:1px solid #292b31;margin-bottom:20px}
-    .toolbar h2{font-size:28px;letter-spacing:-.6px}
+    #products{padding-top:8px;padding-bottom:110px}
+    .toolbar{padding:12px 0 15px;border-bottom:1px solid #292b31;margin-bottom:18px}
+    .toolbar h2{font-size:27px;letter-spacing:-.5px}
     .toolbar input,.toolbar select{background:#14151a;border-color:#363840}
-    .grid{gap:16px}
-    .card{background:linear-gradient(155deg,#17181e,#111216);border:1px solid #2d2f36;border-radius:13px;padding:10px;transition:transform .2s,border-color .2s,box-shadow .2s}
-    .card:hover{transform:translateY(-4px);border-color:#74313a;box-shadow:0 14px 35px #0005}
-    .pic{height:220px;background:#f5f5f5;border-radius:8px}
+    .grid{gap:15px}
+    .card{background:linear-gradient(155deg,#17181e,#111216);border:1px solid #2d2f36;border-radius:12px;padding:10px;transition:transform .2s,border-color .2s,box-shadow .2s}
+    .card:hover{transform:translateY(-3px);border-color:#74313a;box-shadow:0 12px 28px #0005}
+    .pic{height:215px;background:#f5f5f5;border-radius:8px}
     .card h3{font-size:15px;font-weight:700;line-height:1.45}
     .cat{font-weight:700;letter-spacing:.3px;text-transform:uppercase;font-size:10px}
     .price{color:#fff!important;font-size:21px;letter-spacing:-.3px}
     .card button{min-height:42px;border-radius:7px}
-    .dss-footer{border-top:1px solid #292b31;background:#08090c;padding:32px 0 18px}
-    .dss-footer-inner{width:min(1200px,94%);margin:auto;display:grid;grid-template-columns:1fr auto;gap:26px}
-    .dss-footer-brand{display:flex;align-items:center;gap:14px}.dss-footer-logo{display:flex;align-items:center;justify-content:center;width:52px;height:52px;background:#e32636;border-radius:11px;font-size:21px;font-weight:900;letter-spacing:-1px}
+    .dss-footer{border-top:1px solid #292b31;background:#08090c;padding:30px 0 18px}
+    .dss-footer-inner{width:min(1200px,94%);margin:auto;display:grid;grid-template-columns:1fr auto;gap:24px}
+    .dss-footer-brand{display:flex;align-items:center;gap:14px}.dss-footer-logo{display:flex;align-items:center;justify-content:center;width:50px;height:50px;background:#e32636;border-radius:10px;font-size:21px;font-weight:900;letter-spacing:-1px}
     .dss-footer-brand b{font-size:10px;letter-spacing:1.5px}.dss-footer-brand p{font-size:12px;color:#9da0aa;margin:8px 0 0}
     .dss-footer-links{display:flex;align-items:center;gap:15px;flex-wrap:wrap;font-size:12px}.dss-footer-links>b{color:#fff}.dss-footer-links a{color:#b8bac2;text-decoration:none}.dss-footer-links a:hover{color:#ff4654}
     .dss-footer-bottom{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:18px;border-top:1px solid #24262d;color:#858892;font-size:11px}.dss-footer-bottom a{color:#b8bac2;text-decoration:none}
-    @media(max-width:850px){.dss-hero-inner{grid-template-columns:1fr .8fr;gap:18px}.dss-hero h1{font-size:clamp(34px,5.2vw,48px)}.dss-hero-visual>img{height:280px}.dss-benefits>div{padding:15px 12px}.dss-benefits b{font-size:11px}}
+    @media(max-width:850px){.category-btn{flex-basis:120px}.category-btn img{height:86px}.grid{gap:12px}}
     @media(max-width:650px){
-      .dss-hero-inner{grid-template-columns:1fr;gap:20px;padding:38px 0 30px;min-height:0}
-      .dss-kicker{font-size:9px;letter-spacing:1.4px;margin-bottom:16px}
-      .dss-hero h1{font-size:clamp(35px,9vw,46px);letter-spacing:-1.4px;margin-bottom:15px}
-      .dss-hero-copy>p{font-size:14px;line-height:1.7;margin-bottom:20px}
-      .dss-primary-cta,.dss-secondary-cta{min-height:45px;padding:0 13px;font-size:12px}
-      .dss-hero-points{gap:8px 12px;font-size:10px;margin-top:18px}
-      .dss-hero-visual{min-height:220px}.dss-hero-visual>img{width:100%;height:225px;border-radius:13px}
-      .dss-visual-tag{left:10px;bottom:10px;padding:10px 12px}.dss-visual-corner{right:9px;top:9px}
-      .dss-benefits{grid-template-columns:1fr;margin-top:15px}.dss-benefits>div{padding:12px 14px;border-right:0;border-bottom:1px solid #2a2c33}.dss-benefits>div:last-child{border-bottom:0}
-      .dss-benefit-icon{width:38px;height:38px}.dss-benefits b{font-size:12px}
-      .categories-section{padding-top:25px}.categories-section h2{font-size:23px}
-      .categories{gap:10px}.category-btn{flex-basis:116px;padding:7px}.category-btn img{height:84px}.category-btn span{font-size:11px;min-height:30px}
-      .toolbar{padding-top:10px}.toolbar h2{font-size:24px}
+      .dss-sales-inner{min-height:88px;gap:10px;padding:13px 0}
+      .dss-sales-label{font-size:10px;padding:10px 8px}
+      .dss-sales-inner strong{font-size:16px;line-height:1.25}
+      .dss-sales-inner small{font-size:10px;line-height:1.4;margin-top:5px}
+      .dss-sales-inner>a{font-size:11px;padding:11px 10px;gap:5px}
+      .categories-section{padding-top:22px}.categories-section h2{font-size:22px}
+      .categories{gap:9px}.category-btn{flex-basis:108px;padding:7px}.category-btn img{height:78px}.category-btn span{font-size:11px;min-height:29px}
+      .toolbar{padding-top:8px}.toolbar h2{font-size:24px}
       .grid{gap:10px}.pic{height:155px}.card{padding:8px}.card h3{font-size:13px;min-height:38px}.price{font-size:18px}.card button{font-size:12px}
       .dss-footer-inner{grid-template-columns:1fr;gap:20px}.dss-footer-links{gap:13px}.dss-footer-bottom{font-size:10px}
     }
-    @media(max-width:390px){.dss-hero h1{font-size:34px}.dss-hero-actions{gap:8px}.dss-secondary-cta{padding:0 10px}.category-btn{flex-basis:108px}.category-btn img{height:78px}}
+    @media(max-width:390px){.dss-sales-inner{gap:7px}.dss-sales-inner strong{font-size:14px}.dss-sales-inner small{font-size:9px}.dss-sales-inner>a{padding:10px 8px}.dss-sales-label{font-size:9px}.category-btn{flex-basis:102px}.category-btn img{height:72px}}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
@@ -157,30 +132,12 @@
         style="display:none;background:#e50914;color:white;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:bold;"></a>
     </div>
   </section>
-  <section class="dss-hero">
-    <div class="dss-hero-inner">
-      <div class="dss-hero-copy">
-        <div class="dss-kicker"><span></span> SIGURI • TEKNOLOGJI • BESUESHMËRI</div>
-        <h1>Siguri inteligjente.<br><em>Teknologji që të mbron.</em></h1>
-        <p>Kamera sigurie, alarme, kontroll aksesi dhe pajisje rrjeti për shtëpinë dhe biznesin tënd.</p>
-        <div class="dss-hero-actions">
-          <a href="#products" class="dss-primary-cta">Shiko produktet <span>→</span></a>
-          <a href="#categories" class="dss-secondary-cta">Eksploro kategoritë</a>
-        </div>
-        <div class="dss-hero-points"><span>✓ Pajisje profesionale</span><span>✓ Mbështetje teknike</span><span>✓ Porosi të thjeshta</span></div>
-      </div>
-      <div class="dss-hero-visual" aria-label="Kamerë profesionale sigurie">
-        <div class="dss-hero-glow"></div>
-        <img src="https://images.unsplash.com/photo-1557324232-b8917d3c3dcb?auto=format&fit=crop&w=900&q=85" alt="Kamerë sigurie profesionale">
-        <div class="dss-visual-tag"><span class="dss-live-dot"></span><div><b>MBROJTJE 24/7</b><small>Kontroll në çdo moment</small></div></div>
-        <div class="dss-visual-corner">DSS <span>SECURITY SYSTEMS</span></div>
-      </div>
+  <section class="dss-sales-strip">
+    <div class="dss-sales-inner">
+      <span class="dss-sales-label">DSS SHOP</span>
+      <div><strong>Pajisje sigurie për çdo buxhet</strong><small>Kamera • Alarme • Rrjetëzim • Kontroll aksesi</small></div>
+      <a href="#products">Bli tani <span>→</span></a>
     </div>
-  </section>
-  <section class="dss-benefits wrap" aria-label="Përfitimet">
-    <div><span class="dss-benefit-icon">◈</span><p><b>Zgjidhje profesionale</b><small>Për shtëpi dhe biznes</small></p></div>
-    <div><span class="dss-benefit-icon">⌁</span><p><b>Teknologji moderne</b><small>Pajisje për çdo nevojë</small></p></div>
-    <div><span class="dss-benefit-icon">♧</span><p><b>Ndihmë nga DSS</b><small>Jemi këtu për ty</small></p></div>
   </section>
 <main>
     <section class="wrap categories-section" id="categories">
@@ -249,7 +206,7 @@
     <button type="button" id="bottomCartBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"></path></svg><span id="bottomCartLabel">Shporta</span></button>
     <button type="button" id="profileBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"></circle><path d="M4 21v-2a8 8 0 0 1 16 0v2"></path></svg><span id="profileLabel">Profili</span></button>
   </div>
-  <script src="app.js?v=20261015-social-links"></script>
+  <script src="app.js?v=20261015-sales-first"></script>
   <script>
     function focusSearch() {
       const search = document.getElementById("search");
