@@ -492,26 +492,27 @@ window.openProductDetails = function (p) {
       position: "fixed",
       inset: "0",
       zIndex: "99999",
-      background: "rgba(0,0,0,0.88)",
+      background: "#080808",
       display: "none",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "16px",
+      alignItems: "stretch",
+      justifyContent: "stretch",
+      padding: "0",
       overflowY: "auto",
       boxSizing: "border-box"
     });
 
     modal.innerHTML = `
       <div style="
-        background:#171717;
+        background:#080808;
         color:#fff;
         width:100%;
-        max-width:520px;
-        max-height:90vh;
-        overflow-y:auto;
-        border:1px solid #444;
-        border-radius:14px;
-        padding:18px;
+        max-width:none;
+        min-height:100%;
+        max-height:none;
+        overflow-y:visible;
+        border:0;
+        border-radius:0;
+        padding:20px max(16px, calc((100% - 1000px) / 2));
         box-sizing:border-box;
       ">
         <button id="detailsClose" type="button"
@@ -525,7 +526,7 @@ window.openProductDetails = function (p) {
         </nav>
 
         <img id="detailsImage" alt=""
-          style="width:100%;max-height:280px;object-fit:contain;
+          style="width:100%;max-height:55vh;object-fit:contain;
           border-radius:10px;display:none;margin:12px 0">
 
         <div id="detailsCategory"
