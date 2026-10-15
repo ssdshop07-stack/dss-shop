@@ -519,6 +519,11 @@ window.openProductDetails = function (p) {
           ✕
         </button>
 
+        <nav id="detailsBreadcrumb" aria-label="Breadcrumb"
+          style="display:flex;flex-wrap:wrap;align-items:center;gap:7px;
+          font-size:13px;line-height:1.5;margin:8px 0 14px;clear:both">
+        </nav>
+
         <img id="detailsImage" alt=""
           style="width:100%;max-height:280px;object-fit:contain;
           border-radius:10px;display:none;margin:12px 0">
@@ -568,6 +573,43 @@ window.openProductDetails = function (p) {
 
   const image = modal.querySelector("#detailsImage");
   const description = String(p.description || "").trim();
+  const breadcrumb = modal.querySelector("#detailsBreadcrumb");
+
+  breadcrumb.innerHTML = `
+    <button type="button" onclick="window.dssBreadcrumbHome()"
+      style="border:0;background:transparent;color:#fff;padding:0;
+      text-decoration:underline;cursor:pointer">${t("home")}</button>
+    <span style="color:#777">›</span>
+    <button type="button" onclick="window.dssBreadcrumbCategory()"
+      style="border:0;background:transparent;color:#ff535b;padding:0;
+      text-decoration:underline;cursor:pointer">${esc(p.category || t("categories"))}</button>
+    <span style="color:#777">›</span>
+    <span style="color:#bbb;overflow-wrap:anywhere">${esc(p.name || "")}</span>
+  `;
+
+  window.dssBreadcrumbHome = () => {
+    modal.style.display = "none";
+    selectedCategory = "all";
+    document.querySelectorAll("#categories .category-btn").forEach((button) => {
+      button.classList.remove("active");
+    });
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  window.dssBreadcrumbCategory = () => {
+    modal.style.display = "none";
+    selectedCategory = p.category || "all";
+    document.querySelectorAll("#categories .category-btn").forEach((button) => {
+      button.classList.toggle(
+        "active",
+        normalizeCategory(button.dataset.category) === normalizeCategory(selectedCategory)
+      );
+    });
+    render();
+    const productsSection = document.getElementById("products");
+    if (productsSection) productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   image.style.display = p.image_url ? "block" : "none";
   image.src = p.image_url || "";
