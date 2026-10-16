@@ -19,6 +19,25 @@ let currentUser = null;
 let customerApproved = false;
 let accountMode = "signup";
 let language = localStorage.getItem("dss_language") || "sq";
+let dssDetailHistoryOpen = false;
+
+window.addEventListener("popstate", () => {
+  const detailModal = document.getElementById("productDetailsModal");
+  if (detailModal && detailModal.style.display === "flex") {
+    detailModal.style.display = "none";
+    dssDetailHistoryOpen = false;
+  }
+});
+
+window.dssCloseProductDetails = function () {
+  const detailModal = document.getElementById("productDetailsModal");
+  if (dssDetailHistoryOpen) {
+    dssDetailHistoryOpen = false;
+    window.history.back();
+  } else if (detailModal) {
+    detailModal.style.display = "none";
+  }
+};
 
 const $ = (s) => document.querySelector(s);
 
@@ -602,12 +621,12 @@ window.openProductDetails = function (p) {
       </div>`;
     document.body.appendChild(modal);
 
-    modal.querySelector("#detailsClose").onclick = () => { modal.style.display = "none"; };
+    modal.querySelector("#detailsClose").onclick = () => window.dssCloseProductDetails();
     modal.addEventListener("click", (e) => {
-      if (e.target === modal) modal.style.display = "none";
+      if (e.target === modal) window.dssCloseProductDetails();
     });
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") modal.style.display = "none";
+      if (e.key === "Escape") window.dssCloseProductDetails();
     });
   }
 
@@ -623,7 +642,7 @@ window.openProductDetails = function (p) {
     <span style="color:#bbb;overflow-wrap:anywhere">${esc(p.name || "")}</span>`;
 
   window.dssBreadcrumbHome = () => {
-    modal.style.display = "none";
+    window.dssCloseProductDetails();
     selectedCategory = "all";
     document.querySelectorAll("#categories .category-btn").forEach(button => button.classList.remove("active"));
     render();
@@ -631,7 +650,7 @@ window.openProductDetails = function (p) {
   };
 
   window.dssBreadcrumbCategory = () => {
-    modal.style.display = "none";
+    window.dssCloseProductDetails();
     selectedCategory = p.category || "all";
     document.querySelectorAll("#categories .category-btn").forEach(button => {
       button.classList.toggle("active", normalizeCategory(button.dataset.category) === normalizeCategory(selectedCategory));
@@ -694,9 +713,13 @@ window.openProductDetails = function (p) {
   };
   modal.querySelector("#detailsAdd").onclick = () => {
     window.add(p);
-    modal.style.display = "none";
+    window.dssCloseProductDetails();
   };
 
+  if (modal.style.display !== "flex" && !dssDetailHistoryOpen) {
+    window.history.pushState({ ...(window.history.state || {}), dssProductDetails: true }, "", window.location.href);
+    dssDetailHistoryOpen = true;
+  }
   modal.style.display = "flex";
 };
 /* =========================================
