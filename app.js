@@ -1029,9 +1029,20 @@ if (accountForm) {
         if (data.session && data.user) {
           currentUser = data.user;
           await checkCustomerApproval(currentUser);
-          refreshCartPrices();
-          render();
-          updateAccountUI(customerApproved ? t("signupSuccess") : "Llogaria u krijua. Prit miratimin e administratorit për të aktivizuar uljen.");
+
+          if (!customerApproved) {
+            await sb.auth.signOut();
+            currentUser = null;
+            customerApproved = false;
+            accountMode = "login";
+            refreshCartPrices();
+            render();
+            updateAccountUI("Llogaria u krijua, por është në pritje të miratimit të administratorit. Mund të hysh pasi të aprovohet.");
+          } else {
+            refreshCartPrices();
+            render();
+            updateAccountUI(t("signupSuccess"));
+          }
         } else {
           accountMode = "login";
           updateAccountUI(t("registered"));
@@ -1046,9 +1057,20 @@ if (accountForm) {
 
         currentUser = data.user;
         await checkCustomerApproval(currentUser);
+
+        if (!customerApproved) {
+          await sb.auth.signOut();
+          currentUser = null;
+          customerApproved = false;
+          refreshCartPrices();
+          render();
+          updateAccountUI("Llogaria është në pritje të miratimit të administratorit. Hyrja do të lejohet pasi të aprovohet.");
+          return;
+        }
+
         refreshCartPrices();
         render();
-        updateAccountUI(customerApproved ? t("loginSuccess") : "U kyçe, por llogaria është ende në pritje të miratimit. Çmimet mbeten pa ulje.");
+        updateAccountUI(t("loginSuccess"));
       }
     } catch (error) {
       updateAccountUI(
@@ -1132,6 +1154,14 @@ sb.auth.getSession().then(async ({ data, error }) => {
 sb.auth.onAuthStateChange(async (_event, session) => {
   currentUser = session?.user || null;
   await checkCustomerApproval(currentUser);
+
+  // Blloko sesionet e llogarive që nuk janë miratuar nga administratori.
+  if (currentUser && !customerApproved) {
+    await sb.auth.signOut();
+    currentUser = null;
+    customerApproved = false;
+  }
+
   refreshCartPrices();
   render();
   updateAccountUI();
