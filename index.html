@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="DSS Shop">
   <title>DSS Shop | Security & Technology</title>
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="style.css?v=20261016-ssd-layout-1">
+  <link rel="stylesheet" href="style.css?v=20261016-ssd-layout-2">
   <style>
     :root{color-scheme:dark;--bg:#080808;--panel:#191919;--red:#e50914;--text:#f5f5f5;--muted:#aaa}
     *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
@@ -129,6 +129,29 @@
       .dss-benefit{padding:13px}
       .dss-footer{padding-bottom:100px}
     }
+
+    /* KATEGORITE — rregullim i fokusuar: stil i hapur si katalogu SSD */
+    .categories-section{padding-top:30px!important;padding-bottom:28px!important;background:#fff!important}
+    .categories-section h2{font-size:clamp(23px,2.5vw,30px)!important;color:#20242a!important;font-weight:800!important;margin:0 0 10px!important;letter-spacing:-.45px}
+    .categories-section h2:after{content:"";display:block;width:54px;height:3px;background:#e50914;margin-top:12px;border-radius:2px}
+    .categories{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:16px!important;overflow:visible!important;padding:12px 0 4px!important}
+    .category-btn{display:flex!important;flex:initial!important;min-width:0!important;width:100%!important;min-height:0!important;padding:10px!important;gap:10px!important;align-items:center!important;justify-content:flex-start!important;background:#fff!important;color:#252a31!important;border:1px solid #e2e5e9!important;border-radius:10px!important;box-shadow:0 2px 8px #17203308!important;transition:border-color .18s,box-shadow .18s,transform .18s!important}
+    .category-btn img{display:block!important;width:66px!important;height:66px!important;flex:0 0 66px!important;object-fit:contain!important;padding:4px!important;border:0!important;border-radius:7px!important;background:#f5f6f8!important}
+    .category-btn span{display:block!important;min-height:0!important;font-size:14px!important;line-height:1.35!important;font-weight:700!important;text-align:left!important;color:#252a31!important;overflow-wrap:anywhere}
+    .category-btn:hover{border-color:#c9cdd3!important;box-shadow:0 5px 15px #17203312!important;transform:translateY(-1px)}
+    .category-btn.active{background:#fff!important;color:#20242a!important;border-color:#e50914!important;box-shadow:0 0 0 1px #e50914!important}
+    .category-btn.active span{color:#20242a!important}
+    .category-btn.active img{border:0!important}
+    .category-btn:focus-visible{outline:2px solid #e50914!important;outline-offset:2px}
+    @media(max-width:1000px){.categories{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}.category-btn img{width:56px!important;height:56px!important;flex-basis:56px!important}}
+    @media(max-width:650px){
+      .categories-section{padding-top:24px!important;padding-bottom:18px!important}
+      .categories-section h2{font-size:23px!important}
+      .categories{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;overflow:visible!important}
+      .category-btn{padding:8px!important;gap:8px!important;border-radius:9px!important}
+      .category-btn img{width:48px!important;height:48px!important;flex-basis:48px!important;padding:2px!important}
+      .category-btn span{font-size:12px!important;line-height:1.3!important}
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
@@ -183,7 +206,7 @@
       <div class="dss-benefit"><b>Porosi e thjeshtë</b><span>Zgjidhni produktet dhe dërgoni të dhënat e porosisë nga shporta.</span></div>
     </section>
     <section id="categories" class="wrap categories-section">
-      <h2 id="categoriesTitle">Kategoritë</h2>
+      <h2 id="categoriesTitle">Shfletoni kategoritë tona</h2>
       <div class="categories" id="categories">
         <button type="button" class="category-btn active" data-category="all"><img src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="All products"><span>Të gjitha</span></button>
         <button type="button" class="category-btn" data-category="Kamera IP"><img src="https://images.unsplash.com/photo-1557324232-b8917d3c3dcb?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="IP cameras"><span>Kamera IP</span></button>
