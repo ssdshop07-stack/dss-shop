@@ -448,3 +448,21 @@ main, .wrap, #products, .toolbar { background-color: #ffffff; }
 .pic { background: #f4f4f4; }
 .toolbar input, .toolbar select { background: #ffffff; color: #222222; border-color: #d2d2d2; }
 #products .cat, .card .cat { color: #ff4757; }
+
+
+/* DSS Shop: karta produktesh pak me kompakte qe te duken 4 produkte ne ekranin e telefonit */
+@media (min-width: 601px) {
+  #products .pic { height: 155px; }
+  #products .card { padding: 10px; }
+  #products .card h3 { min-height: 38px; font-size: 14px; margin: 8px 0; }
+  #products .price { font-size: 18px; margin: 8px 0; }
+}
+@media (max-width: 600px) {
+  #products .grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 7px !important; }
+  #products .card { padding: 6px !important; }
+  #products .pic { height: 88px !important; }
+  #products .card h3 { min-height: 30px !important; font-size: 11px !important; line-height: 1.2 !important; margin: 5px 0 !important; }
+  #products .card .cat { font-size: 9px !important; }
+  #products .price { font-size: 13px !important; margin: 5px 0 !important; }
+  #products .card button { padding: 7px 5px !important; font-size: 10px !important; }
+}
