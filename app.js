@@ -433,34 +433,43 @@ function renderCart() {
 
   if (!count || !items || !totalEl) return;
 
-  count.textContent = cart.reduce(
-    (a, x) => a + Number(x.qty || 0),
-    0
-  );
+  const itemCount = cart.reduce((sum, x) => sum + Number(x.qty || 0), 0);
+  count.textContent = itemCount;
+  const itemCountText = document.getElementById("cartItemCountText");
+  if (itemCountText) itemCountText.textContent = "(" + itemCount + " artikuj)";
 
-  items.innerHTML = cart.map((x, i) => `
-    <div class="cartItem">
-      <div>
-        <b>${esc(x.name)}</b>
-        <small>${money(x.price)} × ${x.qty}</small>
-      </div>
-      <div>
-        <button type="button"
-          onclick="change(${i},-1)"
-          aria-label="Decrease quantity">−</button>
-        <button type="button"
-          onclick="change(${i},1)"
-          aria-label="Increase quantity">+</button>
-      </div>
-    </div>
-  `).join("") || `<p>${t("emptyCart")}</p>`;
+  items.innerHTML = cart.map((x, i) => {
+    const product = products.find(p => String(p.id) === String(x.id));
+    const imageUrl = product?.image_url || x.image_url || "";
+    const original = Number(x.basePrice ?? x.price ?? 0);
+    const current = Number(x.price || 0);
+    return `
+      <article class="cartItem dss-cart-product">
+        <div class="dss-cart-thumb">${imageUrl ? `<img src="${esc(imageUrl)}" alt="${esc(x.name)}">` : `<span>DSS</span>`}</div>
+        <div class="dss-cart-product-info">
+          <b>${esc(x.name)}</b>
+          <small>${money(current)}</small>
+          <div class="dss-qty">
+            <button type="button" onclick="change(${i},-1)" aria-label="Ul pak">−</button>
+            <span>${Number(x.qty || 0)}</span>
+            <button type="button" onclick="change(${i},1)" aria-label="Shto një">+</button>
+          </div>
+        </div>
+        <button class="dss-remove" type="button" onclick="change(${i},-${Number(x.qty || 0)})" aria-label="Hiq produktin">▤</button>
+        <strong class="dss-line-total">${money(current * Number(x.qty || 0))}</strong>
+      </article>`;
+  }).join("") || `<p class="dss-empty-cart">${t("emptyCart")}</p>`;
 
-  const total = cart.reduce(
-    (a, x) => a + Number(x.price) * Number(x.qty),
-    0
-  );
-
+  const subtotal = cart.reduce((sum, x) => sum + Number(x.basePrice ?? x.price ?? 0) * Number(x.qty || 0), 0);
+  const total = cart.reduce((sum, x) => sum + Number(x.price || 0) * Number(x.qty || 0), 0);
+  const discount = Math.max(0, subtotal - total);
   totalEl.textContent = money(total);
+  const subtotalEl = document.getElementById("cartSubtotal");
+  const discountRow = document.getElementById("cartDiscountRow");
+  const discountValue = document.getElementById("cartDiscountValue");
+  if (subtotalEl) subtotalEl.textContent = money(subtotal);
+  if (discountRow) discountRow.hidden = discount <= 0;
+  if (discountValue) discountValue.textContent = "-" + money(discount);
 }
 
 window.change = (i, d) => {
@@ -1152,6 +1161,20 @@ if (cartBtn) {
     if (cartBox) cartBox.classList.add("open");
   };
 }
+
+const checkoutButton = $("#dssCheckoutButton");
+if (checkoutButton) checkoutButton.onclick = () => {
+  const form = $("#orderForm");
+  if (form) {
+    form.classList.add("dss-order-visible");
+    form.scrollIntoView({behavior:"smooth", block:"start"});
+  }
+};
+const continueButton = $("#dssContinueButton");
+if (continueButton) continueButton.onclick = () => {
+  const cartBox = $("#cart");
+  if (cartBox) cartBox.classList.remove("open");
+};
 
 const closeCart = $("#closeCart");
 
