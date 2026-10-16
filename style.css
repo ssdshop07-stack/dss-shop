@@ -466,3 +466,6 @@ main, .wrap, #products, .toolbar { background-color: #ffffff; }
   #products .price { font-size: 13px !important; margin: 5px 0 !important; }
   #products .card button { padding: 7px 5px !important; font-size: 10px !important; }
 }
+
+/* Hide the add-to-cart button on product listing cards only. */
+#products .card > button { display: none !important; }
