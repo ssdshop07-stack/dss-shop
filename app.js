@@ -455,7 +455,7 @@ function renderCart() {
             <button type="button" onclick="change(${i},1)" aria-label="Shto një">+</button>
           </div>
         </div>
-        <button class="dss-remove" type="button" onclick="change(${i},-${Number(x.qty || 0)})" aria-label="Hiq produktin">▤</button>
+        <button class="dss-remove" type="button" onclick="change(${i},-${Number(x.qty || 0)})" aria-label="Hiq produktin" title="Hiq produktin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-11 0 1 14h12l1-14M10 10v6m4-6v6"/></svg></button>
         <strong class="dss-line-total">${money(current * Number(x.qty || 0))}</strong>
       </article>`;
   }).join("") || `<p class="dss-empty-cart">${t("emptyCart")}</p>`;
