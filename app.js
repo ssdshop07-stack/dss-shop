@@ -51,7 +51,6 @@ const translations = {
     methodPassword: "Email/Telefon + Fjalëkalim",
     methodSms: "Hyr me kod SMS",
     otp: "Kodi 6-shifror SMS",
-    verifyOtp: "Verifiko kodin",
     otpSent: "Kodi u dërgua. Kontrollo SMS dhe shkruaj kodin 6-shifror.",
     approvalPending: "Llogaria është në pritje të miratimit të administratorit. Hyrja do të lejohet pasi të aprovohet.",
     signup: "Regjistrohu",
@@ -979,21 +978,14 @@ function updateAccountUI(message) {
   status.textContent=message||(accountMode==="signup"?t("signupIntro"):t("loginIntro"));
 }
 
-function normalizeDssPhone(value){
-  const raw=String(value||"").trim();if(raw.includes("@"))throw new Error("Për hyrje me telefon, shkruaj numrin e telefonit.");
-  const compact=raw.replace(/[\s().-]/g,"");if(compact.startsWith("+")&&/^\+\d{8,15}$/.test(compact))return compact;
-  const digits=compact.replace(/\D/g,"");if(digits.startsWith("355")&&digits.length>=11&&digits.length<=15)return "+"+digits;
-  if(digits.startsWith("0")&&digits.length>=9&&digits.length<=11)return "+355"+digits.slice(1);
-  if(digits.startsWith("6")&&digits.length>=8&&digits.length<=10)return "+355"+digits;
-  throw new Error("Shkruaj numrin me prefiks ndërkombëtar, p.sh. +355681234567.");
-}
+
 async function finishCustomerLogin(user,successMessage){
   currentUser=user||null;const approved=await checkCustomerApproval(currentUser);
   if(!currentUser||!approved){
-    if(currentUser)await sb.auth.signOut();currentUser=null;customerApproved=false;pendingPhoneOtp="";pendingPhoneOtpPurpose="";
+    if(currentUser)await sb.auth.signOut();currentUser=null;customerApproved=false;
     refreshCartPrices();render();updateAccountUI(t("approvalPending"));return false;
   }
-  pendingPhoneOtp="";pendingPhoneOtpPurpose="";refreshCartPrices();render();updateAccountUI(successMessage||t("loginSuccess"));return true;
+  refreshCartPrices();render();updateAccountUI(successMessage||t("loginSuccess"));return true;
 }
 
 const accountForm=$("#accountForm");
