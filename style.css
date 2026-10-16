@@ -436,13 +436,15 @@ button:hover,
 }
 
 
-/* DSS Shop: sfond i bardhe per faqen publike */
+/* DSS Shop: sfond i bardhe, karta produktesh me tekst te bardhe */
 html { background: #ffffff; }
 body { background: #ffffff; color: #222222; }
 main, .wrap, #products, .toolbar { background-color: #ffffff; }
 .toolbar h2, #products h2, #products label { color: #222222; }
-.card { background: #ffffff; color: #222222; border-color: #e2e2e2; box-shadow: 0 3px 14px #0000000d; }
-.card h3, .card p, .card small, .card .description { color: #222222; }
-.price { color: #171717; }
+.card { background: #171717; color: #ffffff; border-color: #dedede; box-shadow: 0 3px 14px #00000012; }
+.card h3, .card h3 a, .card p, .card small, .card .description { color: #ffffff; }
+.card small, .card .description { color: #e0e0e0; }
+.price { color: #ffffff; }
 .pic { background: #f4f4f4; }
 .toolbar input, .toolbar select { background: #ffffff; color: #222222; border-color: #d2d2d2; }
+#products .cat, .card .cat { color: #ff4757; }
