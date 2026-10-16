@@ -159,12 +159,17 @@
   </aside>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="accountBox" hidden style="position:fixed;inset:0;z-index:3000;background:#000b;align-items:center;justify-content:center;padding:18px">
-    <div style="width:100%;max-width:400px;background:#191919;border:1px solid #444;border-radius:14px;padding:20px;color:#fff">
+    <div style="width:100%;max-width:420px;background:#191919;border:1px solid #444;border-radius:14px;padding:20px;color:#fff">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h2 id="accountTitle" style="margin:0">Llogaria DSS</h2><button id="accountClose" type="button" style="background:#e50914;color:#fff;border:0;border-radius:7px;padding:8px 12px">Mbyll ×</button></div>
       <p id="accountStatus">Regjistrohu ose hyr për të përfituar 10% ulje.</p>
+      <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:12px">
+        <button id="accountMethodPassword" type="button" style="width:100%;padding:11px;background:#292929;color:white;border:1px solid #555;border-radius:8px">Email/Telefon + Fjalëkalim</button>
+        <button id="accountMethodSms" type="button" style="width:100%;padding:11px;background:#292929;color:white;border:1px solid #555;border-radius:8px">Hyr me kod SMS</button>
+      </div>
       <form id="accountForm" style="display:grid;gap:12px">
-        <input id="accountEmail" type="email" placeholder="Email-i" autocomplete="email" required>
+        <input id="accountEmail" type="text" placeholder="Email ose telefon (+355...)" autocomplete="username" required>
         <input id="accountPassword" type="password" placeholder="Fjalëkalimi (minimumi 6 karaktere)" autocomplete="new-password" minlength="6" required>
+        <input id="accountOtp" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="Kodi 6-shifror SMS" maxlength="6" pattern="[0-9]{6}" hidden>
         <button id="accountSubmit" type="submit" style="background:#e50914;color:white;border:0;border-radius:8px;padding:13px;font-weight:bold">Regjistrohu</button>
       </form>
       <button id="accountSwitch" type="button" style="margin-top:12px;width:100%;padding:12px;background:#292929;color:white;border:1px solid #555;border-radius:8px">Kam llogari — Hyr</button>
@@ -180,7 +185,7 @@
     <button type="button" id="bottomCartBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"></path></svg><span id="bottomCartLabel">Shporta</span></button>
     <button type="button" id="profileBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"></circle><path d="M4 21v-2a8 8 0 0 1 16 0v2"></path></svg><span id="profileLabel">Profili</span></button>
   </div>
-  <script src="app.js?v=20261016-cart-trash"></script>
+  <script src="app.js?v=20261016-phone-auth"></script>
   <script>
     function focusSearch() {
       const search = document.getElementById("search");
