@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#080808">
+  <meta name="theme-color" content="#ffffff">
   <meta name="description" content="DSS Shop — Kamera sigurie, alarme dhe teknologji">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="DSS Shop">
@@ -413,7 +413,101 @@
       #categoriesSection .category-btn span{font-size:12px!important}
     }
 
-</style>
+
+    /* DSS full storefront redesign — clean white shop layout */
+    :root{color-scheme:light;--bg:#fff;--panel:#fff;--red:#d71920;--text:#20242a;--muted:#68717d}
+    html,body{background:#fff!important;color:#20242a!important}
+    body{font-family:Arial,Helvetica,sans-serif}
+    header{background:#fff!important;color:#20242a!important;border-bottom:1px solid #e5e7eb!important;box-shadow:0 2px 8px rgba(20,30,45,.04)!important}
+    .wrap{width:min(1240px,94%)!important}
+    .nav{min-height:72px!important}
+    .brand img{height:46px!important;max-width:170px!important}
+    nav a{color:#20242a!important;font-weight:600}
+    .header-actions button{background:#fff!important;color:#20242a!important;border:1px solid #dfe3e8!important}
+    .main-cart-btn{border-color:#d71920!important;color:#20242a!important}
+    #cartCount{background:#d71920!important;color:#fff!important}
+    #categoriesSection{padding-top:22px!important;padding-bottom:18px!important}
+    #categoriesSection .categories{display:flex!important;gap:12px!important;overflow-x:auto!important;overflow-y:hidden!important;scrollbar-width:thin!important;padding:12px 0 16px!important}
+    #categoriesSection .category-btn{flex:0 0 178px!important;width:178px!important;min-width:178px!important;height:82px!important;min-height:82px!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;padding:9px!important;border:1px solid #e4e7eb!important;border-radius:10px!important;background:#fff!important;box-shadow:none!important;color:#242932!important}
+    #categoriesSection .category-btn img{display:block!important;flex:0 0 58px!important;width:58px!important;height:58px!important;min-width:58px!important;object-fit:contain!important;background:#f7f8fa!important;border:0!important;border-radius:7px!important}
+    #categoriesSection .category-btn span{display:block!important;flex:1!important;min-height:0!important;width:auto!important;color:#242932!important;text-align:left!important;font-size:13px!important;line-height:1.3!important;font-weight:700!important}
+    #categoriesSection .category-btn.active{border:1px solid #d71920!important;box-shadow:0 0 0 1px #d71920!important}
+    #categoriesSection .category-btn.active span{color:#d71920!important}
+    #products{padding-top:10px!important;padding-bottom:110px!important}
+    .toolbar{display:flex!important;gap:12px!important;align-items:center!important;margin:0 0 18px!important}
+    .toolbar h2{font-size:26px!important;font-weight:800!important;color:#20242a!important}
+    #search,input,select,.toolbar input,.toolbar select{background:#fff!important;color:#20242a!important;border:1px solid #d9dee5!important;border-radius:8px!important}
+    #search{min-width:180px!important}
+    .grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:18px!important}
+    #products .card,#grid>.card{background:#fff!important;color:#20242a!important;border:1px solid #e3e6ea!important;border-radius:10px!important;padding:12px!important;box-shadow:0 2px 9px rgba(18,30,50,.055)!important;transition:box-shadow .18s,border-color .18s!important}
+    #products .card:hover,#grid>.card:hover{border-color:#cfd4db!important;box-shadow:0 5px 18px rgba(18,30,50,.10)!important}
+    #products .pic,#grid>.card .pic{height:220px!important;background:#fff!important;border-radius:7px!important;margin-bottom:10px!important}
+    #products .pic img,#grid>.card .pic img{width:100%!important;height:100%!important;object-fit:contain!important}
+    #products .card .cat,#grid>.card .cat{color:#747b85!important;font-size:12px!important;margin:7px 0!important}
+    #products .card h3,#grid>.card h3{color:#20242a!important;font-size:15px!important;line-height:1.4!important;font-weight:600!important;min-height:42px!important;margin:7px 0!important}
+    #products .card .price,#grid>.card .price{color:#20242a!important;font-size:21px!important;font-weight:800!important;margin:12px 0!important}
+    #products .card button,#grid>.card button{width:100%!important;min-height:42px!important;background:#d71920!important;color:#fff!important;border:0!important;border-radius:6px!important;font-size:13px!important;font-weight:700!important}
+    #products .card button:hover,#grid>.card button:hover{background:#b9141b!important}
+    #products .card [style*="background:"],#grid>.card [style*="background:"]{border-radius:4px!important}
+    .dss-home-hero{background:#fff!important}
+    .dss-benefit{background:#fff!important}
+    .bottom-nav{background:#fff!important;border-top:1px solid #e4e7eb!important}
+    .bottom-nav a,.bottom-nav button{color:#4c5561!important}
+    .bottom-nav .home-link{color:#d71920!important}
+    .search-float{background:#d71920!important;box-shadow:0 3px 12px #0002!important}
+    .whatsapp-contact{box-shadow:0 3px 12px #0002!important}
+    #cart.drawer{background:#fff!important;color:#20242a!important;border-left:1px solid #e2e6eb!important}
+    #cart .drawerHead{background:#fff!important;color:#20242a!important;border-bottom:1px solid #e5e7eb!important}
+    #cart .drawerHead button{color:#20242a!important;background:#fff!important;border:1px solid #dfe3e8!important}
+    .dss-cart-page-title{color:#20242a!important}
+    .dss-cart-product,.dss-cart-summary{background:#fff!important;color:#20242a!important;border:1px solid #e3e6ea!important;box-shadow:0 2px 8px #17203308!important}
+    .dss-cart-product-info>b,.dss-line-total,.dss-cart-summary h2,.dss-summary-row b,.dss-summary-total{color:#20242a!important}
+    .dss-cart-product-info small,.dss-summary-row{color:#68717d!important}
+    .dss-qty{border-color:#dfe3e8!important}
+    .dss-qty button{color:#20242a!important}
+    .dss-qty span{border-color:#dfe3e8!important;color:#20242a!important}
+    .dss-summary-total{border-color:#e3e6ea!important}
+    .dss-discount-row{background:#f0fbf4!important;border-color:#b8e4c7!important;color:#16803c!important}
+    .dss-discount-row b{color:#16803c!important}
+    .dss-continue-button{background:#fff!important;color:#20242a!important;border-color:#d9dee5!important}
+    #orderForm{background:#fff!important;border-color:#e3e6ea!important}
+    #toast{background:#20242a!important;color:#fff!important}
+    .dss-footer{background:#f7f8fa!important;color:#20242a!important;border-top:1px solid #e5e7eb!important}
+    .dss-footer p{color:#59616d!important}
+    .dss-footer a{color:#20242a!important}
+    @media(max-width:900px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:13px!important}#products .pic,#grid>.card .pic{height:190px!important}}
+    @media(max-width:650px){
+      .nav{min-height:62px!important;gap:6px!important}
+      .brand img{height:39px!important;max-width:125px!important}
+      .header-actions{gap:4px!important}
+      .header-actions button{min-height:34px!important;padding:6px 8px!important;font-size:12px!important}
+      #categoriesSection{padding-top:17px!important;padding-bottom:12px!important}
+      #categoriesSection h2{font-size:22px!important;margin-bottom:5px!important}
+      #categoriesSection .categories{gap:9px!important;padding:10px 0 14px!important}
+      #categoriesSection .category-btn{flex:0 0 158px!important;width:158px!important;min-width:158px!important;height:72px!important;min-height:72px!important;padding:7px!important;gap:8px!important}
+      #categoriesSection .category-btn img{flex-basis:48px!important;width:48px!important;height:48px!important;min-width:48px!important}
+      #categoriesSection .category-btn span{font-size:12px!important}
+      .toolbar{gap:9px!important}
+      .toolbar h2{font-size:23px!important}
+      .toolbar input,.toolbar select{width:100%!important}
+      .grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+      #products .card,#grid>.card{padding:8px!important;border-radius:8px!important}
+      #products .pic,#grid>.card .pic{height:155px!important;margin-bottom:8px!important}
+      #products .card h3,#grid>.card h3{font-size:13px!important;line-height:1.35!important;min-height:52px!important}
+      #products .card .price,#grid>.card .price{font-size:18px!important;margin:9px 0!important}
+      #products .card button,#grid>.card button{min-height:40px!important;font-size:12px!important;padding:10px 5px!important}
+      #products{padding-bottom:100px!important}
+      #cart .drawerHead{min-height:62px!important}
+      .dss-cart-page-title{font-size:29px!important}
+    }
+    @media(max-width:390px){
+      .brand img{max-width:105px!important}
+      .header-actions button{padding:5px 6px!important}
+      #products .pic,#grid>.card .pic{height:132px!important}
+      #products .card h3,#grid>.card h3{font-size:12px!important}
+    }
+
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
 </head>
@@ -511,7 +605,7 @@
     <button type="button" id="bottomCartBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"></path></svg><span id="bottomCartLabel">Shporta</span></button>
     <button type="button" id="profileBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"></circle><path d="M4 21v-2a8 8 0 0 1 16 0v2"></path></svg><span id="profileLabel">Profili</span></button>
   </div>
-  <script src="app.js?v=20261016-profile-panel-fix3"></script>
+  <script src="app.js?v=20261016-white-storefront-1"></script>
   <script>
     /* Kategorite levizin automatikisht nga e majta ne te djathte; ndalen perkohesisht kur perdoruesi prek rreshtin. */
     (function () {
