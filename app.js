@@ -1089,8 +1089,9 @@ if (accountBox) {
 const profileBtn = $("#profileBtn");
 
 if (profileBtn) {
-  profileBtn.onclick = () => {
-    window.location.href = "./account.html";
+  profileBtn.onclick = (event) => {
+    event.preventDefault();
+    openAccount();
   };
 }
 
