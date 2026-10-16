@@ -997,7 +997,26 @@ function updateAccountUI(message) {
   const status=$("#accountStatus"), form=$("#accountForm"), identifier=$("#accountEmail"), password=$("#accountPassword");
   const submit=$("#accountSubmit"), switchBtn=$("#accountSwitch"), logout=$("#accountLogout");
   if(!status||!form||!identifier||!password||!submit||!switchBtn||!logout)return;
-  if(currentUser){status.textContent=message||(t("loggedIn")+" "+(currentUser.email||"")+t("discountAll"));form.hidden=true;switchBtn.hidden=true;logout.hidden=false;return;}
+  if(currentUser){
+    status.innerHTML="";
+    const panel=document.createElement("div");
+    panel.style.cssText="display:block;margin:14px 0;padding:16px;border:1px solid #dfe3e8;border-radius:12px;background:#f8fafc;color:#20242a";
+    const heading=document.createElement("div");
+    heading.textContent="Profili yt";
+    heading.style.cssText="font-size:18px;font-weight:800;margin-bottom:10px";
+    const email=document.createElement("div");
+    email.textContent="Email: "+(currentUser.email||"");
+    email.style.cssText="font-size:14px;overflow-wrap:anywhere;margin-bottom:10px";
+    const discount=document.createElement("div");
+    discount.textContent="Keni zbritje personale 10%";
+    discount.style.cssText="color:#16803c;font-weight:700;font-size:14px";
+    const note=document.createElement("div");
+    note.textContent=message||(t("loggedIn")+" "+(currentUser.email||""));
+    note.style.cssText="font-size:12px;color:#68717d;margin-top:10px";
+    panel.append(heading,email,discount,note);
+    status.appendChild(panel);
+    form.hidden=true;switchBtn.hidden=true;logout.hidden=false;return;
+  }
   form.hidden=false;logout.hidden=true;identifier.type="email";identifier.placeholder="Email-i";identifier.disabled=false;
   password.hidden=false;password.disabled=false;password.required=true;
   const otpInput=$("#accountOtp");if(otpInput){otpInput.hidden=true;otpInput.required=false;otpInput.disabled=true;}
