@@ -1047,41 +1047,65 @@
   async function loadCustomerApprovals() {
     const el = $("customerApprovals");
     if (!el) return;
+
     el.textContent = "Po ngarkohen kërkesat...";
     const { data, error } = await db
       .from("customer_approvals")
       .select("user_id,email,status,created_at")
       .order("created_at", { ascending: false });
+
     if (error) throw error;
     if (!data || !data.length) {
       el.textContent = "Nuk ka kërkesa për llogari.";
       return;
     }
+
     el.innerHTML = data.map(item => `
       <article style="padding:12px 0;border-bottom:1px solid #ddd">
-        <strong>Email / Telefon: ${esc(item.email || "—")}</strong>
-        <p>Statusi: <strong>${esc(item.status)}</strong> · Regjistruar: ${esc(item.created_at ? new Date(item.created_at).toLocaleString("sq-AL") : "—")}</p>
+        <strong>Email: ${esc(item.email || "—")}</strong>
+        <p>Statusi: <strong>${esc(item.status || "i panjohur")}</strong> · Regjistruar: ${esc(item.created_at ? new Date(item.created_at).toLocaleString("sq-AL") : "—")}</p>
         ${item.status === "pending" ? `
           <button type="button" data-approval="${esc(item.user_id)}" data-status="approved">Aprovo llogarinë</button>
           <button type="button" class="danger" data-approval="${esc(item.user_id)}" data-status="rejected">Refuzo</button>
         ` : ""}
       </article>
     `).join("");
+
     el.querySelectorAll("[data-approval]").forEach(button => {
       button.addEventListener("click", async () => {
         const id = button.dataset.approval;
         const status = button.dataset.status;
-        button.disabled = true;
+        const article = button.closest("article");
+        const buttons = article ? article.querySelectorAll("button") : [button];
+        buttons.forEach(b => { b.disabled = true; });
+        const oldText = button.textContent;
+        button.textContent = "Po ruhet...";
+
         try {
-          const { error } = await db.from("customer_approvals")
+          // Confirm that Supabase actually changed a row; UPDATE without SELECT
+          // can otherwise appear successful when RLS blocks the operation.
+          const { data: updated, error: updateError } = await db
+            .from("customer_approvals")
             .update({ status, reviewed_at: new Date().toISOString() })
-            .eq("user_id", id);
-          if (error) throw error;
-          msg("loginMsg", status === "approved" ? "Llogaria e klientit u aprovua." : "Kërkesa e klientit u refuzua.");
+            .eq("user_id", id)
+            .select("user_id,email,status")
+            .maybeSingle();
+
+          if (updateError) throw updateError;
+          if (!updated) {
+            throw new Error("Supabase nuk ndryshoi asnjë rresht. Kontrollo që je hyrë si administratori i DSS Shop dhe që politikat RLS lejojnë miratimin.");
+          }
+
+          msg("loginMsg", status === "approved"
+            ? "Llogaria u aprovua. Klienti mund të hyjë tani me email dhe fjalëkalim."
+            : "Kërkesa e klientit u refuzua.");
           await loadCustomerApprovals();
         } catch (e) {
-          alert("Nuk u ndryshua statusi: " + (e.message || "Gabim"));
-          button.disabled = false;
+          const message = "Miratimi dështoi: " + (e.message || "Gabim i panjohur");
+          msg("loginMsg", message, true);
+          alert(message);
+          buttons.forEach(b => { b.disabled = false; });
+          button.textContent = oldText;
         }
       });
     });
