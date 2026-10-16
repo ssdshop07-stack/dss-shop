@@ -626,6 +626,7 @@
       $("productCondition").value = data.product_condition === "used" ? "used" : "new";
       $("productStock").value = data.stock ?? 0;
       $("productDescription").value = data.description || "";
+      $("productVideoUrl").value = data.installation_video_url || "";
       $("productFeatured").checked = !!data.featured;
       $("productActive").checked = data.active !== false;
       $("productImage").value = "";
@@ -715,6 +716,7 @@
         sale_price: sale === "" ? null : Number(sale),
         stock: stock,
         description: $("productDescription").value.trim() || null,
+        installation_video_url: $("productVideoUrl").value.trim() || null,
         featured: $("productFeatured").checked,
         active: $("productActive").checked,
         image_url: uploaded || productPhoto || null
