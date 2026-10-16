@@ -1009,7 +1009,7 @@ if(accountForm)accountForm.addEventListener("submit",async(e)=>{
       const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;await finishCustomerLogin(data.user,t("loginSuccess"));
     }
   }catch(error){updateAccountUI(t("registerError")+(error.message||"Action failed."));}
-  finally{submit.disabled=false;if(!currentUser)submit.textContent=accountMode==="signup"?t("signup"):t("login");}
+  finally{submit.disabled=false;submit.textContent=accountMode==="signup"?t("signup"):t("login");}
 });
 const accountSwitch=$("#accountSwitch");
 if(accountSwitch)accountSwitch.addEventListener("click",()=>{accountMode=accountMode==="signup"?"login":"signup";updateAccountUI();});
@@ -1082,22 +1082,18 @@ sb.auth.getSession().then(async ({ data, error }) => {
   updateAccountUI();
 });
 
-// Keep the Supabase auth callback synchronous. Calling Supabase again
-// inside an async auth callback can lock the auth client and leave login at "Prit…".
+// Do not query Supabase from the auth listener: approval is checked by
+// finishCustomerLogin() and the initial session check. Duplicate requests here
+// can race and leave the customer account screen stuck at "Prit...".
 sb.auth.onAuthStateChange((_event, session) => {
   currentUser = session?.user || null;
-  const user = currentUser;
-  setTimeout(async () => {
-    try {
-      await checkCustomerApproval(user);
-      if (currentUser?.id !== user?.id) return;
-      refreshCartPrices();
-      render();
-      updateAccountUI();
-    } catch (error) {
-      console.error("DSS auth refresh failed:", error?.message || error);
-    }
-  }, 0);
+
+  if (!currentUser) {
+    customerApproved = false;
+    refreshCartPrices();
+    render();
+    updateAccountUI();
+  }
 });
 
 /* =========================================
