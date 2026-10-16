@@ -1082,12 +1082,22 @@ sb.auth.getSession().then(async ({ data, error }) => {
   updateAccountUI();
 });
 
-sb.auth.onAuthStateChange(async (_event, session) => {
+// Keep the Supabase auth callback synchronous. Calling Supabase again
+// inside an async auth callback can lock the auth client and leave login at "Prit…".
+sb.auth.onAuthStateChange((_event, session) => {
   currentUser = session?.user || null;
-  await checkCustomerApproval(currentUser);
-  refreshCartPrices();
-  render();
-  updateAccountUI();
+  const user = currentUser;
+  setTimeout(async () => {
+    try {
+      await checkCustomerApproval(user);
+      if (currentUser?.id !== user?.id) return;
+      refreshCartPrices();
+      render();
+      updateAccountUI();
+    } catch (error) {
+      console.error("DSS auth refresh failed:", error?.message || error);
+    }
+  }, 0);
 });
 
 /* =========================================
