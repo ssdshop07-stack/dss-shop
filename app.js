@@ -883,6 +883,9 @@ async function loadCategoriesUI() {
   const container = document.querySelector("#categories");
   if (!container) return;
 
+  // Keep the categories already in index.html as a safe fallback.
+  const fallbackMarkup = container.innerHTML;
+
   try {
     const { data, error } = await sb
       .from("categories")
@@ -904,21 +907,28 @@ async function loadCategoriesUI() {
       !["te gjitha", "te gjitha produktet", "all"].includes(normalize(category.name))
     );
 
-    container.innerHTML = activeCategories.map((category, index) => {
-      const name = String(category.name || "").trim();
-      return `<button type="button" class="category-btn${index === 0 ? " active" : ""}" data-category="${esc(name)}">
-        ${category.image_url ? `<img src="${esc(category.image_url)}" alt="${esc(name)}" loading="lazy">` : ""}
-        <span>${esc(name)}</span>
-      </button>`;
-    }).join("");
+    // An empty table must not erase the categories already shown on the shop.
+    if (!activeCategories.length) {
+      container.innerHTML = fallbackMarkup;
+      console.warn("Tabela categories është bosh; po përdoren kategoritë rezervë nga index.html.");
+    } else {
+      container.innerHTML = activeCategories.map((category, index) => {
+        const name = String(category.name || "").trim();
+        return `<button type="button" class="category-btn${index === 0 ? " active" : ""}" data-category="${esc(name)}">
+          ${category.image_url ? `<img src="${esc(category.image_url)}" alt="${esc(name)}" loading="lazy">` : ""}
+          <span>${esc(name)}</span>
+        </button>`;
+      }).join("");
+    }
 
-    // Shfaq të gjitha produktet në hapjen e faqes, pa një kartë "Të gjitha".
     selectedCategory = "all";
     container.querySelectorAll(".category-btn").forEach((button) => {
       button.classList.remove("active");
     });
   } catch (error) {
-    console.error("Kategoritë nuk u ngarkuan nga Supabase:", error);
+    // Supabase category errors should not make the category row disappear.
+    container.innerHTML = fallbackMarkup;
+    console.error("Kategoritë nuk u ngarkuan nga Supabase; u rikthyen kategoritë rezervë:", error);
   }
 }
 
