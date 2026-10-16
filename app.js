@@ -46,12 +46,7 @@ const translations = {
     account: "Llogaria DSS",
     accountIntro: "Krijo llogari ose hyr në llogarinë tënde.",
     email: "Email-i",
-    identifier: "Email ose telefon (+355...)",
     password: "Fjalëkalimi (minimumi 6 karaktere)",
-    methodPassword: "Email/Telefon + Fjalëkalim",
-    methodSms: "Hyr me kod SMS",
-    otp: "Kodi 6-shifror SMS",
-    otpSent: "Kodi u dërgua. Kontrollo SMS dhe shkruaj kodin 6-shifror.",
     approvalPending: "Llogaria është në pritje të miratimit të administratorit. Hyrja do të lejohet pasi të aprovohet.",
     signup: "Regjistrohu",
     login: "Hyr",
@@ -313,10 +308,7 @@ function applyLanguage() {
   const email = $("#accountEmail");
   const password = $("#accountPassword");
 
-  if (email) { email.placeholder = t("identifier"); email.type = "text"; email.autocomplete = "username"; }
-  const otpInput = $("#accountOtp"); if (otpInput) otpInput.placeholder = t("otp");
-  if (passwordMethodBtn) passwordMethodBtn.textContent = t("methodPassword");
-  if (smsMethodBtn) smsMethodBtn.textContent = t("methodSms");
+  if (email) { email.placeholder = t("email"); email.type = "email"; email.autocomplete = "email"; }
 
   if (password) {
     password.placeholder = t("password");
