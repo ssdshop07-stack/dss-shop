@@ -270,7 +270,10 @@
 
     el.querySelectorAll("[data-save-category]").forEach(button => {
       button.addEventListener("click", async function () {
-        if (busy) return;
+        if (busy) {
+          msg("categoryMsg", "Një veprim tjetër është në proces. Prit pak dhe provo përsëri.", true);
+          return;
+        }
 
         const id = button.dataset.saveCategory;
         const original = categories.find(
