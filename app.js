@@ -1146,6 +1146,18 @@ sb.auth.getSession().then(async ({ data, error }) => {
 
   currentUser = data?.session?.user || null;
   await checkCustomerApproval(currentUser);
+
+  if (currentUser && !customerApproved) {
+    await sb.auth.signOut();
+    currentUser = null;
+    customerApproved = false;
+    accountMode = "login";
+    refreshCartPrices();
+    render();
+    updateAccountUI("Llogaria është në pritje të miratimit të administratorit. Hyrja do të lejohet pasi të aprovohet.");
+    return;
+  }
+
   refreshCartPrices();
   render();
   updateAccountUI();
@@ -1154,14 +1166,6 @@ sb.auth.getSession().then(async ({ data, error }) => {
 sb.auth.onAuthStateChange(async (_event, session) => {
   currentUser = session?.user || null;
   await checkCustomerApproval(currentUser);
-
-  // Blloko sesionet e llogarive që nuk janë miratuar nga administratori.
-  if (currentUser && !customerApproved) {
-    await sb.auth.signOut();
-    currentUser = null;
-    customerApproved = false;
-  }
-
   refreshCartPrices();
   render();
   updateAccountUI();
