@@ -18,6 +18,9 @@ let selectedCategory = "all";
 let currentUser = null;
 let customerApproved = false;
 let accountMode = "signup";
+let accountAuthMethod = "password";
+let pendingPhoneOtp = "";
+let pendingPhoneOtpPurpose = "";
 let language = localStorage.getItem("dss_language") || "sq";
 
 const $ = (s) => document.querySelector(s);
@@ -46,7 +49,15 @@ const translations = {
     account: "Llogaria DSS",
     accountIntro: "Krijo llogari ose hyr në llogarinë tënde.",
     email: "Email-i",
+    identifier: "Email ose telefon (+355...)",
     password: "Fjalëkalimi (minimumi 6 karaktere)",
+    methodPassword: "Email/Telefon + Fjalëkalim",
+    methodSms: "Hyr me kod SMS",
+    otp: "Kodi 6-shifror SMS",
+    sendOtp: "Dërgo kodin SMS",
+    verifyOtp: "Verifiko kodin",
+    otpSent: "Kodi u dërgua. Kontrollo SMS dhe shkruaj kodin 6-shifror.",
+    approvalPending: "Llogaria është në pritje të miratimit të administratorit. Hyrja do të lejohet pasi të aprovohet.",
     signup: "Regjistrohu",
     login: "Hyr",
     switchLogin: "Kam llogari — Hyr",
@@ -110,7 +121,15 @@ const translations = {
     account: "DSS Account",
     accountIntro: "Create an account or sign in.",
     email: "Email",
+    identifier: "Email or phone (+355...)",
     password: "Password (minimum 6 characters)",
+    methodPassword: "Email/Phone + Password",
+    methodSms: "Sign in with SMS code",
+    otp: "6-digit SMS code",
+    sendOtp: "Send SMS code",
+    verifyOtp: "Verify code",
+    otpSent: "Code sent. Check your SMS and enter the 6-digit code.",
+    approvalPending: "Your account is awaiting administrator approval. Sign-in will be allowed once approved.",
     signup: "Register",
     login: "Sign in",
     switchLogin: "I have an account — Sign in",
@@ -299,7 +318,11 @@ function applyLanguage() {
   const email = $("#accountEmail");
   const password = $("#accountPassword");
 
-  if (email) email.placeholder = t("email");
+  if (email) { email.placeholder = t("identifier"); email.type = "text"; email.autocomplete = "username"; }
+  const otpInput = $("#accountOtp"); if (otpInput) otpInput.placeholder = t("otp");
+  const passwordMethodBtn = $("#accountMethodPassword"), smsMethodBtn = $("#accountMethodSms");
+  if (passwordMethodBtn) passwordMethodBtn.textContent = t("methodPassword");
+  if (smsMethodBtn) smsMethodBtn.textContent = t("methodSms");
 
   if (password) {
     password.placeholder = t("password");
@@ -949,152 +972,86 @@ function closeAccount() {
 }
 
 function updateAccountUI(message) {
-  const status = $("#accountStatus");
-  const form = $("#accountForm");
-  const email = $("#accountEmail");
-  const password = $("#accountPassword");
-  const submit = $("#accountSubmit");
-  const switchBtn = $("#accountSwitch");
-  const logout = $("#accountLogout");
-
-  if (
-    !status || !form || !email || !password ||
-    !submit || !switchBtn || !logout
-  ) return;
-
-  if (currentUser) {
-    status.textContent =
-      message ||
-      (t("loggedIn") + " " + currentUser.email + t("discountAll"));
-
-    form.hidden = true;
-    switchBtn.hidden = true;
-    logout.hidden = false;
-    logout.textContent = t("logout");
-  } else {
-    status.textContent =
-      message ||
-      (accountMode === "signup"
-        ? t("signupIntro")
-        : t("loginIntro"));
-
-    form.hidden = false;
-    email.disabled = false;
-    password.disabled = false;
-    submit.disabled = false;
-
-    submit.textContent =
-      accountMode === "signup" ? t("signup") : t("login");
-
-    switchBtn.hidden = false;
-    switchBtn.textContent =
-      accountMode === "signup"
-        ? t("switchLogin")
-        : t("switchSignup");
-
-    logout.hidden = true;
+  const status=$("#accountStatus"), form=$("#accountForm"), identifier=$("#accountEmail"), password=$("#accountPassword");
+  const otpInput=$("#accountOtp"), submit=$("#accountSubmit"), switchBtn=$("#accountSwitch"), logout=$("#accountLogout");
+  const passwordMethodBtn=$("#accountMethodPassword"), smsMethodBtn=$("#accountMethodSms");
+  if(!status||!form||!identifier||!password||!submit||!switchBtn||!logout)return;
+  if(currentUser){
+    status.textContent=message||(t("loggedIn")+" "+(currentUser.email||currentUser.phone||"")+t("discountAll"));
+    form.hidden=true;switchBtn.hidden=true;logout.hidden=false;
+    if(passwordMethodBtn)passwordMethodBtn.hidden=true;if(smsMethodBtn)smsMethodBtn.hidden=true;
+    logout.textContent=t("logout");return;
   }
+  form.hidden=false;logout.hidden=true;
+  if(passwordMethodBtn)passwordMethodBtn.hidden=false;if(smsMethodBtn)smsMethodBtn.hidden=false;
+  const waiting=Boolean(pendingPhoneOtp), smsMode=accountAuthMethod==="sms";
+  identifier.disabled=waiting;password.hidden=smsMode||waiting;password.disabled=smsMode||waiting;password.required=!smsMode&&!waiting;
+  if(otpInput){otpInput.hidden=!waiting;otpInput.required=waiting;otpInput.disabled=!waiting;}
+  switchBtn.hidden=smsMode;switchBtn.textContent=accountMode==="signup"?t("switchLogin"):t("switchSignup");
+  submit.disabled=false;submit.textContent=waiting?t("verifyOtp"):(smsMode?t("sendOtp"):(accountMode==="signup"?t("signup"):t("login")));
+  status.textContent=message||(smsMode?"Shkruaj numrin e telefonit me prefiks shteti. Do të të dërgohet kod SMS.":(accountMode==="signup"?t("signupIntro"):t("loginIntro")));
+}
+function normalizeDssPhone(value){
+  const raw=String(value||"").trim();if(raw.includes("@"))throw new Error("Për hyrje me telefon, shkruaj numrin e telefonit.");
+  const compact=raw.replace(/[\s().-]/g,"");if(compact.startsWith("+")&&/^\+\d{8,15}$/.test(compact))return compact;
+  const digits=compact.replace(/\D/g,"");if(digits.startsWith("355")&&digits.length>=11&&digits.length<=15)return "+"+digits;
+  if(digits.startsWith("0")&&digits.length>=9&&digits.length<=11)return "+355"+digits.slice(1);
+  if(digits.startsWith("6")&&digits.length>=8&&digits.length<=10)return "+355"+digits;
+  throw new Error("Shkruaj numrin me prefiks ndërkombëtar, p.sh. +355681234567.");
+}
+async function finishCustomerLogin(user,successMessage){
+  currentUser=user||null;const approved=await checkCustomerApproval(currentUser);
+  if(!currentUser||!approved){
+    if(currentUser)await sb.auth.signOut();currentUser=null;customerApproved=false;pendingPhoneOtp="";pendingPhoneOtpPurpose="";
+    refreshCartPrices();render();updateAccountUI(t("approvalPending"));return false;
+  }
+  pendingPhoneOtp="";pendingPhoneOtpPurpose="";refreshCartPrices();render();updateAccountUI(successMessage||t("loginSuccess"));return true;
 }
 
-const accountForm = $("#accountForm");
-
-if (accountForm) {
-  accountForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const email = $("#accountEmail").value.trim();
-    const password = $("#accountPassword").value;
-    const submit = $("#accountSubmit");
-
-    if (!email || !password) {
-      updateAccountUI(t("enterBoth"));
-      return;
-    }
-
-    submit.disabled = true;
-    submit.textContent = t("wait");
-
-    try {
-      if (accountMode === "signup") {
-        const { data, error } = await sb.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin + window.location.pathname.replace(/[^/]*$/, "account.html")
-          }
-        });
-
-        if (error) throw error;
-
-        if (data.session && data.user) {
-          currentUser = data.user;
-          await checkCustomerApproval(currentUser);
-
-          if (!customerApproved) {
-            await sb.auth.signOut();
-            currentUser = null;
-            customerApproved = false;
-            accountMode = "login";
-            refreshCartPrices();
-            render();
-            updateAccountUI("Llogaria u krijua, por është në pritje të miratimit të administratorit. Mund të hysh pasi të aprovohet.");
-          } else {
-            refreshCartPrices();
-            render();
-            updateAccountUI(t("signupSuccess"));
-          }
-        } else {
-          accountMode = "login";
-          updateAccountUI(t("registered"));
-        }
-      } else {
-        const { data, error } = await sb.auth.signInWithPassword({
-          email,
-          password
-        });
-
-        if (error) throw error;
-
-        currentUser = data.user;
-        await checkCustomerApproval(currentUser);
-
-        if (!customerApproved) {
-          await sb.auth.signOut();
-          currentUser = null;
-          customerApproved = false;
-          refreshCartPrices();
-          render();
-          updateAccountUI("Llogaria është në pritje të miratimit të administratorit. Hyrja do të lejohet pasi të aprovohet.");
-          return;
-        }
-
-        refreshCartPrices();
-        render();
-        updateAccountUI(t("loginSuccess"));
+const accountForm=$("#accountForm");
+if(accountForm)accountForm.addEventListener("submit",async(e)=>{
+  e.preventDefault();const identifier=$("#accountEmail").value.trim(),password=$("#accountPassword").value,otpInput=$("#accountOtp"),submit=$("#accountSubmit");
+  const smsMode=accountAuthMethod==="sms",waiting=Boolean(pendingPhoneOtp);
+  if(!identifier){updateAccountUI("Shkruaj email-in ose numrin e telefonit.");return;}
+  submit.disabled=true;submit.textContent=t("wait");
+  try{
+    if(waiting){
+      const token=String(otpInput?.value||"").trim();if(!/^\d{6}$/.test(token))throw new Error("Shkruaj kodin SMS me 6 shifra.");
+      const phone=pendingPhoneOtp,purpose=pendingPhoneOtpPurpose;
+      const {data,error}=await sb.auth.verifyOtp({phone,token,type:"sms"});if(error)throw error;
+      const success=await finishCustomerLogin(data.user,purpose==="signup"?t("signupSuccess"):t("loginSuccess"));
+      if(success){otpInput.value="";accountMode="login";}
+    }else if(smsMode){
+      const phone=normalizeDssPhone(identifier);
+      const {error}=await sb.auth.signInWithOtp({phone,options:{shouldCreateUser:false}});if(error)throw error;
+      pendingPhoneOtp=phone;pendingPhoneOtpPurpose="sms-login";if(otpInput)otpInput.value="";updateAccountUI(t("otpSent"));
+    }else if(accountMode==="signup"){
+      if(!password||password.length<6)throw new Error("Fjalëkalimi duhet të ketë të paktën 6 karaktere.");
+      if(identifier.includes("@")){
+        const {data,error}=await sb.auth.signUp({email:identifier,password,options:{emailRedirectTo:window.location.origin+window.location.pathname.replace(/[^/]*$/,"account.html")}});
+        if(error)throw error;if(data.session&&data.user)await finishCustomerLogin(data.user,t("signupSuccess"));else{accountMode="login";updateAccountUI(t("registered"));}
+      }else{
+        const phone=normalizeDssPhone(identifier);const {data,error}=await sb.auth.signUp({phone,password,options:{data:{phone}}});
+        if(error)throw error;if(data.session&&data.user)await finishCustomerLogin(data.user,t("signupSuccess"));
+        else{pendingPhoneOtp=phone;pendingPhoneOtpPurpose="signup";if(otpInput)otpInput.value="";updateAccountUI(t("otpSent"));}
       }
-    } catch (error) {
-      updateAccountUI(
-        t("registerError") + (error.message || "Action failed.")
-      );
-    } finally {
-      submit.disabled = false;
-
-      if (!currentUser) {
-        submit.textContent =
-          accountMode === "signup" ? t("signup") : t("login");
+    }else{
+      if(!password)throw new Error("Shkruaj fjalëkalimin.");
+      if(identifier.includes("@")){
+        const {data,error}=await sb.auth.signInWithPassword({email:identifier,password});if(error)throw error;await finishCustomerLogin(data.user,t("loginSuccess"));
+      }else{
+        const phone=normalizeDssPhone(identifier);const {data,error}=await sb.auth.signInWithPassword({phone,password});if(error)throw error;await finishCustomerLogin(data.user,t("loginSuccess"));
       }
     }
-  });
-}
-
-const accountSwitch = $("#accountSwitch");
-
-if (accountSwitch) {
-  accountSwitch.addEventListener("click", () => {
-    accountMode = accountMode === "signup" ? "login" : "signup";
-    updateAccountUI();
-  });
-}
+  }catch(error){updateAccountUI(t("registerError")+(error.message||"Action failed."));}
+  finally{submit.disabled=false;if(!currentUser)submit.textContent=pendingPhoneOtp?t("verifyOtp"):(accountAuthMethod==="sms"?t("sendOtp"):(accountMode==="signup"?t("signup"):t("login")));}
+});
+const accountMethodPassword=$("#accountMethodPassword");
+if(accountMethodPassword)accountMethodPassword.addEventListener("click",()=>{accountAuthMethod="password";pendingPhoneOtp="";pendingPhoneOtpPurpose="";if($("#accountOtp"))$("#accountOtp").value="";updateAccountUI();});
+const accountMethodSms=$("#accountMethodSms");
+if(accountMethodSms)accountMethodSms.addEventListener("click",()=>{accountAuthMethod="sms";accountMode="login";pendingPhoneOtp="";pendingPhoneOtpPurpose="";if($("#accountOtp"))$("#accountOtp").value="";updateAccountUI();});
+const accountSwitch=$("#accountSwitch");
+if(accountSwitch)accountSwitch.addEventListener("click",()=>{accountMode=accountMode==="signup"?"login":"signup";pendingPhoneOtp="";pendingPhoneOtpPurpose="";if($("#accountOtp"))$("#accountOtp").value="";updateAccountUI();});
 
 const accountLogout = $("#accountLogout");
 
