@@ -393,17 +393,30 @@ function customerPrice(price) {
 async function checkCustomerApproval(user) {
   customerApproved = false;
   if (!user?.id) return false;
-  const { data, error } = await sb
-    .from("customer_approvals")
-    .select("status")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  if (error) {
-    console.error("DSS approval check failed:", error.message);
+
+  try {
+    const result = await Promise.race([
+      sb.from("customer_approvals")
+        .select("status")
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      new Promise((resolve) => setTimeout(
+        () => resolve({ data: null, error: new Error("Kontrolli i miratimit zgjati shumë.") }),
+        8000
+      ))
+    ]);
+
+    if (result.error) {
+      console.error("DSS approval check failed:", result.error.message);
+      return false;
+    }
+
+    customerApproved = result.data?.status === "approved";
+    return customerApproved;
+  } catch (error) {
+    console.error("DSS approval check failed:", error?.message || error);
     return false;
   }
-  customerApproved = data?.status === "approved";
-  return customerApproved;
 }
 
 function save() {
