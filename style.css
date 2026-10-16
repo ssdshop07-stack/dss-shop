@@ -500,3 +500,14 @@ main, .wrap, #products, .toolbar { background-color: #ffffff; }
 #grid > .card .pic { background: #f4f5f7 !important; }
 #products .card .cat,
 #grid > .card .cat { color: #e50914 !important; }
+
+
+/* Slightly larger product cards on phone for easier reading */
+@media (max-width: 600px) {
+  #products .grid { gap: 9px !important; }
+  #products .card { padding: 8px !important; }
+  #products .pic { height: 102px !important; }
+  #products .card h3 { min-height: 34px !important; font-size: 12px !important; line-height: 1.25 !important; margin: 6px 0 !important; }
+  #products .card .cat { font-size: 10px !important; }
+  #products .price { font-size: 14px !important; margin: 6px 0 !important; }
+}
