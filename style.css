@@ -469,3 +469,7 @@ main, .wrap, #products, .toolbar { background-color: #ffffff; }
 
 /* Hide the add-to-cart button on product listing cards only. */
 #products .card > button { display: none !important; }
+
+
+/* Hide add-to-cart buttons on product cards; the product detail button remains available. */
+#products .card > button { display: none !important; }
