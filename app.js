@@ -508,6 +508,7 @@ window.openProductDetails = function (p) {
       #productDetailsModal .dss-detail-meta p{margin:0;background:#202127;border:1px solid #34353d;border-radius:8px;padding:9px 11px;color:#d4d5da;font-size:12px}\n      #productDetailsModal #detailsStock{background:#12351f;border-color:#247442;color:#75e69a;font-weight:800}
       #productDetailsModal #detailsDescriptionTitle{font-size:16px;margin:20px 0 8px}
       #productDetailsModal #detailsDescription{white-space:pre-wrap;line-height:1.7;color:#c9cad0;font-size:14px;margin:0 0 20px;overflow-wrap:anywhere}
+      #productDetailsModal #detailsInstallGuide iframe{display:block}
       #productDetailsModal #detailsAdd{width:100%;min-height:48px;padding:14px;background:#e32636;color:#fff;border:0;border-radius:9px;font-weight:bold;font-size:15px;cursor:pointer}
       #productDetailsModal #detailsShare{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
       #productDetailsModal #detailsShare button{flex:1;min-width:95px;min-height:40px;padding:10px;background:#24252c;color:#fff;border:1px solid #41424a;border-radius:8px;font-size:12px;font-weight:bold;cursor:pointer}
@@ -552,6 +553,13 @@ window.openProductDetails = function (p) {
             <div class="dss-detail-meta"><p id="detailsCondition"></p></div>
             <h3 id="detailsDescriptionTitle"></h3>
             <p id="detailsDescription"></p>
+            <section id="detailsInstallGuide" style="display:none;margin:20px 0;padding:14px;background:#17191f;border:1px solid #34353d;border-radius:12px">
+              <h3 style="margin:0 0 12px;font-size:17px;color:#75e69a">Udhëzime instalimi</h3>
+              <div style="position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:9px;overflow:hidden">
+                <iframe id="detailsInstallVideo" src="" title="Udhëzime instalimi për kamerën IPC P8F" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+              </div>
+              <a href="https://www.youtube.com/watch?v=ienqfTgR7-0" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:10px;color:#75e69a;font-weight:bold;text-decoration:none">Hap videon në YouTube ↗</a>
+            </section>
             <button id="detailsAdd" type="button"></button>
             <div id="detailsShare">
               <button id="shareFacebook" type="button">Facebook</button>
@@ -628,6 +636,11 @@ window.openProductDetails = function (p) {
   personalDiscount.style.display = (hasProductSale || customerApproved) ? "flex" : "none";
   modal.querySelector("#detailsDescriptionTitle").textContent = t("description");
   modal.querySelector("#detailsDescription").textContent = description || t("noDescription");
+  const installGuide = modal.querySelector("#detailsInstallGuide");
+  const installVideo = modal.querySelector("#detailsInstallVideo");
+  const isIpcP8f = /ipc\s*[-_ ]?p8f|p8f/i.test(String(p.name || ""));
+  installGuide.style.display = isIpcP8f ? "block" : "none";
+  installVideo.src = isIpcP8f ? "https://www.youtube-nocookie.com/embed/ienqfTgR7-0" : "";
   modal.querySelector("#shareCopy").textContent = language === "sq" ? "Kopjo linkun" : "Copy link";
   modal.querySelector("#detailsAdd").textContent = t("add");
 
