@@ -192,6 +192,86 @@
     #cart .drawerHead button { color:#20242a !important; border-color:#cfd5dc !important; }
     #cart .cartItem { border-bottom-color:#e2e5e9 !important; }
 
+
+    /* Kategorite e medha me emer siper fotos, stil modern si SSD.al */
+    #categoriesSection .categories{
+      gap:14px!important;
+      padding:12px 3px 16px!important;
+    }
+    #categoriesSection .category-btn{
+      position:relative!important;
+      display:block!important;
+      flex:0 0 230px!important;
+      width:230px!important;
+      min-width:230px!important;
+      height:170px!important;
+      min-height:170px!important;
+      padding:0!important;
+      overflow:hidden!important;
+      border:1px solid #e2e5e9!important;
+      border-radius:14px!important;
+      background:#f3f5f7!important;
+      box-shadow:0 3px 12px #17203312!important;
+      text-align:center!important;
+    }
+    #categoriesSection .category-btn img{
+      position:absolute!important;
+      inset:0!important;
+      display:block!important;
+      width:100%!important;
+      height:100%!important;
+      max-width:none!important;
+      flex:none!important;
+      object-fit:cover!important;
+      padding:0!important;
+      border:0!important;
+      border-radius:0!important;
+      background:#f3f5f7!important;
+      transition:transform .25s ease!important;
+    }
+    #categoriesSection .category-btn::after{
+      content:""!important;
+      position:absolute!important;
+      inset:25% 0 0!important;
+      background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.78) 100%)!important;
+      pointer-events:none!important;
+    }
+    #categoriesSection .category-btn span{
+      position:absolute!important;
+      z-index:2!important;
+      left:0!important;
+      right:0!important;
+      bottom:0!important;
+      display:block!important;
+      min-height:0!important;
+      padding:13px 8px 12px!important;
+      color:#fff!important;
+      font-size:16px!important;
+      line-height:1.25!important;
+      font-weight:800!important;
+      text-align:center!important;
+      text-shadow:0 1px 4px #000!important;
+      overflow-wrap:anywhere!important;
+    }
+    #categoriesSection .category-btn:hover img{transform:scale(1.05)!important}
+    #categoriesSection .category-btn.active{
+      border:2px solid #e50914!important;
+      box-shadow:0 0 0 1px #e50914!important;
+    }
+    #categoriesSection .category-btn.active span{color:#fff!important}
+    @media(max-width:650px){
+      #categoriesSection .categories{gap:10px!important;padding:10px 2px 14px!important}
+      #categoriesSection .category-btn{
+        flex-basis:205px!important;
+        width:205px!important;
+        min-width:205px!important;
+        height:155px!important;
+        min-height:155px!important;
+        border-radius:13px!important;
+      }
+      #categoriesSection .category-btn span{font-size:15px!important;padding:12px 7px 11px!important}
+    }
+
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
