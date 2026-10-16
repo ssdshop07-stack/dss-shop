@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="DSS Shop">
   <title>DSS Shop</title>
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="style.css?v=20261016-remove-slogan-1">
+  <link rel="stylesheet" href="style.css?v=20261016-white-product-cards-1">
   <style>
     :root{color-scheme:dark;--bg:#080808;--panel:#191919;--red:#e50914;--text:#f5f5f5;--muted:#aaa}
     *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
@@ -161,6 +161,14 @@
     #categoriesSection .categories::-webkit-scrollbar{height:5px}
     #categoriesSection .categories::-webkit-scrollbar-thumb{background:#c9cdd3;border-radius:8px}
     @media(max-width:650px){#categoriesSection{margin-top:6px!important;padding-top:12px!important}#categoriesSection .categories{gap:9px!important}#categoriesSection .category-btn{flex-basis:190px!important;width:190px!important;min-width:190px!important}}
+
+
+    /* Produktet ne sfond te bardhe, me tekst te erret */
+    #products .card{background:#fff!important;color:#20242a!important;border:1px solid #e2e5e9!important;box-shadow:0 3px 14px #1720330d!important}
+    #products .card h3,#products .card h3 a,#products .card p,#products .card small,#products .card .description,#products .card .price{color:#20242a!important}
+    #products .card .cat{color:#e50914!important}
+    #products .card .pic{background:#f5f6f8!important}
+    #products .card button{color:#fff!important}
 
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
