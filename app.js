@@ -994,37 +994,68 @@ function closeAccount() {
 }
 
 function updateAccountUI(message) {
-  const status=$("#accountStatus"), form=$("#accountForm"), identifier=$("#accountEmail"), password=$("#accountPassword");
-  const submit=$("#accountSubmit"), switchBtn=$("#accountSwitch"), logout=$("#accountLogout");
-  if(!status||!form||!identifier||!password||!submit||!switchBtn||!logout)return;
-  if(currentUser){
-    status.innerHTML="";
-    const panel=document.createElement("div");
-    panel.style.cssText="display:block;margin:14px 0;padding:16px;border:1px solid #dfe3e8;border-radius:12px;background:#f8fafc;color:#20242a";
-    const heading=document.createElement("div");
-    heading.textContent="Profili yt";
-    heading.style.cssText="font-size:18px;font-weight:800;margin-bottom:10px";
-    const email=document.createElement("div");
-    email.textContent="Email: "+(currentUser.email||"");
-    email.style.cssText="font-size:14px;overflow-wrap:anywhere;margin-bottom:10px";
-    const discount=document.createElement("div");
-    discount.textContent="Keni zbritje personale 10%";
-    discount.style.cssText="color:#16803c;font-weight:700;font-size:14px";
-    const note=document.createElement("div");
-    note.textContent=message||(t("loggedIn")+" "+(currentUser.email||""));
-    note.style.cssText="font-size:12px;color:#68717d;margin-top:10px";
-    panel.append(heading,email,discount,note);
-    status.appendChild(panel);
-    form.hidden=true;switchBtn.hidden=true;logout.hidden=false;return;
-  }
-  form.hidden=false;logout.hidden=true;identifier.type="email";identifier.placeholder="Email-i";identifier.disabled=false;
-  password.hidden=false;password.disabled=false;password.required=true;
-  const otpInput=$("#accountOtp");if(otpInput){otpInput.hidden=true;otpInput.required=false;otpInput.disabled=true;}
-  switchBtn.hidden=false;switchBtn.textContent=accountMode==="signup"?t("switchLogin"):t("switchSignup");
-  submit.disabled=false;submit.textContent=accountMode==="signup"?t("signup"):t("login");
-  status.textContent=message||(accountMode==="signup"?t("signupIntro"):t("loginIntro"));
-}
+  const status = $("#accountStatus");
+  const form = $("#accountForm");
+  const identifier = $("#accountEmail");
+  const password = $("#accountPassword");
+  const submit = $("#accountSubmit");
+  const switchBtn = $("#accountSwitch");
+  const logout = $("#accountLogout");
+  if (!status || !form || !identifier || !password || !submit || !switchBtn || !logout) return;
 
+  if (currentUser) {
+    status.innerHTML = "";
+    const panel = document.createElement("div");
+    panel.className = "dss-profile-panel";
+
+    const heading = document.createElement("div");
+    heading.className = "dss-profile-title";
+    heading.textContent = "Profili yt";
+
+    const email = document.createElement("div");
+    email.className = "dss-profile-email";
+    email.textContent = "Email: " + (currentUser.email || "Llogaria jote");
+
+    const discount = document.createElement("div");
+    discount.className = "dss-profile-discount";
+    discount.textContent = customerApproved
+      ? "Keni zbritje personale 10%"
+      : "Llogaria është në pritje të miratimit";
+
+    const note = document.createElement("div");
+    note.className = "dss-profile-note";
+    note.textContent = message || (customerApproved
+      ? "Je i/e kyçur në llogarinë tënde."
+      : "Zbritja aktivizohet pasi administratori të miratojë llogarinë.");
+
+    panel.append(heading, email, discount, note);
+    status.appendChild(panel);
+    form.hidden = true;
+    switchBtn.hidden = true;
+    logout.hidden = false;
+    return;
+  }
+
+  form.hidden = false;
+  logout.hidden = true;
+  identifier.type = "email";
+  identifier.placeholder = "Email-i";
+  identifier.disabled = false;
+  password.hidden = false;
+  password.disabled = false;
+  password.required = true;
+  const otpInput = $("#accountOtp");
+  if (otpInput) {
+    otpInput.hidden = true;
+    otpInput.required = false;
+    otpInput.disabled = true;
+  }
+  switchBtn.hidden = false;
+  switchBtn.textContent = accountMode === "signup" ? t("switchLogin") : t("switchSignup");
+  submit.disabled = false;
+  submit.textContent = accountMode === "signup" ? t("signup") : t("login");
+  status.textContent = message || (accountMode === "signup" ? t("signupIntro") : t("loginIntro"));
+}
 
 async function finishCustomerLogin(user,successMessage){
   currentUser=user||null;const approved=await checkCustomerApproval(currentUser);
