@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="DSS Shop">
   <title>DSS Shop | Security & Technology</title>
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="style.css?v=20261016-camera-carousel-2">
+  <link rel="stylesheet" href="style.css?v=20261016-camera-carousel-3">
   <style>
     :root{color-scheme:dark;--bg:#080808;--panel:#191919;--red:#e50914;--text:#f5f5f5;--muted:#aaa}
     *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
@@ -293,6 +293,45 @@
     <button type="button" id="profileBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"></circle><path d="M4 21v-2a8 8 0 0 1 16 0v2"></path></svg><span id="profileLabel">Profili</span></button>
   </div>
   <script src="app.js?v=20261016-customer-login-fix-5"></script>
+  <script>
+    /* Kategorite levizin automatikisht nga e majta ne te djathte; ndalen perkohesisht kur perdoruesi prek rreshtin. */
+    (function () {
+      const initCategoryMotion = () => {
+        const rail = document.querySelector("#categories");
+        if (!rail || rail.dataset.autoMotionReady === "1" || rail.children.length < 2) return;
+        rail.dataset.autoMotionReady = "1";
+        rail.style.direction = "ltr";
+        let pauseUntil = 0;
+        let lastTime = 0;
+        const speed = 24; // pikselë në sekondë
+        const pause = () => { pauseUntil = Date.now() + 3500; };
+        rail.addEventListener("touchstart", pause, { passive: true });
+        rail.addEventListener("pointerdown", pause);
+        rail.addEventListener("mouseenter", pause);
+        rail.addEventListener("focusin", pause);
+        const animate = (time) => {
+          if (!document.hidden && Date.now() > pauseUntil) {
+            const max = rail.scrollWidth - rail.clientWidth;
+            if (max > 1) {
+              if (lastTime) rail.scrollLeft -= speed * Math.min((time - lastTime) / 1000, 0.05);
+              if (rail.scrollLeft <= 0) rail.scrollLeft = max;
+            }
+          }
+          lastTime = time;
+          requestAnimationFrame(animate);
+        };
+        requestAnimationFrame(animate);
+      };
+      const rail = document.querySelector("#categories");
+      if (rail) {
+        const observer = new MutationObserver(initCategoryMotion);
+        observer.observe(rail, { childList: true });
+        initCategoryMotion();
+      }
+      window.addEventListener("load", initCategoryMotion);
+    })();
+  </script>
+
   <script>
     function focusSearch() {
       const search = document.getElementById("search");
