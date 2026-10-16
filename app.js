@@ -607,17 +607,25 @@ window.openProductDetails = function (p) {
   image.parentElement.style.display = p.image_url ? "flex" : "none";
   modal.querySelector("#detailsCategory").textContent = p.category || t("categories");
   modal.querySelector("#detailsName").textContent = p.name || "";
-  modal.querySelector("#detailsPrice").textContent = customerApproved
-    ? money(basePrice(p)) + " → " + money(customerPrice(basePrice(p))) + " (-10%)"
-    : money(basePrice(p));
+  const regularPrice = Number(p.price || 0);
+  const salePrice = Number(p.sale_price || 0);
+  const hasProductSale = salePrice > 0 && regularPrice > salePrice;
+  const effectivePrice = hasProductSale ? salePrice : regularPrice;
+  const finalCustomerPrice = customerPrice(effectivePrice);
+  const discountPercent = hasProductSale ? Math.round((1 - salePrice / regularPrice) * 100) : 10;
+  modal.querySelector("#detailsPrice").innerHTML = hasProductSale
+    ? '<span style="text-decoration:line-through;color:#aaa;font-size:.58em;font-weight:500;display:block">' + money(regularPrice) + '</span>' + money(salePrice)
+    : money(effectivePrice);
   modal.querySelector("#detailsCondition").textContent = t("condition") + ": " +
     (p.product_condition === "used" ? t("usedCondition") : t("newCondition"));
   modal.querySelector("#detailsStock").textContent = t("stock") + " " + (p.stock ?? t("noStock"));
   const personalDiscount = modal.querySelector("#detailsPersonalDiscount");
-  personalDiscount.querySelector(".discount-title").textContent = language === "sq" ? "Keni zbritje personale: -10%" : "Your personal discount: -10%";
+  personalDiscount.querySelector(".discount-title").textContent = hasProductSale
+    ? (language === "sq" ? "Keni zbritje: -" + discountPercent + "%" : "You save: -" + discountPercent + "%")
+    : (language === "sq" ? "Keni zbritje personale: -10%" : "Your personal discount: -10%");
   personalDiscount.querySelector(".discount-sub").textContent = language === "sq" ? "Aplikohet automatikisht në checkout" : "Applied automatically at checkout";
-  modal.querySelector("#detailsDiscountPrice").textContent = money(customerPrice(basePrice(p)));
-  personalDiscount.style.display = customerApproved ? "flex" : "none";
+  modal.querySelector("#detailsDiscountPrice").textContent = money(hasProductSale ? salePrice : finalCustomerPrice);
+  personalDiscount.style.display = (hasProductSale || customerApproved) ? "flex" : "none";
   modal.querySelector("#detailsDescriptionTitle").textContent = t("description");
   modal.querySelector("#detailsDescription").textContent = description || t("noDescription");
   modal.querySelector("#shareCopy").textContent = language === "sq" ? "Kopjo linkun" : "Copy link";
