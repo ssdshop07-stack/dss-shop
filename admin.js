@@ -335,15 +335,6 @@
         try {
           msg("categoryMsg", "Po ruhen ndryshimet...");
 
-          if (name !== original.name) {
-            const { error: productError } = await db
-              .from("products")
-              .update({ category: name })
-              .eq("category", original.name);
-
-            if (productError) throw productError;
-          }
-
           let imageUrl = original.image_url || null;
           const imageFile = imageInput && imageInput.files
             ? imageInput.files[0]
@@ -353,7 +344,8 @@
             imageUrl = await upload(imageFile, "categories");
           }
 
-          const { error } = await db
+          // Ruaj fillimisht kategorinë dhe verifiko që rreshti u ndryshua.
+          const { data: savedCategory, error: categoryError } = await db
             .from("categories")
             .update({
               name: name,
@@ -361,9 +353,28 @@
               sort_order: order,
               active: activeInput.checked
             })
-            .eq("id", original.id);
+            .eq("id", original.id)
+            .select("id, name")
+            .maybeSingle();
 
-          if (error) throw error;
+          if (categoryError) throw categoryError;
+          if (!savedCategory) {
+            throw new Error("Kategoria nuk u ndryshua në databazë. Kontrollo lejet (RLS) të tabelës categories në Supabase.");
+          }
+
+          // Përditëso edhe produktet që përdorin emrin e vjetër.
+          if (name !== original.name) {
+            const { error: productError } = await db
+              .from("products")
+              .update({ category: name })
+              .eq("category", original.name);
+
+            if (productError) {
+              await loadCategories();
+              await loadProducts();
+              throw new Error("Emri i kategorisë u ruajt, por produktet nuk u lidhën me emrin e ri. Kontrollo lejet UPDATE të tabelës products në Supabase. Detaji: " + productError.message);
+            }
+          }
 
           await loadCategories();
           await loadProducts();
