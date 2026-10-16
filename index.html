@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="DSS Shop">
   <title>DSS Shop</title>
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="style.css?v=20261016-hide-add-button-1">
+  <link rel="stylesheet" href="style.css?v=20261016-white-cart-products-1">
   <style>
     :root{color-scheme:dark;--bg:#080808;--panel:#191919;--red:#e50914;--text:#f5f5f5;--muted:#aaa}
     *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
@@ -169,6 +169,28 @@
     #products .card .cat{color:#e50914!important}
     #products .card .pic{background:#f5f6f8!important}
     #products .card button{color:#fff!important}
+
+    /* DSS: shporta dhe produktet me sfond te bardhe, tekst te erret */
+    #cart.drawer, #cart .drawerHead { background:#fff !important; color:#20242a !important; }
+    #cart .drawerHead { border-bottom:1px solid #e2e5e9 !important; }
+    #cart .drawerHead h2, #cart .dss-cart-page-title, #cart .dss-cart-page-title small,
+    #cart .dss-cart-product, #cart .dss-cart-product-info, #cart .dss-cart-product-info b,
+    #cart .dss-cart-product-info small, #cart .dss-cart-summary, #cart .dss-cart-summary h2,
+    #cart .dss-cart-summary p, #cart .dss-cart-summary span, #cart .dss-cart-summary strong,
+    #cart .total, #cart label, #cart #total, #cart #cartSubtotal { color:#20242a !important; }
+    #cart .dss-cart-product, #cart .dss-cart-summary, #cart #orderForm {
+      background:#fff !important; border:1px solid #e2e5e9 !important;
+      box-shadow:0 3px 14px #1720330d !important;
+    }
+    #cart .dss-cart-product { border-bottom:1px solid #e2e5e9 !important; }
+    #cart .dss-cart-product-info small, #cart .dss-cart-page-title small { color:#626b75 !important; }
+    #cart .dss-cart-thumb { background:#f5f6f8 !important; }
+    #cart #orderForm input, #cart #orderForm textarea, #cart #orderForm select {
+      background:#fff !important; color:#20242a !important; border:1px solid #cfd5dc !important;
+    }
+    #cart .dss-qty span { color:#20242a !important; }
+    #cart .drawerHead button { color:#20242a !important; border-color:#cfd5dc !important; }
+    #cart .cartItem { border-bottom-color:#e2e5e9 !important; }
 
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
