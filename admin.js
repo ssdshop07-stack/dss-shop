@@ -1089,7 +1089,8 @@
 
   /* PANELI */
 
-  async function showPanel() {
+  function showPanel() {
+    // Hap panelin menjëherë; mos e lidh hyrjen me ngarkimin e tabelave.
     show("login", false);
     show("reset", false);
     show("panel", true);
@@ -1104,20 +1105,18 @@
       ["customerApprovals", loadCustomerApprovals]
     ];
 
-    const results = await Promise.allSettled(
-      tasks.map(([, fn]) => fn())
-    );
-
-    results.forEach((result, index) => {
-      if (result.status === "rejected") {
-        const target = $(tasks[index][0]);
-
-        if (target) {
-          target.textContent =
-            "Gabim: " +
-            (result.reason?.message || "Gabim i panjohur");
-        }
-      }
+    tasks.forEach(([targetId, loader]) => {
+      Promise.resolve()
+        .then(() => loader())
+        .catch(error => {
+          console.error("DSS Admin load failed:", targetId, error);
+          const target = $(targetId);
+          if (target) {
+            target.textContent = "Gabim gjatë ngarkimit: " +
+              (error?.message || "Gabim i panjohur") +
+              ". Shtyp Rifresko për të provuar përsëri.";
+          }
+        });
     });
   }
 
