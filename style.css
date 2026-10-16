@@ -473,3 +473,30 @@ main, .wrap, #products, .toolbar { background-color: #ffffff; }
 
 /* Hide add-to-cart buttons on product cards; the product detail button remains available. */
 #products .card > button { display: none !important; }
+
+
+/* FIX: sfond i bardhe per kartat e produkteve dhe tekst i erret */
+#products .card,
+#products .grid > .card,
+#grid > .card {
+  background: #ffffff !important;
+  color: #20242a !important;
+  border: 1px solid #e2e5e9 !important;
+  box-shadow: 0 3px 14px #1720330d !important;
+}
+#products .card h3,
+#products .card h3 a,
+#products .card p,
+#products .card small,
+#products .card .description,
+#products .card .price,
+#grid > .card h3,
+#grid > .card p,
+#grid > .card small,
+#grid > .card .price {
+  color: #20242a !important;
+}
+#products .card .pic,
+#grid > .card .pic { background: #f4f5f7 !important; }
+#products .card .cat,
+#grid > .card .cat { color: #e50914 !important; }
