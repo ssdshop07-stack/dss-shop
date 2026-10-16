@@ -538,30 +538,30 @@ window.openProductDetails = function (p) {
     style.id = "dssProductDetailsStyles";
     style.textContent = `
       #productDetailsModal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.82);backdrop-filter:blur(5px);overflow-y:auto;box-sizing:border-box}
-      #productDetailsModal .dss-detail-panel{position:relative;width:min(100%,1000px);max-height:92vh;overflow:auto;background:#111217;color:#f7f7f8;border:1px solid #34353d;border-radius:18px;box-shadow:0 24px 80px #000b;padding:22px;box-sizing:border-box}
-      #productDetailsModal .dss-detail-close{position:absolute;top:14px;right:14px;width:40px;height:40px;border:1px solid #45464e;border-radius:50%;background:#24252c;color:white;font-size:22px;z-index:2}
+      #productDetailsModal .dss-detail-panel{position:relative;width:min(100%,1000px);max-height:92vh;overflow:auto;background:#ffffff;color:#20242a;border:1px solid #e2e5e9;border-radius:18px;box-shadow:0 24px 80px #0005;padding:22px;box-sizing:border-box}
+      #productDetailsModal .dss-detail-close{position:absolute;top:14px;right:14px;width:40px;height:40px;border:1px solid #d8dde4;border-radius:50%;background:#f4f5f7;color:#20242a;font-size:22px;z-index:2}
       #productDetailsModal #detailsBreadcrumb{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding-right:48px;font-size:12px;line-height:1.5;margin:3px 0 18px}
       #productDetailsModal .dss-detail-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}
       #productDetailsModal .dss-detail-photo{display:flex;align-items:center;justify-content:center;min-height:300px;background:#f6f6f6;border-radius:13px;overflow:hidden}
       #productDetailsModal #detailsImage{display:block;width:100%;height:100%;max-height:470px;min-height:260px;object-fit:contain;margin:0}
-      #productDetailsModal #detailsCategory{display:inline-block;color:#ff626b;background:#30171b;border:1px solid #52242c;border-radius:20px;padding:6px 10px;font-size:11px;font-weight:bold;margin:2px 0 10px}
+      #productDetailsModal #detailsCategory{display:inline-block;color:#c91420;background:#fff0f1;border:1px solid #ffd1d5;border-radius:20px;padding:6px 10px;font-size:11px;font-weight:bold;margin:2px 0 10px}
       #productDetailsModal #detailsName{font-size:clamp(22px,3vw,30px);line-height:1.25;letter-spacing:-.4px;margin:0 44px 10px 0;overflow-wrap:anywhere;text-transform:uppercase}
-      #productDetailsModal .dss-detail-stars{display:flex;align-items:center;gap:12px;color:#c9c9c9;margin:0 0 18px;font-size:14px}
-      #productDetailsModal .dss-detail-stars .stars{color:#555;font-size:22px;letter-spacing:2px;white-space:nowrap}
-      #productDetailsModal .dss-price-stock-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid #292929;border-bottom:1px solid #292929;padding:15px 0;margin:0 0 18px}
-      #productDetailsModal #detailsPrice{font-size:clamp(25px,5vw,34px);font-weight:800;color:#fff;margin:0}
+      #productDetailsModal .dss-detail-stars{display:flex;align-items:center;gap:12px;color:#606875;margin:0 0 18px;font-size:14px}
+      #productDetailsModal .dss-detail-stars .stars{color:#d29b13;font-size:22px;letter-spacing:2px;white-space:nowrap}
+      #productDetailsModal .dss-price-stock-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:15px 0;margin:0 0 18px}
+      #productDetailsModal #detailsPrice{font-size:clamp(25px,5vw,34px);font-weight:800;color:#20242a;margin:0}
       #productDetailsModal #detailsStock{margin:0;border:1px solid #174a2c;border-radius:30px;padding:9px 13px;background:#092014;color:#20d16b;font-weight:800;white-space:nowrap}
       #productDetailsModal #detailsPersonalDiscount{display:none;align-items:center;justify-content:space-between;gap:12px;background:#092014;border:1px solid #174a2c;border-radius:14px;padding:16px;margin:0 0 22px;color:#20d16b;font-size:15px;font-weight:bold}
       #productDetailsModal #detailsPersonalDiscount .discount-sub{display:block;color:#168b47;font-weight:normal;font-size:13px;margin-top:4px}
       #productDetailsModal #detailsPersonalDiscount .discount-price{font-size:25px;white-space:nowrap}
       #productDetailsModal .dss-detail-meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
-      #productDetailsModal .dss-detail-meta p{margin:0;background:#202127;border:1px solid #34353d;border-radius:8px;padding:9px 11px;color:#d4d5da;font-size:12px}\n      #productDetailsModal #detailsStock{background:#12351f;border-color:#247442;color:#75e69a;font-weight:800}
+      #productDetailsModal .dss-detail-meta p{margin:0;background:#f5f6f8;border:1px solid #e2e5e9;border-radius:8px;padding:9px 11px;color:#4b5563;font-size:12px}\n      #productDetailsModal #detailsStock{background:#12351f;border-color:#247442;color:#75e69a;font-weight:800}
       #productDetailsModal #detailsDescriptionTitle{font-size:16px;margin:20px 0 8px}
-      #productDetailsModal #detailsDescription{white-space:pre-wrap;line-height:1.7;color:#c9cad0;font-size:14px;margin:0 0 20px;overflow-wrap:anywhere}
+      #productDetailsModal #detailsDescription{white-space:pre-wrap;line-height:1.7;color:#4b5563;font-size:14px;margin:0 0 20px;overflow-wrap:anywhere}
       #productDetailsModal #detailsInstallGuide iframe{display:block}
       #productDetailsModal #detailsAdd{width:100%;min-height:48px;padding:14px;background:#e32636;color:#fff;border:0;border-radius:9px;font-weight:bold;font-size:15px;cursor:pointer}
       #productDetailsModal #detailsShare{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
-      #productDetailsModal #detailsShare button{flex:1;min-width:95px;min-height:40px;padding:10px;background:#24252c;color:#fff;border:1px solid #41424a;border-radius:8px;font-size:12px;font-weight:bold;cursor:pointer}
+      #productDetailsModal #detailsShare button{flex:1;min-width:95px;min-height:40px;padding:10px;background:#f5f6f8;color:#20242a;border:1px solid #dfe3e8;border-radius:8px;font-size:12px;font-weight:bold;cursor:pointer}
       #productDetailsModal #shareFacebook{background:#173b72;border-color:#24539a}
       #productDetailsModal #shareInstagram{background:#482044;border-color:#74305f}
       @media(max-width:650px){
