@@ -329,6 +329,57 @@
       #categoriesSection .category-btn span{font-size:13px!important;line-height:1.25!important}
     }
 
+
+    /* DSS customer login modal — restored compact, centered mobile-friendly design */
+    #accountBox{
+      position:fixed!important;inset:0!important;z-index:3000!important;
+      display:none;align-items:center!important;justify-content:center!important;
+      padding:18px!important;background:rgba(0,0,0,.76)!important;
+      backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+    }
+    #accountBox[hidden]{display:none!important}
+    #accountBox > div{
+      width:min(100%,420px)!important;max-height:min(88dvh,680px)!important;
+      overflow-y:auto!important;padding:24px 22px 22px!important;
+      background:#171717!important;border:1px solid #383838!important;
+      border-radius:18px!important;color:#f7f7f7!important;
+      box-shadow:0 24px 80px rgba(0,0,0,.55),0 0 0 1px rgba(229,9,20,.08)!important;
+    }
+    #accountBox #accountTitle{font-size:23px!important;font-weight:800!important;letter-spacing:-.3px!important}
+    #accountBox #accountTitle::before{
+      content:"DSS";display:inline-flex;align-items:center;justify-content:center;
+      width:36px;height:36px;margin-right:10px;border-radius:9px;
+      background:#e50914;color:#fff;font-size:15px;letter-spacing:0;vertical-align:middle;
+    }
+    #accountBox #accountClose{min-width:40px;min-height:40px;font-size:15px!important}
+    #accountBox #accountStatus{color:#bdbdbd;font-size:14px;line-height:1.5;margin:17px 0 20px!important}
+    #accountBox #accountForm{display:grid!important;gap:11px!important}
+    #accountBox #accountForm input{
+      display:block;width:100%;min-width:0;min-height:48px!important;
+      padding:13px 14px!important;border:1px solid #454545!important;
+      border-radius:9px!important;background:#101010!important;color:#fff!important;
+      font-size:15px!important;outline:none;
+    }
+    #accountBox #accountForm input:focus{border-color:#e50914!important;box-shadow:0 0 0 3px rgba(229,9,20,.15)!important}
+    #accountBox #accountForm input::placeholder{color:#929292!important;opacity:1}
+    #accountBox #accountSubmit{
+      width:100%;min-height:48px;margin-top:3px;border:0!important;
+      border-radius:9px!important;background:#e50914!important;color:#fff!important;
+      font-size:15px!important;font-weight:800!important;
+    }
+    #accountBox #accountSwitch,#accountBox #accountLogout{
+      width:100%;min-height:46px;margin-top:10px!important;
+      border:1px solid #444!important;border-radius:9px!important;
+      background:#242424!important;color:#f5f5f5!important;font-size:14px!important;font-weight:700!important;
+    }
+    #accountBox #accountSwitch:hover,#accountBox #accountLogout:hover{border-color:#e50914!important}
+    #accountBox #accountLogout:not([hidden]){display:block}
+    @media(max-width:480px){
+      #accountBox{padding:14px!important}
+      #accountBox > div{padding:21px 17px 18px!important;border-radius:15px!important;max-height:86dvh!important}
+      #accountBox #accountTitle{font-size:21px!important}
+    }
+
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
@@ -427,7 +478,7 @@
     <button type="button" id="bottomCartBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"></path></svg><span id="bottomCartLabel">Shporta</span></button>
     <button type="button" id="profileBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"></circle><path d="M4 21v-2a8 8 0 0 1 16 0v2"></path></svg><span id="profileLabel">Profili</span></button>
   </div>
-  <script src="app.js?v=20261016-product-details-light"></script>
+  <script src="app.js?v=20261016-profile-login-restored"></script>
   <script>
     /* Kategorite levizin automatikisht nga e majta ne te djathte; ndalen perkohesisht kur perdoruesi prek rreshtin. */
     (function () {
