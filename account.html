@@ -99,6 +99,13 @@ $("reloadOrders").onclick=loadOrders;
 $("logout").onclick=async()=>{const {error}=await sb.auth.signOut();if(error){profileNotice(error.message,"error");return}user=null;showUser();setMode("login");notice("Dole nga llogaria.","success")};
 sb.auth.getSession().then(({data,error})=>{if(!authResolved){user=data?.session?.user||null;authResolved=true;showUser()}if(error)notice("Nuk u kontrollua sesioni: "+error.message,"error")});
 sb.auth.onAuthStateChange((_event,session)=>{authResolved=true;user=session?.user||null;showUser()});
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"})
+      .then(reg=>reg.update())
+      .catch(error=>console.warn("DSS app update check:",error));
+  });
+}
 const hash=new URLSearchParams(location.hash.slice(1));if(hash.get("type")==="recovery"){setMode("login");notice("Konfirmimi/rikuperimi u hap. Mund të hysh përsëri ose të përdorësh Harrova fjalëkalimin.","success")}
 })();
 </script>
