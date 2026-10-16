@@ -495,8 +495,15 @@ window.openProductDetails = function (p) {
       #productDetailsModal .dss-detail-photo{display:flex;align-items:center;justify-content:center;min-height:300px;background:#f6f6f6;border-radius:13px;overflow:hidden}
       #productDetailsModal #detailsImage{display:block;width:100%;height:100%;max-height:470px;min-height:260px;object-fit:contain;margin:0}
       #productDetailsModal #detailsCategory{display:inline-block;color:#ff626b;background:#30171b;border:1px solid #52242c;border-radius:20px;padding:6px 10px;font-size:11px;font-weight:bold;margin:2px 0 10px}
-      #productDetailsModal #detailsName{font-size:clamp(22px,3vw,30px);line-height:1.25;letter-spacing:-.4px;margin:0 44px 14px 0;overflow-wrap:anywhere}
-      #productDetailsModal #detailsPrice{font-size:28px;font-weight:800;color:#fff;margin:12px 0 16px}
+      #productDetailsModal #detailsName{font-size:clamp(22px,3vw,30px);line-height:1.25;letter-spacing:-.4px;margin:0 44px 10px 0;overflow-wrap:anywhere;text-transform:uppercase}
+      #productDetailsModal .dss-detail-stars{display:flex;align-items:center;gap:12px;color:#c9c9c9;margin:0 0 18px;font-size:14px}
+      #productDetailsModal .dss-detail-stars .stars{color:#555;font-size:22px;letter-spacing:2px;white-space:nowrap}
+      #productDetailsModal .dss-price-stock-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid #292929;border-bottom:1px solid #292929;padding:15px 0;margin:0 0 18px}
+      #productDetailsModal #detailsPrice{font-size:clamp(25px,5vw,34px);font-weight:800;color:#fff;margin:0}
+      #productDetailsModal #detailsStock{margin:0;border:1px solid #174a2c;border-radius:30px;padding:9px 13px;background:#092014;color:#20d16b;font-weight:800;white-space:nowrap}
+      #productDetailsModal #detailsPersonalDiscount{display:none;align-items:center;justify-content:space-between;gap:12px;background:#092014;border:1px solid #174a2c;border-radius:14px;padding:16px;margin:0 0 22px;color:#20d16b;font-size:15px;font-weight:bold}
+      #productDetailsModal #detailsPersonalDiscount .discount-sub{display:block;color:#168b47;font-weight:normal;font-size:13px;margin-top:4px}
+      #productDetailsModal #detailsPersonalDiscount .discount-price{font-size:25px;white-space:nowrap}
       #productDetailsModal .dss-detail-meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
       #productDetailsModal .dss-detail-meta p{margin:0;background:#202127;border:1px solid #34353d;border-radius:8px;padding:9px 11px;color:#d4d5da;font-size:12px}\n      #productDetailsModal #detailsStock{background:#12351f;border-color:#247442;color:#75e69a;font-weight:800}
       #productDetailsModal #detailsDescriptionTitle{font-size:16px;margin:20px 0 8px}
@@ -514,7 +521,12 @@ window.openProductDetails = function (p) {
         #productDetailsModal .dss-detail-photo{min-height:0;height:min(38vh,330px);border-radius:11px}
         #productDetailsModal #detailsImage{min-height:0;height:100%;max-height:100%}
         #productDetailsModal #detailsName{font-size:23px;margin-right:42px}
-        #productDetailsModal #detailsPrice{font-size:25px}\n        #productDetailsModal #detailsStock{font-size:11px;padding:8px 9px}\n        #productDetailsModal #detailsPersonalDiscount{font-size:13px}
+        #productDetailsModal .dss-detail-stars{margin-bottom:14px}
+        #productDetailsModal .dss-price-stock-row{gap:9px}
+        #productDetailsModal #detailsPrice{font-size:27px}
+        #productDetailsModal #detailsStock{font-size:11px;padding:8px 9px}
+        #productDetailsModal #detailsPersonalDiscount{font-size:13px;padding:13px}
+        #productDetailsModal #detailsPersonalDiscount .discount-price{font-size:22px}
         #productDetailsModal #detailsDescription{font-size:13px}
         #productDetailsModal .dss-detail-close{top:12px;right:12px}
       }
@@ -534,8 +546,9 @@ window.openProductDetails = function (p) {
           <section class="dss-detail-info">
             <div id="detailsCategory"></div>
             <h2 id="detailsName"></h2>
+            <div class="dss-detail-stars"><span class="stars" aria-label="Pa ende vlerësime">☆☆☆☆☆</span><span id="detailsReviews">Ende pa komente</span></div>
             <div class="dss-price-stock-row"><div id="detailsPrice"></div><p id="detailsStock"></p></div>
-            <div id="detailsPersonalDiscount"></div>
+            <div id="detailsPersonalDiscount"><span><span class="discount-title">Keni zbritje personale: -10%</span><span class="discount-sub">Aplikohet automatikisht në checkout</span></span><strong class="discount-price" id="detailsDiscountPrice"></strong></div>
             <div class="dss-detail-meta"><p id="detailsCondition"></p></div>
             <h3 id="detailsDescriptionTitle"></h3>
             <p id="detailsDescription"></p>
@@ -601,8 +614,10 @@ window.openProductDetails = function (p) {
     (p.product_condition === "used" ? t("usedCondition") : t("newCondition"));
   modal.querySelector("#detailsStock").textContent = t("stock") + " " + (p.stock ?? t("noStock"));
   const personalDiscount = modal.querySelector("#detailsPersonalDiscount");
-  personalDiscount.textContent = language === "sq" ? "Keni zbritje personale 10%" : "You have a personal 10% discount";
-  personalDiscount.style.display = customerApproved ? "block" : "none";
+  personalDiscount.querySelector(".discount-title").textContent = language === "sq" ? "Keni zbritje personale: -10%" : "Your personal discount: -10%";
+  personalDiscount.querySelector(".discount-sub").textContent = language === "sq" ? "Aplikohet automatikisht në checkout" : "Applied automatically at checkout";
+  modal.querySelector("#detailsDiscountPrice").textContent = money(customerPrice(basePrice(p)));
+  personalDiscount.style.display = customerApproved ? "flex" : "none";
   modal.querySelector("#detailsDescriptionTitle").textContent = t("description");
   modal.querySelector("#detailsDescription").textContent = description || t("noDescription");
   modal.querySelector("#shareCopy").textContent = language === "sq" ? "Kopjo linkun" : "Copy link";
