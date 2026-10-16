@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="DSS Shop">
   <title>DSS Shop | Security & Technology</title>
   <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="style.css?v=20261016-white-bg-2">
+  <link rel="stylesheet" href="style.css?v=20261016-ssd-layout-1">
   <style>
     :root{color-scheme:dark;--bg:#080808;--panel:#191919;--red:#e50914;--text:#f5f5f5;--muted:#aaa}
     *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
@@ -79,6 +79,56 @@
     @media(min-width:651px){#cart.drawer{width:min(620px,100%);border-left:1px solid #333;padding-bottom:20px}.dss-cart-page-title{font-size:30px}}
 
     @media(min-width:651px){.search-float{display:none}}
+
+    /* DSS storefront refresh: clean catalog layout inspired by modern security shops */
+    :root{color-scheme:light;--bg:#ffffff;--panel:#17191d;--red:#e50914;--text:#20242a;--muted:#646b75}
+    html,body{background:#fff!important;color:#20242a}
+    header{background:#fff;border-bottom:1px solid #e6e8eb;box-shadow:0 2px 10px #1018280a}
+    .brand{color:#20242a}
+    nav a{color:#20242a}
+    .header-actions button{background:#fff;color:#20242a;border-color:#dfe3e8}
+    .main-cart-btn{color:#20242a!important;border-color:var(--red)!important}
+    .categories-section h2,.toolbar h2{color:#20242a}
+    .categories-section{background:#fff}
+    .category-btn{color:#20242a}
+    .category-btn img{background:#f3f5f7;border-color:#e5e7eb;border-radius:14px}
+    .category-btn.active{color:var(--red)}
+    #products{background:#fff}
+    .toolbar input,.toolbar select,input,select{background:#fff;color:#20242a;border-color:#d7dce2}
+    .card{background:#17191d;color:#fff;border-color:#e3e6ea;border-radius:12px;box-shadow:0 3px 14px #1118270a}
+    .card h3,.card h3 a,.card p,.card small,.card .description,.card .price{color:#fff}
+    .card .cat{color:#ff6972}
+    .pic{background:#f5f6f8}
+    .dss-home-hero{background:linear-gradient(110deg,#f5f7fa 0%,#fff 62%,#fff0f1 100%);border-bottom:1px solid #e8eaee;padding:42px 0 38px}
+    .dss-home-hero-inner{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center}
+    .dss-home-hero .eyebrow{display:inline-block;color:#d20c19;font-size:12px;letter-spacing:1.4px;font-weight:800}
+    .dss-home-hero h1{font-size:clamp(30px,4vw,48px);line-height:1.1;letter-spacing:-1px;margin:12px 0;color:#17191d;max-width:650px}
+    .dss-home-hero p{color:#555e69;line-height:1.7;max-width:590px;margin:0}
+    .dss-hero-cta{display:inline-flex;margin-top:22px;padding:13px 20px;background:#e50914;color:#fff;border-radius:8px;font-weight:800}
+    .dss-hero-panel{background:#17191d;color:#fff;border-radius:16px;padding:24px;box-shadow:0 12px 30px #10182820}
+    .dss-hero-panel strong{display:block;font-size:20px;margin-bottom:8px}
+    .dss-hero-panel p{color:#e1e4e8;font-size:14px}
+    .dss-benefits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:24px 0 8px}
+    .dss-benefit{border:1px solid #e5e7eb;border-radius:12px;padding:16px;background:#fff}
+    .dss-benefit b{display:block;color:#20242a;margin-bottom:6px}
+    .dss-benefit span{display:block;color:#69717c;font-size:13px;line-height:1.5}
+    .dss-section-intro{color:#69717c;margin:-8px 0 20px;line-height:1.6}
+    .dss-footer{background:#17191d;color:#fff;margin-top:40px;padding:30px 0 90px}
+    .dss-footer-inner{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    .dss-footer p{color:#d2d6dc;line-height:1.6;margin:7px 0}
+    .dss-footer a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+    .bottom-nav{background:#fff!important;border-top:1px solid #e1e4e8!important}
+    .bottom-nav a,.bottom-nav button{color:#4d5560!important}
+    .bottom-nav .home-link{color:var(--red)!important}
+    @media(max-width:650px){
+      .dss-home-hero{padding:28px 0}
+      .dss-home-hero-inner{grid-template-columns:1fr;gap:18px}
+      .dss-home-hero h1{font-size:32px}
+      .dss-hero-panel{padding:18px}
+      .dss-benefits{grid-template-columns:1fr;gap:9px;padding-top:18px}
+      .dss-benefit{padding:13px}
+      .dss-footer{padding-bottom:100px}
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
@@ -113,7 +163,26 @@
     </div>
   </section>
 <main>
-    <section class="wrap categories-section">
+    <section class="dss-home-hero">
+      <div class="wrap dss-home-hero-inner">
+        <div>
+          <span class="eyebrow">DSS • SIGURI • TEKNOLOGJI</span>
+          <h1>Zgjidhje profesionale për sigurinë dhe teknologjinë</h1>
+          <p>Kamera sigurie, alarme, kontroll aksesi dhe pajisje rrjeti për shtëpi dhe biznes. Gjeni pajisjet e duhura në katalogun DSS.</p>
+          <a class="dss-hero-cta" href="#products">Shfleto produktet&nbsp; →</a>
+        </div>
+        <div class="dss-hero-panel">
+          <strong>Siguri që mund t’i besoni</strong>
+          <p>Shfletoni produktet, kontrolloni çmimet dhe dërgoni porosinë online. Për ndihmë me instalimin, na kontaktoni.</p>
+        </div>
+      </div>
+    </section>
+    <section class="wrap dss-benefits" aria-label="Përfitimet DSS">
+      <div class="dss-benefit"><b>Produkte për siguri</b><span>Kamera, alarm, akses dhe rrjetëzim në një vend.</span></div>
+      <div class="dss-benefit"><b>Mbështetje për klientët</b><span>Na kontaktoni për këshilla rreth zgjedhjes dhe instalimit.</span></div>
+      <div class="dss-benefit"><b>Porosi e thjeshtë</b><span>Zgjidhni produktet dhe dërgoni të dhënat e porosisë nga shporta.</span></div>
+    </section>
+    <section id="categories" class="wrap categories-section">
       <h2 id="categoriesTitle">Kategoritë</h2>
       <div class="categories" id="categories">
         <button type="button" class="category-btn active" data-category="all"><img src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="All products"><span>Të gjitha</span></button>
@@ -136,8 +205,15 @@
         <select id="sort" aria-label="Sort products"><option value="default">Renditja</option><option value="low">Çmimi: ulët → lart</option><option value="high">Çmimi: lart → ulët</option></select>
       </div>
       <div id="grid" class="grid"></div>
-    </section>
+      </section>
   </main>
+  <footer class="dss-footer">
+    <div class="wrap dss-footer-inner">
+      <div><strong>DSS — Security &amp; Technology</strong><p>Zgjidhje për sigurinë, kamerat dhe teknologjinë.</p></div>
+      <div><strong>Kontakti</strong><p>Telefon / WhatsApp: <a href="https://wa.me/355684398803">+355 68 439 8803</a></p><p><a href="mailto:ssdshop07@gmail.com">ssdshop07@gmail.com</a></p></div>
+      <div><strong>Dyqani</strong><p><a href="#products">Produktet</a></p><p><a href="#categories">Kategoritë</a></p></div>
+    </div>
+  </footer>
   <aside id="cart" class="drawer" aria-label="Cart">
     <div class="drawerHead"><h2 id="cartTitle">Shporta</h2><button id="closeCart" type="button" aria-label="Close cart">×</button></div>
     <h1 class="dss-cart-page-title">Shporta <small id="cartItemCountText">(0 artikuj)</small></h1>
