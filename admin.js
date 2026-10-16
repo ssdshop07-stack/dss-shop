@@ -1059,7 +1059,7 @@
     }
     el.innerHTML = data.map(item => `
       <article style="padding:12px 0;border-bottom:1px solid #ddd">
-        <strong>${esc(item.email)}</strong>
+        <strong>Email / Telefon: ${esc(item.email || "—")}</strong>
         <p>Statusi: <strong>${esc(item.status)}</strong> · Regjistruar: ${esc(item.created_at ? new Date(item.created_at).toLocaleString("sq-AL") : "—")}</p>
         ${item.status === "pending" ? `
           <button type="button" data-approval="${esc(item.user_id)}" data-status="approved">Aprovo llogarinë</button>
