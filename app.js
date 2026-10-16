@@ -558,7 +558,7 @@ window.openProductDetails = function (p) {
               <div style="position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:9px;overflow:hidden">
                 <iframe id="detailsInstallVideo" src="" title="Udhëzime instalimi për kamerën IPC P8F" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
               </div>
-              <a href="https://www.youtube.com/watch?v=ienqfTgR7-0" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:10px;color:#75e69a;font-weight:bold;text-decoration:none">Hap videon në YouTube ↗</a>
+              <a id="detailsInstallLink" href="" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:10px;color:#75e69a;font-weight:bold;text-decoration:none">Hap videon në YouTube ↗</a>
             </section>
             <button id="detailsAdd" type="button"></button>
             <div id="detailsShare">
@@ -638,9 +638,13 @@ window.openProductDetails = function (p) {
   modal.querySelector("#detailsDescription").textContent = description || t("noDescription");
   const installGuide = modal.querySelector("#detailsInstallGuide");
   const installVideo = modal.querySelector("#detailsInstallVideo");
-  const isIpcP8f = /ipc\s*[-_ ]?p8f|p8f/i.test(String(p.name || ""));
-  installGuide.style.display = isIpcP8f ? "block" : "none";
-  installVideo.src = isIpcP8f ? "https://www.youtube-nocookie.com/embed/ienqfTgR7-0" : "";
+  const installLink = modal.querySelector("#detailsInstallLink");
+  const rawVideoUrl = String(p.installation_video_url || "").trim();
+  const videoMatch = rawVideoUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/);
+  const videoId = videoMatch ? videoMatch[1] : "";
+  installGuide.style.display = videoId ? "block" : "none";
+  installVideo.src = videoId ? "https://www.youtube-nocookie.com/embed/" + videoId : "";
+  installLink.href = videoId ? "https://www.youtube.com/watch?v=" + videoId : "";
   modal.querySelector("#shareCopy").textContent = language === "sq" ? "Kopjo linkun" : "Copy link";
   modal.querySelector("#detailsAdd").textContent = t("add");
 
