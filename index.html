@@ -39,6 +39,44 @@
       .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:990;min-height:68px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:#0b0b0b;border-top:1px solid #292929;display:flex;align-items:center;justify-content:space-around}
       .bottom-nav a,.bottom-nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#ccc;text-decoration:none;background:transparent;border:0;padding:2px;font-size:11px}.bottom-nav svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.bottom-nav .home-link{color:var(--red)}}
     @media(max-width:390px){.brand span{display:none}.nav{gap:5px}nav{gap:6px}.header-actions button{padding:6px}.main-cart-btn{font-size:11px!important}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.category-btn,.category-btn img{width:135px}.category-btn{flex-basis:135px}.category-btn img{height:135px}.pic{height:135px}}
+
+    /* DSS mobile cart page, inspired by the supplied reference */
+    #cart.drawer{width:100%;max-width:100%;height:100dvh;top:0;right:0;z-index:1005;border:0;border-left:0;background:#090909;padding:0 0 calc(82px + env(safe-area-inset-bottom));box-shadow:none}
+    #cart.drawer.open{transform:translateX(0);visibility:visible}
+    #cart .drawerHead{position:sticky;top:0;z-index:3;min-height:72px;padding:10px 20px;background:#090909;border-bottom:1px solid #292929;margin:0}
+    #cart .drawerHead h2{font-size:24px;margin:0}
+    #cart .drawerHead button{background:transparent;border:1px solid #444;border-radius:50%;width:40px;height:40px}
+    .dss-cart-page-title{font-size:34px;margin:0;padding:18px 20px 24px;letter-spacing:-.7px}
+    .dss-cart-page-title small{font-size:20px;color:#c9c9c9;font-weight:400;letter-spacing:0}
+    #cartItems{padding:0 20px}
+    .dss-cart-product{position:relative;display:grid;grid-template-columns:100px minmax(0,1fr) 28px;grid-template-rows:auto auto;gap:10px 14px;align-items:center;padding:20px 14px;background:#191919;border:1px solid #393939;border-radius:15px;margin-bottom:24px}
+    .dss-cart-thumb{grid-row:1 / span 2;width:100px;height:100px;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#e50914;font-weight:bold}
+    .dss-cart-thumb img{width:100%;height:100%;object-fit:contain}
+    .dss-cart-product-info{align-self:start;min-width:0}
+    .dss-cart-product-info>b{display:block;font-size:19px;line-height:1.35;overflow-wrap:anywhere}
+    .dss-cart-product-info small{display:block;color:#c9c9c9;font-size:16px;margin-top:5px}
+    .dss-qty{display:inline-flex;align-items:center;margin-top:14px;border:1px solid #414141;border-radius:12px;overflow:hidden;height:42px}
+    .dss-qty button{height:40px;min-width:42px;padding:0;background:transparent;color:white;border:0;font-size:21px}
+    .dss-qty span{height:40px;min-width:48px;display:flex;align-items:center;justify-content:center;border-left:1px solid #414141;border-right:1px solid #414141}
+    .dss-remove{grid-column:3;grid-row:1;background:transparent!important;color:#ff2935!important;font-size:21px;padding:0!important;align-self:start}
+    .dss-line-total{grid-column:2 / 4;grid-row:2;text-align:right;font-size:18px;align-self:center}
+    .dss-cart-summary{margin:0 20px 24px;padding:26px 22px;background:#191919;border:1px solid #393939;border-radius:15px}
+    .dss-cart-summary h2{font-size:26px;margin:0 0 28px}
+    .dss-summary-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;color:#ccc;font-size:17px}
+    .dss-summary-row b{color:#f5f5f5;font-size:18px}
+    .dss-discount-row{margin:12px 0;padding:15px 12px;border:1px solid #176338;border-radius:14px;background:#102c1d;color:#18c765;font-weight:bold}
+    .dss-discount-row b{color:#18c765}
+    .dss-summary-total{border-top:1px solid #383838;margin-top:12px;padding-top:24px;font-size:22px;font-weight:bold;color:white}
+    .dss-summary-total b{font-size:25px}
+    .dss-checkout-button,.dss-continue-button{width:100%;min-height:58px;border-radius:13px;font-size:20px;font-weight:bold;margin-top:18px}
+    .dss-checkout-button{background:#e50914;color:#fff;border:0}
+    .dss-continue-button{background:transparent;color:#fff;border:1px solid #414141}
+    #orderForm{display:none;margin:0 20px 28px;padding:20px;border:1px solid #393939;border-radius:14px;background:#191919}
+    #orderForm.dss-order-visible{display:grid}
+    .dss-empty-cart{padding:24px 0;color:#ccc}
+    @media(max-width:420px){.dss-cart-page-title{font-size:31px;padding:18px 16px}.dss-cart-page-title small{font-size:17px}#cartItems{padding:0 16px}.dss-cart-product{grid-template-columns:88px minmax(0,1fr) 24px;gap:10px;padding:14px 10px}.dss-cart-thumb{width:88px;height:88px}.dss-cart-product-info>b{font-size:17px}.dss-qty button{min-width:34px}.dss-qty span{min-width:36px}.dss-cart-summary{margin:0 16px 20px;padding:22px 16px}.dss-cart-summary h2{font-size:23px}}
+    @media(min-width:651px){#cart.drawer{width:min(620px,100%);border-left:1px solid #333;padding-bottom:20px}.dss-cart-page-title{font-size:30px}}
+
     @media(min-width:651px){.search-float{display:none}}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -101,8 +139,16 @@
   </main>
   <aside id="cart" class="drawer" aria-label="Cart">
     <div class="drawerHead"><h2 id="cartTitle">Shporta</h2><button id="closeCart" type="button" aria-label="Close cart">×</button></div>
+    <h1 class="dss-cart-page-title">Shporta <small id="cartItemCountText">(0 artikuj)</small></h1>
     <div id="cartItems"></div>
-    <div class="total"><span id="totalLabel">Total:</span> <b id="total">€0.00</b></div>
+    <section class="dss-cart-summary">
+      <h2>Përmbledhja e Porosisë</h2>
+      <div class="dss-summary-row"><span>Nëntotali</span><b id="cartSubtotal">€0.00</b></div>
+      <div class="dss-summary-row dss-discount-row" id="cartDiscountRow" hidden><span>🏷 Zbritja juaj</span><b id="cartDiscountValue">-€0.00</b></div>
+      <div class="dss-summary-row dss-summary-total"><span>Totali</span><b id="total">€0.00</b></div>
+      <button type="button" class="dss-checkout-button" id="dssCheckoutButton">➜ &nbsp; Bëj Porosinë</button>
+      <button type="button" class="dss-continue-button" id="dssContinueButton">Vazhdo Blerjet</button>
+    </section>
     <form id="orderForm">
       <input name="name" placeholder="Emri dhe mbiemri" autocomplete="name" required>
       <input name="phone" type="tel" placeholder="Telefoni" autocomplete="tel" required>
