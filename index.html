@@ -692,29 +692,6 @@
       window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(error => console.error("Service Worker error:", error)));
     }
   </script>
-  <script>
-    (function(){
-      const tabs=document.querySelectorAll("[data-account-tab]");
-      const heading=document.getElementById("accountSectionTitle");
-      const message=document.getElementById("dssAccountTabMessage");
-      if(!tabs.length||!heading||!message)return;
-      const sections={
-        profile:{title:"Informacioni i Llogarisë",text:"Hyr ose regjistrohu për të hapur profilin tënd."},
-        orders:{title:"Porositë e Mia",text:"Hyr në llogarinë tënde për të parë porositë. Porositë e mëparshme do të shfaqen këtu kur të jenë të lidhura me profilin."},
-        wishlist:{title:"Lista e Dëshirave",text:"Ruaj produktet e preferuara në listën e dëshirave. Kjo pamje është gati për t'u lidhur me listën e produkteve."}
-      };
-      tabs.forEach(function(tab){tab.addEventListener("click",function(){
-        tabs.forEach(function(t){t.classList.toggle("active",t===tab)});
-        const section=sections[tab.dataset.accountTab]||sections.profile;
-        heading.textContent=section.title;
-        const form=document.getElementById("accountForm");
-        const sw=document.getElementById("accountSwitch");
-        const logout=document.getElementById("accountLogout");
-        if(tab.dataset.accountTab==="profile"){message.hidden=true;if(form)form.hidden=false;if(sw)sw.hidden=false;return}
-        message.textContent=section.text;message.hidden=false;
-        if(form)form.hidden=true;if(sw)sw.hidden=true;
-      })});
-    })();
-  </script>
+
 </body>
 </html>
