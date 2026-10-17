@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 150" role="img" aria-labelledby="title desc">
+<title id="title">DSS Security &amp; Technology</title>
+<desc id="desc">DSS security and technology logo with shield and camera lens.</desc>
+<defs>
+  <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1677ff"/><stop offset="1" stop-color="#073c9b"/></linearGradient>
+</defs>
+<path d="M22 24 68 8 114 24V65c0 31-21 51-46 64C43 116 22 96 22 65Z" fill="url(#blue)"/>
+<path d="M34 33 68 21 102 33V64c0 22-14 37-34 49C48 101 34 86 34 64Z" fill="none" stroke="#fff" stroke-opacity=".85" stroke-width="2.5"/>
+<circle cx="68" cy="62" r="22" fill="#fff"/>
+<circle cx="68" cy="62" r="15" fill="#152a46"/>
+<circle cx="68" cy="62" r="9" fill="url(#blue)"/>
+<circle cx="73" cy="57" r="3" fill="#fff" opacity=".9"/>
+<text x="132" y="88" font-family="Arial,Helvetica,sans-serif" font-size="82" font-weight="800" letter-spacing="-4" fill="#102b52">DSS</text>
+<path d="M137 104H474" stroke="#1677ff" stroke-width="4" stroke-linecap="round"/>
+<text x="137" y="130" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700" letter-spacing="2.5" fill="#26384e">SECURITY &amp; TECHNOLOGY</text>
+</svg>
