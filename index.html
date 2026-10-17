@@ -529,6 +529,10 @@
     #accountBox .dss-account-heading{display:flex!important;align-items:center!important;gap:14px!important;padding:20px 0 22px!important;border-bottom:1px solid #e3ebf7!important}
     #accountBox .dss-account-avatar{display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 76px!important;width:76px!important;height:76px!important;border-radius:50%!important;background:#1767d4!important;color:#fff!important;box-shadow:0 8px 20px #1767d426!important}
     #accountBox .dss-account-avatar svg{width:38px!important;height:38px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important}
+    #accountBox .dss-account-logo{display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 76px!important;width:76px!important;height:76px!important;min-width:76px!important;border-radius:18px!important;background:#fff!important;border:1px solid #e4eaf3!important;box-shadow:0 5px 16px #1b3b6610!important;overflow:hidden!important}
+    #accountBox .dss-account-logo img{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;object-fit:contain!important;padding:7px!important;box-sizing:border-box!important}
+    #accountBox #accountTitle::before{display:none!important;content:none!important}
+
     #accountBox .dss-account-role{color:#6b7b95!important;margin:6px 0 0!important}
     #accountBox .dss-account-tabs{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;padding:18px 0!important;border-bottom:1px solid #e3ebf7!important;overflow:visible!important}
     #accountBox .dss-account-tabs button{min-width:0!important;white-space:normal!important;min-height:62px!important;padding:9px 5px!important;border:1px solid #dfe8f5!important;border-radius:13px!important;background:#fff!important;color:#273954!important;font-size:12px!important;font-weight:750!important;box-shadow:0 3px 10px #1b3b6608!important}
@@ -543,7 +547,7 @@
     #accountBox #accountSubmit{min-height:54px!important;border:0!important;border-radius:12px!important;background:#1767d4!important;color:#fff!important;font-weight:800!important}
     #accountBox #accountSwitch,#accountBox #accountLogout{width:100%!important;min-height:50px!important;margin-top:10px!important;border-radius:12px!important;border:1px solid #dbe5f2!important;background:#fff!important;color:#1767d4!important}
     #accountBox .dss-account-tab-message{padding:18px!important;margin-top:8px!important;border:1px solid #e1eaf6!important;border-radius:16px!important;background:#fff!important;color:#34445d!important;line-height:1.6!important}
-    #accountBox #accountClose{position:absolute!important;top:12px!important;right:12px!important;z-index:5!important;width:42px!important;height:42px!important;border-radius:50%!important;background:#f0f5fc!important;color:#31445f!important;border:1px solid #dce7f5!important;font-size:26px!important}
+    #accountBox #accountClose{position:absolute!important;top:10px!important;right:10px!important;z-index:5!important;display:flex!important;align-items:center!important;justify-content:center!important;width:32px!important;min-width:32px!important;height:32px!important;min-height:32px!important;padding:0!important;overflow:hidden!important;white-space:nowrap!important;border-radius:50%!important;background:#f0f5fc!important;color:#31445f!important;border:1px solid #dce7f5!important;font-family:Arial,sans-serif!important;font-size:21px!important;font-weight:400!important;line-height:1!important;box-shadow:none!important}
     @media(max-width:380px){#accountBox .dss-account-page{padding-left:12px!important;padding-right:12px!important}#accountBox .dss-account-tabs{gap:5px!important}#accountBox .dss-account-tabs button{font-size:11px!important;padding:8px 3px!important}}
   </style>
 
@@ -622,7 +626,7 @@
     <section class="dss-account-page" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
       <button id="accountClose" class="dss-account-close" type="button" aria-label="Mbyll">×</button>
       <div class="dss-account-heading">
-        <div class="dss-account-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"></circle><path d="M4 21v-2a8 8 0 0 1 16 0v2"></path></svg></div>
+        <div class="dss-account-logo"><img src="./logo-dss-shop.svg?v=20261017" alt="DSS Shop"></div>
         <div><h2 id="accountTitle">Profili</h2><p class="dss-account-role">Klient DSS Shop</p></div>
       </div>
       <nav class="dss-account-tabs" aria-label="Seksionet e llogarisë">
