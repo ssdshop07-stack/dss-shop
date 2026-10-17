@@ -981,7 +981,7 @@ async function load() {
    LLOGARIA E KLIENTIT
 ========================================= */
 
-function openAccount() {
+async function openAccount() {
   const box = $("#accountBox");
 
   if (!box) {
@@ -991,6 +991,17 @@ function openAccount() {
 
   box.hidden = false;
   box.style.display = "flex";
+
+  // Recover the real Supabase session before showing login prompts.
+  if (!currentUser) {
+    const { data } = await sb.auth.getSession();
+    const sessionUser = data?.session?.user || null;
+    if (sessionUser && await checkCustomerApproval(sessionUser)) {
+      currentUser = sessionUser;
+      refreshCartPrices();
+      render();
+    }
+  }
 
   updateAccountUI();
 }
@@ -1127,9 +1138,21 @@ if (accountClose) {
    Më parë butonat Porositë dhe Lista e dëshirave
    nuk kishin event handlers.
 ========================================= */
-function showAccountTab(tabName) {
+async function showAccountTab(tabName) {
   const validTabs = ["profile", "orders", "wishlist"];
   const tab = validTabs.includes(tabName) ? tabName : "profile";
+
+  // If the session check is still finishing, recover it before asking the customer to log in.
+  if (tab !== "profile" && !currentUser) {
+    const { data } = await sb.auth.getSession();
+    const sessionUser = data?.session?.user || null;
+    if (sessionUser && await checkCustomerApproval(sessionUser)) {
+      currentUser = sessionUser;
+      refreshCartPrices();
+      render();
+    }
+  }
+
   const status = $("#accountStatus");
   const form = $("#accountForm");
   const switchBtn = $("#accountSwitch");
