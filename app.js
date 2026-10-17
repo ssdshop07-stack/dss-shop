@@ -1176,9 +1176,35 @@ function showAccountTab(tabName) {
 
   if (tab === "orders") {
     sectionTitle.textContent = "Porositë e mia";
-    status.textContent = "";
-    tabMessage.hidden = false;
-    tabMessage.textContent = "Porositë hapen tani në këtë seksion. Porositë e vjetra në DSS Shop nuk janë të lidhura ende automatikisht me profilin e klientit; duhet lidhur databaza e porosive me llogarinë që të shfaqen këtu.";
+    status.textContent = "Po ngarkohen porositë...";
+    tabMessage.hidden = true;
+    sb.from("orders")
+      .select("id, created_at, total, status")
+      .eq("user_id", currentUser.id)
+      .order("created_at", { ascending: false })
+      .then(({ data, error }) => {
+        if (document.querySelector('[data-account-tab="orders"]')?.classList.contains("active") !== true) return;
+        status.textContent = "";
+        tabMessage.hidden = false;
+        if (error) {
+          console.error("DSS customer orders:", error.message);
+          tabMessage.textContent = "Nuk mundëm t'i ngarkojmë porositë. Provo përsëri më vonë.";
+          return;
+        }
+        if (!data || !data.length) {
+          tabMessage.textContent = "Nuk ke ende porosi të lidhura me këtë llogari.";
+          return;
+        }
+        const labels = { new: "E re", processing: "Në përpunim", completed: "Përfunduar", cancelled: "Anuluar" };
+        tabMessage.innerHTML = data.map((order) =>
+          '<article style="padding:12px 0;border-bottom:1px solid #e5e7eb">' +
+          '<strong>Porosia #' + esc(order.id) + '</strong>' +
+          '<div style="margin-top:6px">Data: ' + esc(order.created_at ? new Date(order.created_at).toLocaleDateString("sq-AL") : "—") + '</div>' +
+          '<div>Totali: ' + money(order.total) + '</div>' +
+          '<div>Statusi: ' + esc(labels[order.status] || order.status || "Në pritje") + '</div>' +
+          '</article>'
+        ).join("");
+      });
     return;
   }
 
