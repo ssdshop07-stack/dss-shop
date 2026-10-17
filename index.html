@@ -548,6 +548,9 @@
     #accountBox #accountSwitch,#accountBox #accountLogout{width:100%!important;min-height:50px!important;margin-top:10px!important;border-radius:12px!important;border:1px solid #dbe5f2!important;background:#fff!important;color:#1767d4!important}
     #accountBox .dss-account-tab-message{padding:18px!important;margin-top:8px!important;border:1px solid #e1eaf6!important;border-radius:16px!important;background:#fff!important;color:#34445d!important;line-height:1.6!important}
     #accountBox #accountClose{position:absolute!important;top:10px!important;right:10px!important;z-index:5!important;display:flex!important;align-items:center!important;justify-content:center!important;width:32px!important;min-width:32px!important;height:32px!important;min-height:32px!important;padding:0!important;overflow:hidden!important;white-space:nowrap!important;border-radius:50%!important;background:#f0f5fc!important;color:#31445f!important;border:1px solid #dce7f5!important;font-family:Arial,sans-serif!important;font-size:21px!important;font-weight:400!important;line-height:1!important;box-shadow:none!important}
+    /* Hidden account controls must stay hidden; component display styles must not override the hidden attribute. */
+    #accountBox [hidden]{display:none!important;visibility:hidden!important}
+    #accountBox #accountForm[hidden],#accountBox #accountSwitch[hidden],#accountBox #accountLogout[hidden],#accountBox #dssAccountTabMessage[hidden]{display:none!important}
     @media(max-width:380px){#accountBox .dss-account-page{padding-left:12px!important;padding-right:12px!important}#accountBox .dss-account-tabs{gap:5px!important}#accountBox .dss-account-tabs button{font-size:11px!important;padding:8px 3px!important}}
   </style>
 
