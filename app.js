@@ -992,14 +992,20 @@ async function openAccount() {
   box.hidden = false;
   box.style.display = "flex";
 
-  // Recover the real Supabase session before showing login prompts.
-  if (!currentUser) {
-    const { data } = await sb.auth.getSession();
-    const sessionUser = data?.session?.user || null;
-    if (sessionUser && await checkCustomerApproval(sessionUser)) {
-      currentUser = sessionUser;
-      refreshCartPrices();
-      render();
+  // Always reconcile UI with Supabase's persisted session before showing login prompts.
+  const { data: sessionData, error: sessionError } = await sb.auth.getSession();
+  if (!sessionError) {
+    const sessionUser = sessionData?.session?.user || null;
+    if (sessionUser) {
+      const approved = await checkCustomerApproval(sessionUser);
+      currentUser = approved ? sessionUser : null;
+      if (approved) {
+        refreshCartPrices();
+        render();
+      }
+    } else {
+      currentUser = null;
+      customerApproved = false;
     }
   }
 
@@ -1142,14 +1148,20 @@ async function showAccountTab(tabName) {
   const validTabs = ["profile", "orders", "wishlist"];
   const tab = validTabs.includes(tabName) ? tabName : "profile";
 
-  // If the session check is still finishing, recover it before asking the customer to log in.
-  if (tab !== "profile" && !currentUser) {
-    const { data } = await sb.auth.getSession();
-    const sessionUser = data?.session?.user || null;
-    if (sessionUser && await checkCustomerApproval(sessionUser)) {
-      currentUser = sessionUser;
-      refreshCartPrices();
-      render();
+  // Reconcile every account tab with the persisted Supabase session to avoid stale login prompts.
+  const { data: sessionData, error: sessionError } = await sb.auth.getSession();
+  if (!sessionError) {
+    const sessionUser = sessionData?.session?.user || null;
+    if (sessionUser) {
+      const approved = await checkCustomerApproval(sessionUser);
+      currentUser = approved ? sessionUser : null;
+      if (approved) {
+        refreshCartPrices();
+        render();
+      }
+    } else {
+      currentUser = null;
+      customerApproved = false;
     }
   }
 
