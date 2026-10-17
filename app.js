@@ -889,7 +889,6 @@ function render() {
         <div class="cat">${esc(p.category || "")}</div>
         <div style="display:inline-block;margin:5px 0 2px;padding:4px 7px;border-radius:5px;font-size:11px;font-weight:bold;background:${p.product_condition === "used" ? "#5a421b" : "#173e2b"};color:${p.product_condition === "used" ? "#ffd27a" : "#8ff0b0"}">${p.product_condition === "used" ? t("usedCondition") : t("newCondition")}</div>
         <h3>${esc(p.name)}</h3>
-        ${ratingMarkup(p.id, true)}
 
         ${priceHtml}
 
