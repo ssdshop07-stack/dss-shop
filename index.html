@@ -158,21 +158,7 @@
     document.getElementById("searchFloat").addEventListener("click", focusSearch);
     document.getElementById("headerSearchBtn").addEventListener("click", focusSearch);
     document.getElementById("bottomCartBtn").addEventListener("click", () => document.getElementById("cartBtn").click());
-    document.getElementById("profileBtn").addEventListener("click", () => {
-      const box = document.getElementById("accountBox");
-      const status = document.getElementById("accountStatus");
-      const form = document.getElementById("accountForm");
-      const switchBtn = document.getElementById("accountSwitch");
-      const logout = document.getElementById("accountLogout");
-      box.hidden = false;
-      box.style.display = "flex";
-      if (status && /ky[cç]ur|logged in/i.test(status.textContent || "")) {
-        status.innerHTML = '<div style="padding:16px;border:1px solid #dfe3e8;border-radius:12px;background:#f8fafc;color:#20242a"><strong style="display:block;font-size:19px;margin-bottom:12px">Profili yt</strong><div style="color:#16803c;font-weight:700;margin-bottom:10px">Keni zbritje personale 10%</div><div style="font-size:13px;color:#68717d">Llogaria jote është aktive.</div></div>';
-        if (form) form.hidden = true;
-        if (switchBtn) switchBtn.hidden = true;
-        if (logout) logout.hidden = false;
-      }
-    });
+    // Butoni i profilit menaxhohet vetëm nga app.js, për të shmangur dy event handlers.
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(error => console.error("Service Worker error:", error)));
     }
