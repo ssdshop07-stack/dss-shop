@@ -1122,6 +1122,92 @@ if (accountClose) {
   accountClose.addEventListener("click", closeAccount);
 }
 
+/* =========================================
+   NAVIGIMI I SEKSIONEVE TË PROFILIT
+   Më parë butonat Porositë dhe Lista e dëshirave
+   nuk kishin event handlers.
+========================================= */
+function showAccountTab(tabName) {
+  const validTabs = ["profile", "orders", "wishlist"];
+  const tab = validTabs.includes(tabName) ? tabName : "profile";
+  const status = $("#accountStatus");
+  const form = $("#accountForm");
+  const switchBtn = $("#accountSwitch");
+  const logout = $("#accountLogout");
+  const sectionTitle = $("#accountSectionTitle");
+  const tabMessage = $("#dssAccountTabMessage");
+
+  document.querySelectorAll("[data-account-tab]").forEach((button) => {
+    const active = button.dataset.accountTab === tab;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", active ? "true" : "false");
+  });
+
+  if (!status || !sectionTitle || !tabMessage) return;
+  tabMessage.hidden = true;
+  tabMessage.textContent = "";
+  status.hidden = false;
+
+  if (tab === "profile") {
+    sectionTitle.textContent = "Informacioni i Llogarisë";
+    if (currentUser) {
+      updateAccountUI();
+    } else {
+      status.textContent = "Hyr ose regjistrohu për të hapur profilin tënd.";
+      if (form) form.hidden = false;
+      if (switchBtn) switchBtn.hidden = false;
+      if (logout) logout.hidden = true;
+    }
+    return;
+  }
+
+  if (!currentUser) {
+    sectionTitle.textContent = tab === "orders" ? "Porositë e mia" : "Lista e dëshirave";
+    status.textContent = "Për të parë këtë seksion, fillimisht hyr në llogarinë tënde.";
+    if (form) form.hidden = false;
+    if (switchBtn) switchBtn.hidden = false;
+    if (logout) logout.hidden = true;
+    return;
+  }
+
+  if (form) form.hidden = true;
+  if (switchBtn) switchBtn.hidden = true;
+  if (logout) logout.hidden = false;
+
+  if (tab === "orders") {
+    sectionTitle.textContent = "Porositë e mia";
+    status.textContent = "";
+    tabMessage.hidden = false;
+    tabMessage.textContent = "Porositë hapen tani në këtë seksion. Porositë e vjetra në DSS Shop nuk janë të lidhura ende automatikisht me profilin e klientit; duhet lidhur databaza e porosive me llogarinë që të shfaqen këtu.";
+    return;
+  }
+
+  sectionTitle.textContent = "Lista e dëshirave";
+  status.textContent = "";
+  const saved = (() => {
+    try {
+      const value = JSON.parse(localStorage.getItem("dss_wishlist") || "[]");
+      return Array.isArray(value) ? value : [];
+    } catch (_) { return []; }
+  })();
+
+  tabMessage.hidden = false;
+  if (!saved.length) {
+    tabMessage.textContent = "Lista e dëshirave është bosh. Produktet e ruajtura do të shfaqen këtu.";
+  } else {
+    tabMessage.innerHTML = saved.map((item) =>
+      '<div style="padding:10px 0;border-bottom:1px solid #e5e7eb"><strong>' +
+      esc(item.name || "Produkt DSS") + '</strong>' +
+      (item.price != null ? '<div>' + money(item.price) + '</div>' : '') +
+      '</div>'
+    ).join("");
+  }
+}
+
+document.querySelectorAll("[data-account-tab]").forEach((button) => {
+  button.addEventListener("click", () => showAccountTab(button.dataset.accountTab));
+});
+
 const accountBox = $("#accountBox");
 
 if (accountBox) {
