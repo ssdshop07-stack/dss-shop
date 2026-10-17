@@ -397,7 +397,7 @@
     #accountBox #accountLogout:not([hidden]){display:block}
     @media(max-width:480px){
       #accountBox{padding:14px!important}
-      #accountBox > div{padding:21px 17px 18px!important;border-radius:15px!important;max-height:86dvh!important}
+      #accountBox > section{padding:21px 17px 18px!important;border-radius:15px!important;max-height:86dvh!important}
       #accountBox #accountTitle{font-size:21px!important}
     }
 
@@ -425,7 +425,7 @@
     #categoriesSection .category-btn.active{border:2px solid #e50914!important;background:#fff!important}
     #accountBox[hidden]{display:none!important}
     #accountBox:not([hidden]){display:flex!important;align-items:center!important;justify-content:center!important}
-    #accountBox > div{background:#fff!important;color:#20242a!important}
+    #accountBox > section{background:#fff!important;color:#20242a!important}
     @media(max-width:650px){
       #categoriesSection .categories{gap:9px!important}
       #categoriesSection .category-btn{flex-basis:174px!important;width:174px!important;min-width:174px!important;height:78px!important;min-height:78px!important;padding:8px!important;gap:8px!important}
@@ -437,7 +437,7 @@
 
     /* Customer profile/login only: white, clean, store-style account panel */
     #accountBox{background:rgba(24,30,38,.48)!important;padding:16px!important;backdrop-filter:blur(3px)!important}
-    #accountBox>div{width:min(100%,440px)!important;max-height:90dvh!important;overflow:auto!important;background:#fff!important;color:#20242a!important;border:1px solid #e5e7eb!important;border-radius:14px!important;padding:24px!important;box-shadow:0 18px 55px rgba(16,24,40,.22)!important}
+    #accountBox>section{width:min(100%,440px)!important;max-height:90dvh!important;overflow:auto!important;background:#fff!important;color:#20242a!important;border:1px solid #e5e7eb!important;border-radius:14px!important;padding:24px!important;box-shadow:0 18px 55px rgba(16,24,40,.22)!important}
     #accountBox #accountTitle{font-size:23px!important;color:#20242a!important;font-weight:800!important}
     #accountBox #accountStatus{color:#5d6672!important;font-size:14px!important;line-height:1.55!important;margin:18px 0!important}
     #accountBox #accountForm{display:grid!important;gap:11px!important}
@@ -450,17 +450,17 @@
     #accountBox .dss-profile-email{overflow-wrap:anywhere!important;font-size:14px!important;margin-bottom:15px!important;color:#4c5561!important}
     #accountBox .dss-profile-discount{background:#f0fbf4!important;color:#16803c!important;border:1px solid #b9e6c8!important;padding:12px!important;border-radius:8px!important;font-size:14px!important;font-weight:800!important}
     #accountBox .dss-profile-note{margin-top:12px!important;font-size:12px!important;color:#68717d!important}
-    @media(max-width:480px){#accountBox>div{padding:20px 17px!important;border-radius:12px!important}}
+    @media(max-width:480px){#accountBox>section{padding:20px 17px!important;border-radius:12px!important}}
 
 
     /* DSS customer account polish: login and signed-in profile only */
-    #accountBox>div{
+    #accountBox>section{
       width:min(100%,460px)!important;
       padding:26px!important;
       border-radius:16px!important;
       box-shadow:0 22px 70px rgba(16,24,40,.22)!important;
     }
-    #accountBox>div>div:first-child{
+    #accountBox>section>div:first-child{
       padding-bottom:16px!important;
       border-bottom:1px solid #edf0f3!important;
     }
@@ -511,7 +511,7 @@
     }
     #accountBox .dss-profile-note{font-size:13px!important;line-height:1.5!important}
     @media(max-width:480px){
-      #accountBox>div{padding:20px 17px!important;border-radius:13px!important}
+      #accountBox>section{padding:20px 17px!important;border-radius:13px!important}
       #accountBox #accountTitle{font-size:20px!important}
     }
 
