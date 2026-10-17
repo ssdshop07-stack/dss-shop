@@ -21,11 +21,23 @@ let accountMode = "signup";
 let language = localStorage.getItem("dss_language") || "sq";
 let dssDetailHistoryOpen = false;
 
+let dssAccountHistoryOpen = false;
+
 window.addEventListener("popstate", () => {
   const detailModal = document.getElementById("productDetailsModal");
   if (detailModal && detailModal.style.display === "flex") {
     detailModal.style.display = "none";
     dssDetailHistoryOpen = false;
+    return;
+  }
+
+  const accountBox = document.getElementById("accountBox");
+  if (accountBox && !accountBox.hidden) {
+    accountBox.style.display = "none";
+    accountBox.hidden = true;
+    dssAccountHistoryOpen = false;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
   }
 });
 
@@ -1079,6 +1091,10 @@ async function openAccount() {
 
   box.hidden = false;
   box.style.display = "flex";
+  if (!dssAccountHistoryOpen) {
+    window.history.pushState({ ...(window.history.state || {}), dssAccount: true }, "", window.location.href);
+    dssAccountHistoryOpen = true;
+  }
 
   // Always reconcile UI with Supabase's persisted session before showing login prompts.
   const { data: sessionData, error: sessionError } = await sb.auth.getSession();
@@ -1106,6 +1122,10 @@ function closeAccount() {
 
   box.style.display = "none";
   box.hidden = true;
+  if (dssAccountHistoryOpen) {
+    dssAccountHistoryOpen = false;
+    window.history.back();
+  }
 }
 
 function updateAccountUI(message) {
