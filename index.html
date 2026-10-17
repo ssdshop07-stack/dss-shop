@@ -518,6 +518,35 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
+
+  <style id="dss-account-white-profile">
+    /* White mobile customer profile only; storefront layout stays unchanged */
+    #accountBox.dss-account-overlay{position:fixed!important;inset:0!important;z-index:3000!important;display:none;align-items:stretch!important;justify-content:center!important;padding:0!important;background:#f5f8fd!important;backdrop-filter:none!important}
+    #accountBox.dss-account-overlay:not([hidden]){display:flex!important}
+    #accountBox[hidden]{display:none!important}
+    #accountBox .dss-account-page{position:relative!important;width:100%!important;max-width:850px!important;height:100dvh!important;max-height:100dvh!important;overflow-y:auto!important;box-sizing:border-box!important;padding:28px 18px 40px!important;margin:0!important;border:0!important;border-radius:0!important;background:linear-gradient(180deg,#fff 0%,#f7faff 100%)!important;color:#17243b!important;box-shadow:none!important}
+    #accountBox #accountTitle{font-size:28px!important;font-weight:800!important;color:#14243d!important;letter-spacing:-.5px!important;margin:0}
+    #accountBox .dss-account-heading{display:flex!important;align-items:center!important;gap:14px!important;padding:20px 0 22px!important;border-bottom:1px solid #e3ebf7!important}
+    #accountBox .dss-account-avatar{display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 76px!important;width:76px!important;height:76px!important;border-radius:50%!important;background:#1767d4!important;color:#fff!important;box-shadow:0 8px 20px #1767d426!important}
+    #accountBox .dss-account-avatar svg{width:38px!important;height:38px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.8!important}
+    #accountBox .dss-account-role{color:#6b7b95!important;margin:6px 0 0!important}
+    #accountBox .dss-account-tabs{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;padding:18px 0!important;border-bottom:1px solid #e3ebf7!important;overflow:visible!important}
+    #accountBox .dss-account-tabs button{min-width:0!important;white-space:normal!important;min-height:62px!important;padding:9px 5px!important;border:1px solid #dfe8f5!important;border-radius:13px!important;background:#fff!important;color:#273954!important;font-size:12px!important;font-weight:750!important;box-shadow:0 3px 10px #1b3b6608!important}
+    #accountBox .dss-account-tabs button.active{background:#1767d4!important;border-color:#1767d4!important;color:#fff!important;box-shadow:0 6px 16px #1767d42b!important}
+    #accountBox .dss-account-content{padding:22px 0 20px!important}
+    #accountBox .dss-account-content h3{font-size:23px!important;color:#14243d!important;margin:0 0 16px!important}
+    #accountBox #accountStatus{color:#60718b!important;line-height:1.6!important}
+    #accountBox .dss-account-form{display:grid!important;gap:13px!important}
+    #accountBox .dss-account-form label{display:grid!important;gap:7px!important;color:#34445d!important;font-size:14px!important;font-weight:700!important}
+    #accountBox #accountForm input{box-sizing:border-box!important;width:100%!important;min-height:52px!important;padding:12px!important;border-radius:12px!important;border:1px solid #dbe5f2!important;background:#f8faff!important;color:#17243b!important}
+    #accountBox #accountForm input:focus{border-color:#1767d4!important;box-shadow:0 0 0 3px #1767d420!important}
+    #accountBox #accountSubmit{min-height:54px!important;border:0!important;border-radius:12px!important;background:#1767d4!important;color:#fff!important;font-weight:800!important}
+    #accountBox #accountSwitch,#accountBox #accountLogout{width:100%!important;min-height:50px!important;margin-top:10px!important;border-radius:12px!important;border:1px solid #dbe5f2!important;background:#fff!important;color:#1767d4!important}
+    #accountBox .dss-account-tab-message{padding:18px!important;margin-top:8px!important;border:1px solid #e1eaf6!important;border-radius:16px!important;background:#fff!important;color:#34445d!important;line-height:1.6!important}
+    #accountBox #accountClose{position:absolute!important;top:12px!important;right:12px!important;z-index:5!important;width:42px!important;height:42px!important;border-radius:50%!important;background:#f0f5fc!important;color:#31445f!important;border:1px solid #dce7f5!important;font-size:26px!important}
+    @media(max-width:380px){#accountBox .dss-account-page{padding-left:12px!important;padding-right:12px!important}#accountBox .dss-account-tabs{gap:5px!important}#accountBox .dss-account-tabs button{font-size:11px!important;padding:8px 3px!important}}
+  </style>
+
 </head>
 <body>
   <header>
