@@ -1,18 +1,523 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="sq">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#050505">
-  <meta name="description" content="DSS Shop — Security & Technology. Kamera sigurie, sisteme alarmi, rrjetëzim dhe aksesorë.">
-  <title>DSS Shop | Security &amp; Technology</title>
-  <link rel="stylesheet" href="./style.css?v=20261017">
-  <link rel="icon" href="./logo-dss-shop.svg" type="image/svg+xml">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="DSS Shop — Kamera sigurie, alarme dhe teknologji">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="DSS Shop">
+  <title>DSS Shop</title>
+  <link rel="icon" type="image/svg+xml" href="./logo-dss-shop.svg?v=20261017">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="style.css?v=20261016-mobile-product-size-2">
   <style>
-    #accountBox .dss-account-brand{position:absolute;top:0;left:0;right:0;min-height:66px;padding:12px 60px 10px 18px;display:flex;align-items:center;justify-content:space-between;background:#fff;border-bottom:1px solid #edf2f8;box-shadow:0 3px 16px #153b7008}
-    #accountBox .dss-account-brand img{display:block;width:210px;max-width:70%;height:auto;max-height:48px;object-fit:contain;object-position:left center}
-    #accountBox .dss-account-tools{display:flex;gap:16px;color:#1767d4;font-size:26px;align-items:center}
+    :root{color-scheme:dark;--bg:#080808;--panel:#191919;--red:#e50914;--text:#f5f5f5;--muted:#aaa}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:80px}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+    button,input,select{font:inherit}button,a{-webkit-tap-highlight-color:transparent}header{background:#090909;border-bottom:1px solid #292929;position:sticky;top:0;z-index:100}
+    .wrap{width:min(1200px,94%);margin:auto}.nav{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0}
+    .brand{color:white;text-decoration:none;display:flex;align-items:center;gap:9px;min-width:0}.brand b{display:flex;align-items:center;justify-content:center;background:#e50914;width:44px;height:44px;border-radius:9px;font-size:19px;flex-shrink:0}.brand span{font-size:10px;letter-spacing:1px;line-height:1.5}
+    nav{display:flex;align-items:center;gap:14px}nav a{color:white;text-decoration:none;font-size:13px}button{cursor:pointer}
+    .header-actions{display:flex;align-items:center;gap:7px}.header-actions button{min-height:40px;border:1px solid #444;background:#171717;color:#fff;border-radius:22px;padding:8px 11px;white-space:nowrap}
+    .header-actions #languageBtn{border-color:#777;font-size:12px;font-weight:bold}.main-cart-btn{border:1px solid var(--red)!important;background:transparent!important;color:white;border-radius:24px;padding:10px 14px;font-weight:bold;white-space:nowrap}
+    #cartCount{display:inline-flex;justify-content:center;align-items:center;min-width:21px;height:21px;border-radius:50%;background:var(--red);margin-left:4px}
+    .categories-section{padding-top:24px;padding-bottom:20px}.categories-section h2{font-size:24px;margin:8px 0 22px}.categories{display:flex;gap:24px;overflow-x:auto;padding:4px 0 12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.categories::-webkit-scrollbar{display:none}
+    .category-btn{flex:0 0 150px;padding:0;background:transparent;border:0;color:white;border-radius:0;display:flex;flex-direction:column;align-items:center;gap:12px;white-space:normal}.category-btn img{display:block;width:150px;height:150px;object-fit:cover;border-radius:22px;background:#191919;border:1px solid #252525}.category-btn span{font-size:15px;font-weight:bold;text-align:center;line-height:1.4;min-height:42px}.category-btn.active{background:transparent;color:#ff2530}.category-btn.active img{border:2px solid var(--red)}
+    #products{padding-bottom:100px}.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.toolbar h2{margin:0 auto 0 0;font-size:25px}
+    input,select{min-height:44px;padding:11px 13px;border-radius:8px;border:1px solid #414141;background:#171717;color:white;max-width:100%}#search{flex:1;min-width:170px}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}.card{overflow:hidden;border:1px solid #303030;border-radius:13px;background:var(--panel);padding:10px;min-width:0}
+    .pic{height:210px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:9px;overflow:hidden;color:var(--red);font-size:30px;font-weight:bold}.pic img{width:100%;height:100%;object-fit:contain}.cat{color:#ff535b;font-size:12px;margin-top:13px}.card h3{font-size:16px;line-height:1.4;min-height:42px;overflow-wrap:anywhere}.price{font-size:21px;font-weight:bold;margin:14px 0}.card button{width:100%;border:0;border-radius:8px;padding:12px 8px;background:var(--red);color:white;font-weight:bold}
+    .drawer{position:fixed;z-index:1001;top:0;right:0;height:100%;width:min(420px,100%);overflow-y:auto;padding:20px;background:#101010;border-left:1px solid #333;box-shadow:-10px 0 35px #0009;transform:translateX(110%);visibility:hidden;transition:transform .25s ease,visibility .25s}.drawer.open{transform:translateX(0);visibility:visible}
+    .drawerHead{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #333;margin-bottom:18px}.drawerHead button{font-size:25px;padding:5px 13px;background:var(--red);color:white;border:0;border-radius:8px}
+    .cartItem{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #333}.cartItem small{display:block;color:#bbb;margin-top:6px}.cartItem button{padding:8px 12px;margin-left:3px;background:var(--red);color:white;border:0;border-radius:7px}.total{padding:20px 0;font-size:20px}
+    #orderForm{display:grid;gap:12px}#orderForm input{width:100%}#orderForm button{min-height:48px;border:0;border-radius:8px;background:var(--red);color:white;font-weight:bold}
+    #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#222;border:1px solid #444;padding:13px 20px;border-radius:8px;z-index:2000;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center}#toast.show{opacity:1}
+    .search-float{position:fixed;right:20px;bottom:112px;z-index:997;width:66px;height:66px;border-radius:50%;border:0;background:var(--red);color:white;display:flex;align-items:center;justify-content:center;font-size:0;box-shadow:0 4px 15px #0008}.search-float svg{width:31px;height:31px;fill:none;stroke:white;stroke-width:2;stroke-linecap:round}
+    .whatsapp-contact{position:fixed;right:20px;bottom:78px;z-index:998;width:66px;height:66px;border-radius:50%;background:#25d366;color:white;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 15px #0008}.whatsapp-contact svg{width:39px;height:39px;display:block;fill:white;stroke:none;shape-rendering:geometricPrecision}.bottom-nav{display:none}
+    @media(max-width:900px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.pic{height:180px}}
+    @media(max-width:650px){.wrap{width:94%}.nav{min-height:68px;gap:7px}.brand{gap:7px}.brand b{width:39px;height:39px;font-size:17px}.brand span{font-size:9px;letter-spacing:.5px}nav{gap:8px}nav a{font-size:12px}.header-actions{gap:4px}.header-actions button{min-height:36px;padding:7px 8px;font-size:12px}.header-actions #languageBtn{font-size:11px;padding:7px 6px}.main-cart-btn{padding:8px!important;font-size:12px}.categories-section{padding-top:20px}.categories-section h2{font-size:23px}.categories{gap:24px}.category-btn{flex-basis:150px}.category-btn img{width:150px;height:150px}.toolbar{gap:10px}.toolbar h2{width:100%;font-size:24px}.toolbar input,.toolbar select{width:100%}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{padding:8px;border-radius:12px}.pic{height:155px;border-radius:8px}.cat{font-size:11px;margin-top:12px}.card h3{font-size:15px;min-height:42px}.price{font-size:20px}.card button{font-size:12px;padding:12px 5px}#products{padding-bottom:105px}
+      .search-float{width:58px;height:58px;right:18px;bottom:185px;z-index:997}.whatsapp-contact{position:fixed;width:58px;height:58px;right:18px;left:auto;bottom:115px;z-index:998}
+      .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:990;min-height:68px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:#0b0b0b;border-top:1px solid #292929;display:flex;align-items:center;justify-content:space-around}
+      .bottom-nav a,.bottom-nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#ccc;text-decoration:none;background:transparent;border:0;padding:2px;font-size:11px}.bottom-nav svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.bottom-nav .home-link{color:var(--red)}}
+    @media(max-width:390px){.brand span{display:none}.nav{gap:5px}nav{gap:6px}.header-actions button{padding:6px}.main-cart-btn{font-size:11px!important}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.category-btn,.category-btn img{width:135px}.category-btn{flex-basis:135px}.category-btn img{height:135px}.pic{height:135px}}
+
+    /* DSS customer profile: clean white mobile-first account page */
+    .dss-account-overlay{position:fixed;inset:0;z-index:3000;background:rgba(20,24,30,.45);display:flex;align-items:flex-start;justify-content:center;padding:18px 12px;overflow-y:auto}
+    .dss-account-page{position:relative;width:100%;max-width:760px;margin:12px auto 28px;background:#fff;color:#202124;border:1px solid #e5e7eb;border-radius:18px;padding:24px;box-shadow:0 18px 60px #0002}
+    .dss-account-close{position:absolute;right:14px;top:12px;border:0;background:#f3f4f6;color:#555;border-radius:50%;width:38px;height:38px;font-size:26px;line-height:1}
+    .dss-account-heading{display:flex;align-items:center;gap:15px;padding:8px 0 22px;border-bottom:1px solid #e5e7eb}
+    .dss-account-avatar{width:72px;height:72px;display:grid;place-items:center;flex-shrink:0;border-radius:50%;background:#fff0f1;color:#e50914}
+    .dss-account-avatar svg{width:36px;height:36px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .dss-account-heading h2{font-size:25px;margin:0 48px 4px 0;color:#161616}.dss-account-role{margin:0;color:#777;font-size:15px}
+    .dss-account-tabs{display:flex;gap:8px;overflow-x:auto;padding:18px 0 12px;border-bottom:1px solid #eee}
+    .dss-account-tabs button{flex:0 0 auto;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;background:#fff;color:#555;font-weight:600;white-space:nowrap}
+    .dss-account-tabs button.active{background:#e50914;border-color:#e50914;color:#fff}
+    .dss-account-content{padding:24px 0 4px}.dss-account-content h3{font-size:22px;margin:0 0 18px;color:#222}.dss-account-content #accountStatus{color:#666;line-height:1.5}
+    .dss-account-form{display:grid;gap:16px}.dss-account-form label{display:grid;gap:8px;color:#666;font-weight:600}
+    .dss-account-form input{width:100%;background:#fff;color:#222;border:1px solid #d7d9dd;border-radius:10px;min-height:50px;padding:13px;font-weight:400}
+    .dss-account-form button{min-height:48px;border:0;border-radius:10px;background:#e50914;color:#fff;font-weight:700}
+    .dss-account-secondary{width:100%;margin-top:12px;padding:13px;background:#fff;color:#333;border:1px solid #d7d9dd;border-radius:10px}
+    .dss-account-tab-message{padding:15px;margin-top:16px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;color:#555}
+    @media(max-width:600px){.dss-account-overlay{padding:8px}.dss-account-page{margin:0 auto 16px;padding:18px 16px;border-radius:14px;min-height:calc(100dvh - 16px)}.dss-account-avatar{width:60px;height:60px}.dss-account-heading h2{font-size:22px}.dss-account-tabs{gap:6px}.dss-account-tabs button{padding:11px 12px;font-size:13px}.dss-account-content{padding-top:20px}.dss-account-content h3{font-size:20px}}
+
+    /* DSS mobile cart page, inspired by the supplied reference */
+    #cart.drawer{width:100%;max-width:100%;height:100dvh;top:0;right:0;z-index:1005;border:0;border-left:0;background:#090909;padding:0 0 calc(82px + env(safe-area-inset-bottom));box-shadow:none}
+    #cart.drawer.open{transform:translateX(0);visibility:visible}
+    #cart .drawerHead{position:sticky;top:0;z-index:3;min-height:72px;padding:10px 20px;background:#090909;border-bottom:1px solid #292929;margin:0}
+    #cart .drawerHead h2{font-size:24px;margin:0}
+    #cart .drawerHead button{background:transparent;border:1px solid #444;border-radius:50%;width:40px;height:40px}
+    .dss-cart-page-title{font-size:34px;margin:0;padding:18px 20px 24px;letter-spacing:-.7px}
+    .dss-cart-page-title small{font-size:20px;color:#c9c9c9;font-weight:400;letter-spacing:0}
+    #cartItems{padding:0 20px}
+    .dss-cart-product{position:relative;display:grid;grid-template-columns:100px minmax(0,1fr) 28px;grid-template-rows:auto auto;gap:10px 14px;align-items:center;padding:20px 14px;background:#191919;border:1px solid #393939;border-radius:15px;margin-bottom:24px}
+    .dss-cart-thumb{grid-row:1 / span 2;width:100px;height:100px;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#e50914;font-weight:bold}
+    .dss-cart-thumb img{width:100%;height:100%;object-fit:contain}
+    .dss-cart-product-info{align-self:start;min-width:0}
+    .dss-cart-product-info>b{display:block;font-size:19px;line-height:1.35;overflow-wrap:anywhere}
+    .dss-cart-product-info small{display:block;color:#c9c9c9;font-size:16px;margin-top:5px}
+    .dss-qty{display:inline-flex;align-items:center;margin-top:14px;border:1px solid #414141;border-radius:12px;overflow:hidden;height:42px}
+    .dss-qty button{height:40px;min-width:42px;padding:0;background:transparent;color:white;border:0;font-size:21px}
+    .dss-qty span{height:40px;min-width:48px;display:flex;align-items:center;justify-content:center;border-left:1px solid #414141;border-right:1px solid #414141}
+    .dss-remove{grid-column:3;grid-row:1;display:flex!important;align-items:center;justify-content:center;width:30px;height:34px;background:transparent!important;color:#ff2935!important;border:0!important;font-size:0;padding:0!important;align-self:start;cursor:pointer}
+    .dss-remove svg{width:24px;height:24px;display:block;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .dss-line-total{grid-column:2 / 4;grid-row:2;text-align:right;font-size:18px;align-self:center}
+    .dss-cart-summary{margin:0 20px 24px;padding:26px 22px;background:#191919;border:1px solid #393939;border-radius:15px}
+    .dss-cart-summary h2{font-size:26px;margin:0 0 28px}
+    .dss-summary-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;color:#ccc;font-size:17px}
+    .dss-summary-row b{color:#f5f5f5;font-size:18px}
+    .dss-discount-row{margin:12px 0;padding:15px 12px;border:1px solid #176338;border-radius:14px;background:#102c1d;color:#18c765;font-weight:bold}
+    .dss-discount-row b{color:#18c765}
+    .dss-summary-total{border-top:1px solid #383838;margin-top:12px;padding-top:24px;font-size:22px;font-weight:bold;color:white}
+    .dss-summary-total b{font-size:25px}
+    .dss-checkout-button,.dss-continue-button{width:100%;min-height:58px;border-radius:13px;font-size:20px;font-weight:bold;margin-top:18px}
+    .dss-checkout-button{background:#e50914;color:#fff;border:0}
+    .dss-continue-button{background:transparent;color:#fff;border:1px solid #414141}
+    #orderForm{display:none;margin:0 20px 28px;padding:20px;border:1px solid #393939;border-radius:14px;background:#191919}
+    #orderForm.dss-order-visible{display:grid}
+    .dss-empty-cart{padding:24px 0;color:#ccc}
+    @media(max-width:420px){.dss-cart-page-title{font-size:31px;padding:18px 16px}.dss-cart-page-title small{font-size:17px}#cartItems{padding:0 16px}.dss-cart-product{grid-template-columns:88px minmax(0,1fr) 24px;gap:10px;padding:14px 10px}.dss-cart-thumb{width:88px;height:88px}.dss-cart-product-info>b{font-size:17px}.dss-qty button{min-width:34px}.dss-qty span{min-width:36px}.dss-cart-summary{margin:0 16px 20px;padding:22px 16px}.dss-cart-summary h2{font-size:23px}}
+    @media(min-width:651px){#cart.drawer{width:min(620px,100%);border-left:1px solid #333;padding-bottom:20px}.dss-cart-page-title{font-size:30px}}
+
+    @media(min-width:651px){.search-float{display:none}}
+
+    /* DSS storefront refresh: clean catalog layout inspired by modern security shops */
+    :root{color-scheme:light;--bg:#ffffff;--panel:#17191d;--red:#e50914;--text:#20242a;--muted:#646b75}
+    html,body{background:#fff!important;color:#20242a}
+    header{background:#fff;border-bottom:1px solid #e6e8eb;box-shadow:0 2px 10px #1018280a}
+    .brand{color:#20242a}
+    nav a{color:#20242a}
+    .header-actions button{background:#fff;color:#20242a;border-color:#dfe3e8}
+    .main-cart-btn{color:#20242a!important;border-color:var(--red)!important}
+    .categories-section h2,.toolbar h2{color:#20242a}
+    .categories-section{background:#fff}
+    .category-btn{color:#20242a}
+    .category-btn img{background:#f3f5f7;border-color:#e5e7eb;border-radius:14px}
+    .category-btn.active{color:var(--red)}
+    #products{background:#fff}
+    .toolbar input,.toolbar select,input,select{background:#fff;color:#20242a;border-color:#d7dce2}
+    .card{background:#17191d;color:#fff;border-color:#e3e6ea;border-radius:12px;box-shadow:0 3px 14px #1118270a}
+    .card h3,.card h3 a,.card p,.card small,.card .description,.card .price{color:#fff}
+    .card .cat{color:#ff6972}
+    .pic{background:#f5f6f8}
+    .dss-home-hero{background:linear-gradient(110deg,#f5f7fa 0%,#fff 62%,#fff0f1 100%);border-bottom:1px solid #e8eaee;padding:42px 0 38px}
+    .dss-home-hero-inner{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center}
+    .dss-home-hero .eyebrow{display:inline-block;color:#d20c19;font-size:12px;letter-spacing:1.4px;font-weight:800}
+    .dss-home-hero h1{font-size:clamp(30px,4vw,48px);line-height:1.1;letter-spacing:-1px;margin:12px 0;color:#17191d;max-width:650px}
+    .dss-home-hero p{color:#555e69;line-height:1.7;max-width:590px;margin:0}
+    .dss-hero-cta{display:inline-flex;margin-top:22px;padding:13px 20px;background:#e50914;color:#fff;border-radius:8px;font-weight:800}
+    .dss-hero-panel{background:#17191d;color:#fff;border-radius:16px;padding:24px;box-shadow:0 12px 30px #10182820}
+    .dss-hero-panel strong{display:block;font-size:20px;margin-bottom:8px}
+    .dss-hero-panel p{color:#e1e4e8;font-size:14px}
+    .dss-benefits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:24px 0 8px}
+    .dss-benefit{border:1px solid #e5e7eb;border-radius:12px;padding:16px;background:#fff}
+    .dss-benefit b{display:block;color:#20242a;margin-bottom:6px}
+    .dss-benefit span{display:block;color:#69717c;font-size:13px;line-height:1.5}
+    .dss-section-intro{color:#69717c;margin:-8px 0 20px;line-height:1.6}
+    .dss-footer{background:#17191d;color:#fff;margin-top:40px;padding:30px 0 90px}
+    .dss-footer-inner{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    .dss-footer p{color:#d2d6dc;line-height:1.6;margin:7px 0}
+    .dss-footer a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+    .bottom-nav{background:#fff!important;border-top:1px solid #e1e4e8!important}
+    .bottom-nav a,.bottom-nav button{color:#4d5560!important}
+    .bottom-nav .home-link{color:var(--red)!important}
+    @media(max-width:650px){
+      .dss-home-hero{padding:28px 0}
+      .dss-home-hero-inner{grid-template-columns:1fr;gap:18px}
+      .dss-home-hero h1{font-size:32px}
+      .dss-hero-panel{padding:18px}
+      .dss-benefits{grid-template-columns:1fr;gap:9px;padding-top:18px}
+      .dss-benefit{padding:13px}
+      .dss-footer{padding-bottom:100px}
+    }
+
+    /* KATEGORITE — rregullim i fokusuar: stil i hapur si katalogu SSD */
+    .categories-section{padding-top:30px!important;padding-bottom:28px!important;background:#fff!important}
+    .categories-section h2{font-size:clamp(23px,2.5vw,30px)!important;color:#20242a!important;font-weight:800!important;margin:0 0 10px!important;letter-spacing:-.45px}
+    .categories-section h2:after{content:"";display:block;width:54px;height:3px;background:#e50914;margin-top:12px;border-radius:2px}
+    .categories{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:16px!important;overflow:visible!important;padding:12px 0 4px!important}
+    .category-btn{display:flex!important;flex:initial!important;min-width:0!important;width:100%!important;min-height:0!important;padding:10px!important;gap:10px!important;align-items:center!important;justify-content:flex-start!important;background:#fff!important;color:#252a31!important;border:1px solid #e2e5e9!important;border-radius:10px!important;box-shadow:0 2px 8px #17203308!important;transition:border-color .18s,box-shadow .18s,transform .18s!important}
+    .category-btn img{display:block!important;width:66px!important;height:66px!important;flex:0 0 66px!important;object-fit:contain!important;padding:4px!important;border:0!important;border-radius:7px!important;background:#f5f6f8!important}
+    .category-btn span{display:block!important;min-height:0!important;font-size:14px!important;line-height:1.35!important;font-weight:700!important;text-align:left!important;color:#252a31!important;overflow-wrap:anywhere}
+    .category-btn:hover{border-color:#c9cdd3!important;box-shadow:0 5px 15px #17203312!important;transform:translateY(-1px)}
+    .category-btn.active{background:#fff!important;color:#20242a!important;border-color:#e50914!important;box-shadow:0 0 0 1px #e50914!important}
+    .category-btn.active span{color:#20242a!important}
+    .category-btn.active img{border:0!important}
+    .category-btn:focus-visible{outline:2px solid #e50914!important;outline-offset:2px}
+    @media(max-width:1000px){.categories{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}.category-btn img{width:56px!important;height:56px!important;flex-basis:56px!important}}
+    @media(max-width:650px){
+      .categories-section{padding-top:24px!important;padding-bottom:18px!important}
+      .categories-section h2{font-size:23px!important}
+      .categories{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;overflow:visible!important}
+      .category-btn{padding:8px!important;gap:8px!important;border-radius:9px!important}
+      .category-btn img{width:48px!important;height:48px!important;flex-basis:48px!important;padding:2px!important}
+      .category-btn span{font-size:12px!important;line-height:1.3!important}
+    }
+  
+    /* Kategorite ne krye: karusel horizontal qe leviz nga e djathta ne te majte */
+    #categoriesSection{margin-top:12px!important;margin-bottom:20px!important;padding-top:18px!important;padding-bottom:14px!important;background:#fff!important}
+    #categoriesSection .categories{display:flex!important;flex-wrap:nowrap!important;direction:ltr!important;gap:12px!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x mandatory!important;scroll-behavior:smooth!important;overscroll-behavior-x:contain!important;-webkit-overflow-scrolling:touch!important;padding:10px 3px 14px!important;scrollbar-width:thin!important}
+    #categoriesSection .category-btn{direction:ltr!important;flex:0 0 220px!important;width:220px!important;min-width:220px!important;scroll-snap-align:start!important}
+    #categoriesSection .category-btn span{text-align:left!important}
+    #categoriesSection .categories::-webkit-scrollbar{height:5px}
+    #categoriesSection .categories::-webkit-scrollbar-thumb{background:#c9cdd3;border-radius:8px}
+    @media(max-width:650px){#categoriesSection{margin-top:6px!important;padding-top:12px!important}#categoriesSection .categories{gap:9px!important}#categoriesSection .category-btn{flex-basis:190px!important;width:190px!important;min-width:190px!important}}
+
+
+    /* Produktet ne sfond te bardhe, me tekst te erret */
+    #products .card{background:#fff!important;color:#20242a!important;border:1px solid #e2e5e9!important;box-shadow:0 3px 14px #1720330d!important}
+    #products .card h3,#products .card h3 a,#products .card p,#products .card small,#products .card .description,#products .card .price{color:#20242a!important}
+    #products .card .cat{color:#e50914!important}
+    #products .card .pic{background:#f5f6f8!important}
+    #products .card button{color:#fff!important}
+
+    /* DSS: shporta dhe produktet me sfond te bardhe, tekst te erret */
+    #cart.drawer, #cart .drawerHead { background:#fff !important; color:#20242a !important; }
+    #cart .drawerHead { border-bottom:1px solid #e2e5e9 !important; }
+    #cart .drawerHead h2, #cart .dss-cart-page-title, #cart .dss-cart-page-title small,
+    #cart .dss-cart-product, #cart .dss-cart-product-info, #cart .dss-cart-product-info b,
+    #cart .dss-cart-product-info small, #cart .dss-cart-summary, #cart .dss-cart-summary h2,
+    #cart .dss-cart-summary p, #cart .dss-cart-summary span, #cart .dss-cart-summary strong,
+    #cart .total, #cart label, #cart #total, #cart #cartSubtotal { color:#20242a !important; }
+    #cart .dss-cart-product, #cart .dss-cart-summary, #cart #orderForm {
+      background:#fff !important; border:1px solid #e2e5e9 !important;
+      box-shadow:0 3px 14px #1720330d !important;
+    }
+    #cart .dss-cart-product { border-bottom:1px solid #e2e5e9 !important; }
+    #cart .dss-cart-product-info small, #cart .dss-cart-page-title small { color:#626b75 !important; }
+    #cart .dss-cart-thumb { background:#f5f6f8 !important; }
+    #cart #orderForm input, #cart #orderForm textarea, #cart #orderForm select {
+      background:#fff !important; color:#20242a !important; border:1px solid #cfd5dc !important;
+    }
+    #cart .dss-qty span { color:#20242a !important; }
+    #cart .drawerHead button { color:#20242a !important; border-color:#cfd5dc !important; }
+    #cart .cartItem { border-bottom-color:#e2e5e9 !important; }
+
+
+    /* Kategorite e medha me emer siper fotos, stil modern si SSD.al */
+    #categoriesSection .categories{
+      gap:14px!important;
+      padding:12px 3px 16px!important;
+    }
+    #categoriesSection .category-btn{
+      position:relative!important;
+      display:block!important;
+      flex:0 0 230px!important;
+      width:230px!important;
+      min-width:230px!important;
+      height:170px!important;
+      min-height:170px!important;
+      padding:0!important;
+      overflow:hidden!important;
+      border:1px solid #e2e5e9!important;
+      border-radius:14px!important;
+      background:#f3f5f7!important;
+      box-shadow:0 3px 12px #17203312!important;
+      text-align:center!important;
+    }
+    #categoriesSection .category-btn img{
+      position:absolute!important;
+      inset:0!important;
+      display:block!important;
+      width:100%!important;
+      height:100%!important;
+      max-width:none!important;
+      flex:none!important;
+      object-fit:cover!important;
+      padding:0!important;
+      border:0!important;
+      border-radius:0!important;
+      background:#f3f5f7!important;
+      transition:transform .25s ease!important;
+    }
+    #categoriesSection .category-btn::after{
+      content:""!important;
+      position:absolute!important;
+      inset:25% 0 0!important;
+      background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.78) 100%)!important;
+      pointer-events:none!important;
+    }
+    #categoriesSection .category-btn span{
+      position:absolute!important;
+      z-index:2!important;
+      left:0!important;
+      right:0!important;
+      bottom:0!important;
+      display:block!important;
+      min-height:0!important;
+      padding:13px 8px 12px!important;
+      color:#fff!important;
+      font-size:16px!important;
+      line-height:1.25!important;
+      font-weight:800!important;
+      text-align:center!important;
+      text-shadow:0 1px 4px #000!important;
+      overflow-wrap:anywhere!important;
+    }
+    #categoriesSection .category-btn:hover img{transform:scale(1.05)!important}
+    #categoriesSection .category-btn.active{
+      border:2px solid #e50914!important;
+      box-shadow:0 0 0 1px #e50914!important;
+    }
+    #categoriesSection .category-btn.active span{color:#fff!important}
+    @media(max-width:650px){
+      #categoriesSection .categories{gap:10px!important;padding:10px 2px 14px!important}
+      #categoriesSection .category-btn{
+        flex-basis:205px!important;
+        width:205px!important;
+        min-width:205px!important;
+        height:155px!important;
+        min-height:155px!important;
+        border-radius:13px!important;
+      }
+      #categoriesSection .category-btn span{font-size:15px!important;padding:12px 7px 11px!important}
+    }
+
+
+    /* Kategorite katrore ne telefon; pa fotografi, vetem emri brenda */
+    #categoriesSection .category-btn img{display:none!important}
+    #categoriesSection .category-btn::after{display:none!important}
+    #categoriesSection .category-btn{
+      position:relative!important;
+      display:flex!important;
+      flex:0 0 150px!important;
+      width:150px!important;
+      min-width:150px!important;
+      height:110px!important;
+      min-height:110px!important;
+      align-items:center!important;
+      justify-content:center!important;
+      padding:12px!important;
+      overflow:hidden!important;
+      border:1px solid #e2e5e9!important;
+      border-radius:12px!important;
+      background:#f4f5f7!important;
+      box-shadow:0 3px 10px #17203310!important;
+    }
+    #categoriesSection .category-btn span{
+      position:static!important;
+      display:flex!important;
+      align-items:center!important;
+      justify-content:center!important;
+      width:100%!important;
+      min-height:0!important;
+      padding:0!important;
+      color:#20242a!important;
+      font-size:15px!important;
+      line-height:1.3!important;
+      font-weight:800!important;
+      text-align:center!important;
+      text-shadow:none!important;
+      overflow-wrap:anywhere!important;
+    }
+    #categoriesSection .category-btn.active{
+      border:2px solid #e50914!important;
+      background:#fff!important;
+      box-shadow:0 0 0 1px #e50914!important;
+    }
+    #categoriesSection .category-btn.active span{color:#20242a!important}
+    @media(max-width:650px){
+      #categoriesSection .categories{gap:9px!important;padding:10px 2px 14px!important}
+      #categoriesSection .category-btn{
+        flex-basis:132px!important;
+        width:132px!important;
+        min-width:132px!important;
+        height:100px!important;
+        min-height:100px!important;
+        padding:8px!important;
+        border-radius:10px!important;
+      }
+      #categoriesSection .category-btn span{font-size:13px!important;line-height:1.25!important}
+    }
+
+
+    /* DSS customer profile/login — clean white card with DSS red accents */
+    #accountBox{
+      position:fixed!important;inset:0!important;z-index:3000!important;
+      display:none;align-items:center!important;justify-content:center!important;
+      padding:18px!important;background:rgba(18,24,32,.58)!important;
+      backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+    }
+    #accountBox[hidden]{display:none!important}
+    #accountBox > div{
+      width:min(100%,420px)!important;max-height:min(88dvh,680px)!important;
+      overflow-y:auto!important;padding:25px 23px 22px!important;
+      background:#fff!important;border:1px solid #e5e7eb!important;
+      border-radius:18px!important;color:#20242a!important;
+      box-shadow:0 24px 80px rgba(16,24,40,.24),0 0 0 1px rgba(229,9,20,.05)!important;
+    }
+    #accountBox #accountTitle{font-size:23px!important;font-weight:800!important;letter-spacing:-.3px!important;color:#20242a!important}
+    #accountBox #accountTitle::before{
+      content:"DSS";display:inline-flex;align-items:center;justify-content:center;
+      width:38px;height:38px;margin-right:10px;border-radius:10px;
+      background:#e50914;color:#fff;font-size:15px;letter-spacing:0;vertical-align:middle;
+    }
+    #accountBox #accountClose{min-width:40px;min-height:40px;font-size:14px!important;background:#fff!important;color:#303640!important;border:1px solid #e1e4e8!important;border-radius:9px!important}
+    #accountBox #accountStatus{color:#68717d;font-size:14px;line-height:1.55;margin:17px 0 20px!important}
+    #accountBox #accountForm{display:grid!important;gap:11px!important}
+    #accountBox #accountForm input{
+      display:block;width:100%;min-width:0;min-height:49px!important;
+      padding:13px 14px!important;border:1px solid #d9dee5!important;
+      border-radius:9px!important;background:#f8f9fb!important;color:#20242a!important;
+      font-size:15px!important;outline:none;
+    }
+    #accountBox #accountForm input:focus{border-color:#e50914!important;background:#fff!important;box-shadow:0 0 0 3px rgba(229,9,20,.12)!important}
+    #accountBox #accountForm input::placeholder{color:#818995!important;opacity:1}
+    #accountBox #accountSubmit{
+      width:100%;min-height:49px;margin-top:3px;border:0!important;
+      border-radius:9px!important;background:#e50914!important;color:#fff!important;
+      font-size:15px!important;font-weight:800!important;box-shadow:0 4px 10px rgba(229,9,20,.16)!important;
+    }
+    #accountBox #accountSubmit:hover{background:#c90812!important}
+    #accountBox #accountSwitch,#accountBox #accountLogout{
+      width:100%;min-height:46px;margin-top:10px!important;
+      border:1px solid #dfe3e8!important;border-radius:9px!important;
+      background:#fff!important;color:#303640!important;font-size:14px!important;font-weight:700!important;
+    }
+    #accountBox #accountSwitch:hover,#accountBox #accountLogout:hover{border-color:#e50914!important;color:#d20c19!important}
+    #accountBox #accountLogout:not([hidden]){display:block}
+    @media(max-width:480px){
+      #accountBox{padding:14px!important}
+      #accountBox > div{padding:21px 17px 18px!important;border-radius:15px!important;max-height:86dvh!important}
+      #accountBox #accountTitle{font-size:21px!important}
+    }
+
+
+    /* DSS FIX: rikthe fotot e kategorive dhe siguro pamjen e profilit */
+    #categoriesSection .category-btn img{
+      display:block!important;position:static!important;flex:0 0 58px!important;
+      width:58px!important;height:58px!important;min-width:58px!important;
+      object-fit:cover!important;padding:0!important;border:1px solid #e5e7eb!important;
+      border-radius:9px!important;background:#f4f6f8!important;
+    }
+    #categoriesSection .category-btn{
+      display:flex!important;flex-direction:row!important;justify-content:flex-start!important;
+      align-items:center!important;gap:10px!important;flex:0 0 190px!important;
+      width:190px!important;min-width:190px!important;height:88px!important;min-height:88px!important;
+      padding:10px!important;background:#fff!important;border:1px solid #e2e5e9!important;
+      border-radius:12px!important;text-align:left!important;
+    }
+    #categoriesSection .category-btn::after{display:none!important}
+    #categoriesSection .category-btn span{
+      position:static!important;display:block!important;flex:1!important;width:auto!important;
+      padding:0!important;text-align:left!important;color:#20242a!important;
+      font-size:14px!important;line-height:1.3!important;text-shadow:none!important;
+    }
+    #categoriesSection .category-btn.active{border:2px solid #e50914!important;background:#fff!important}
+    #accountBox[hidden]{display:none!important}
+    #accountBox:not([hidden]){display:flex!important;align-items:center!important;justify-content:center!important}
+    #accountBox > div{background:#fff!important;color:#20242a!important}
+    @media(max-width:650px){
+      #categoriesSection .categories{gap:9px!important}
+      #categoriesSection .category-btn{flex-basis:174px!important;width:174px!important;min-width:174px!important;height:78px!important;min-height:78px!important;padding:8px!important;gap:8px!important}
+      #categoriesSection .category-btn img{flex-basis:48px!important;width:48px!important;height:48px!important;min-width:48px!important}
+      #categoriesSection .category-btn span{font-size:12px!important}
+    }
+
+
+
+    /* Customer profile/login only: white, clean, store-style account panel */
+    #accountBox{background:rgba(24,30,38,.48)!important;padding:16px!important;backdrop-filter:blur(3px)!important}
+    #accountBox>div{width:min(100%,440px)!important;max-height:90dvh!important;overflow:auto!important;background:#fff!important;color:#20242a!important;border:1px solid #e5e7eb!important;border-radius:14px!important;padding:24px!important;box-shadow:0 18px 55px rgba(16,24,40,.22)!important}
+    #accountBox #accountTitle{font-size:23px!important;color:#20242a!important;font-weight:800!important}
+    #accountBox #accountStatus{color:#5d6672!important;font-size:14px!important;line-height:1.55!important;margin:18px 0!important}
+    #accountBox #accountForm{display:grid!important;gap:11px!important}
+    #accountBox #accountForm input{width:100%!important;min-height:48px!important;background:#fff!important;color:#20242a!important;border:1px solid #d7dce2!important;border-radius:7px!important;padding:12px!important}
+    #accountBox #accountSubmit{width:100%!important;min-height:47px!important;background:#d71920!important;color:#fff!important;border:0!important;border-radius:7px!important;font-weight:800!important}
+    #accountBox #accountSwitch,#accountBox #accountLogout{width:100%!important;min-height:45px!important;background:#fff!important;color:#20242a!important;border:1px solid #d7dce2!important;border-radius:7px!important;font-weight:700!important}
+    #accountBox #accountClose{background:#fff!important;color:#303640!important;border:1px solid #d7dce2!important;border-radius:7px!important;min-height:38px!important}
+    #accountBox .dss-profile-panel{display:block!important;margin:0!important;padding:18px!important;background:#fff!important;border:1px solid #e3e6ea!important;border-radius:10px!important;color:#20242a!important}
+    #accountBox .dss-profile-title{font-size:21px!important;font-weight:800!important;margin-bottom:14px!important;color:#20242a!important}
+    #accountBox .dss-profile-email{overflow-wrap:anywhere!important;font-size:14px!important;margin-bottom:15px!important;color:#4c5561!important}
+    #accountBox .dss-profile-discount{background:#f0fbf4!important;color:#16803c!important;border:1px solid #b9e6c8!important;padding:12px!important;border-radius:8px!important;font-size:14px!important;font-weight:800!important}
+    #accountBox .dss-profile-note{margin-top:12px!important;font-size:12px!important;color:#68717d!important}
+    @media(max-width:480px){#accountBox>div{padding:20px 17px!important;border-radius:12px!important}}
+
+
+    /* DSS customer account polish: login and signed-in profile only */
+    #accountBox>div{
+      width:min(100%,460px)!important;
+      padding:26px!important;
+      border-radius:16px!important;
+      box-shadow:0 22px 70px rgba(16,24,40,.22)!important;
+    }
+    #accountBox>div>div:first-child{
+      padding-bottom:16px!important;
+      border-bottom:1px solid #edf0f3!important;
+    }
+    #accountBox #accountTitle{display:flex!important;align-items:center!important;gap:0!important}
+    #accountBox #accountStatus{
+      padding:2px 0!important;
+      color:#626b77!important;
+    }
+    #accountBox #accountForm input{
+      min-height:50px!important;
+      background:#f9fafb!important;
+      border-radius:8px!important;
+      font-size:15px!important;
+    }
+    #accountBox #accountSubmit{
+      min-height:50px!important;
+      border-radius:8px!important;
+      letter-spacing:.1px!important;
+      box-shadow:0 5px 12px rgba(215,25,32,.15)!important;
+    }
+    #accountBox #accountSwitch,#accountBox #accountLogout{
+      min-height:47px!important;
+      border-radius:8px!important;
+    }
+    #accountBox .dss-profile-panel{
+      padding:20px!important;
+      border-color:#e8ebef!important;
+      border-radius:12px!important;
+      box-shadow:0 4px 16px rgba(20,30,45,.04)!important;
+    }
+    #accountBox .dss-profile-title{
+      margin-bottom:16px!important;
+      font-size:22px!important;
+      letter-spacing:-.35px!important;
+    }
+    #accountBox .dss-profile-email{
+      padding:12px!important;
+      background:#f7f8fa!important;
+      border:1px solid #edf0f3!important;
+      border-radius:8px!important;
+      line-height:1.5!important;
+    }
+    #accountBox .dss-profile-discount{
+      display:block!important;
+      padding:13px!important;
+      border-radius:8px!important;
+      line-height:1.45!important;
+    }
+    #accountBox .dss-profile-note{font-size:13px!important;line-height:1.5!important}
+    @media(max-width:480px){
+      #accountBox>div{padding:20px 17px!important;border-radius:13px!important}
+      #accountBox #accountTitle{font-size:20px!important}
+    }
+
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
 </head>
 <body>
   <header>
@@ -86,7 +591,6 @@
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="accountBox" hidden class="dss-account-overlay">
     <section class="dss-account-page" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
-      <div class="dss-account-brand"><img src="./logo-dss-shop.svg?v=20261017" alt="DSS Shop — Security &amp; Technology"><div class="dss-account-tools"><span aria-hidden="true">⌕</span><span aria-hidden="true">◉</span></div></div>
       <button id="accountClose" class="dss-account-close" type="button" aria-label="Mbyll">×</button>
       <div class="dss-account-heading">
         <div class="dss-account-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"></circle><path d="M4 21v-2a8 8 0 0 1 16 0v2"></path></svg></div>
@@ -169,7 +673,21 @@
     document.getElementById("searchFloat").addEventListener("click", focusSearch);
     document.getElementById("headerSearchBtn").addEventListener("click", focusSearch);
     document.getElementById("bottomCartBtn").addEventListener("click", () => document.getElementById("cartBtn").click());
-    // Butoni i profilit menaxhohet vetëm nga app.js, për të shmangur dy event handlers.
+    document.getElementById("profileBtn").addEventListener("click", () => {
+      const box = document.getElementById("accountBox");
+      const status = document.getElementById("accountStatus");
+      const form = document.getElementById("accountForm");
+      const switchBtn = document.getElementById("accountSwitch");
+      const logout = document.getElementById("accountLogout");
+      box.hidden = false;
+      box.style.display = "flex";
+      if (status && /ky[cç]ur|logged in/i.test(status.textContent || "")) {
+        status.innerHTML = '<div style="padding:16px;border:1px solid #dfe3e8;border-radius:12px;background:#f8fafc;color:#20242a"><strong style="display:block;font-size:19px;margin-bottom:12px">Profili yt</strong><div style="color:#16803c;font-weight:700;margin-bottom:10px">Keni zbritje personale 10%</div><div style="font-size:13px;color:#68717d">Llogaria jote është aktive.</div></div>';
+        if (form) form.hidden = true;
+        if (switchBtn) switchBtn.hidden = true;
+        if (logout) logout.hidden = false;
+      }
+    });
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(error => console.error("Service Worker error:", error)));
     }
