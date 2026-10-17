@@ -560,12 +560,12 @@ window.openProductDetails = function (p) {
 
       #productDetailsModal .dss-price-stock-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:15px 0;margin:0 0 18px}
       #productDetailsModal #detailsPrice{font-size:clamp(25px,5vw,34px);font-weight:800;color:#20242a;margin:0}
-      #productDetailsModal #detailsStock{margin:0;border:1px solid #174a2c;border-radius:30px;padding:9px 13px;background:#092014;color:#20d16b;font-weight:800;white-space:nowrap}
-      #productDetailsModal #detailsPersonalDiscount{display:none;align-items:center;justify-content:space-between;gap:12px;background:#092014;border:1px solid #174a2c;border-radius:14px;padding:16px;margin:0 0 22px;color:#20d16b;font-size:15px;font-weight:bold}
-      #productDetailsModal #detailsPersonalDiscount .discount-sub{display:block;color:#168b47;font-weight:normal;font-size:13px;margin-top:4px}
+      #productDetailsModal #detailsStock{margin:0;border:1px solid #164b2d;border-radius:30px;padding:9px 13px;background:#071d12;color:#08c965;font-weight:800;white-space:nowrap}
+      #productDetailsModal #detailsPersonalDiscount{display:none;align-items:center;justify-content:space-between;gap:12px;background:#071d12;border:1px solid #164b2d;border-radius:14px;padding:16px;margin:0 0 22px;color:#08c965;font-size:15px;font-weight:bold}
+      #productDetailsModal #detailsPersonalDiscount .discount-sub{display:block;color:#187c42;font-weight:normal;font-size:13px;margin-top:4px}
       #productDetailsModal #detailsPersonalDiscount .discount-price{font-size:25px;white-space:nowrap}
       #productDetailsModal .dss-detail-meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
-      #productDetailsModal .dss-detail-meta p{margin:0;background:#f5f6f8;border:1px solid #e2e5e9;border-radius:8px;padding:9px 11px;color:#4b5563;font-size:12px}\n      #productDetailsModal #detailsStock{background:#12351f;border-color:#247442;color:#75e69a;font-weight:800}
+      #productDetailsModal .dss-detail-meta p{margin:0;background:#f5f6f8;border:1px solid #e2e5e9;border-radius:8px;padding:9px 11px;color:#4b5563;font-size:12px}\n      #productDetailsModal #detailsStock{background:#092c1b;border-color:#14532d;color:#08c965;font-weight:800}
       #productDetailsModal #detailsDescriptionTitle{font-size:16px;margin:20px 0 8px}
       #productDetailsModal #detailsDescription{white-space:pre-wrap;line-height:1.7;color:#4b5563;font-size:14px;margin:0 0 20px;overflow-wrap:anywhere}
       #productDetailsModal #detailsInstallGuide iframe{display:block}
@@ -614,11 +614,11 @@ window.openProductDetails = function (p) {
             <h3 id="detailsDescriptionTitle"></h3>
             <p id="detailsDescription"></p>
             <section id="detailsInstallGuide" style="display:none;margin:20px 0;padding:14px;background:#17191f;border:1px solid #34353d;border-radius:12px">
-              <h3 style="margin:0 0 12px;font-size:17px;color:#75e69a">Udhëzime instalimi</h3>
+              <h3 style="margin:0 0 12px;font-size:17px;color:#08c965">Udhëzime instalimi</h3>
               <div style="position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:9px;overflow:hidden">
                 <iframe id="detailsInstallVideo" src="" title="Udhëzime instalimi për kamerën IPC P8F" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
               </div>
-              <a id="detailsInstallLink" href="" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:10px;color:#75e69a;font-weight:bold;text-decoration:none">Hap videon në YouTube ↗</a>
+              <a id="detailsInstallLink" href="" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:10px;color:#08c965;font-weight:bold;text-decoration:none">Hap videon në YouTube ↗</a>
             </section>
             <button id="detailsAdd" type="button"></button>
             <div id="detailsShare">
