@@ -744,7 +744,7 @@ let dssRatingStats = {};
 function ratingMarkup(productId, compact = false) {
   const stats = dssRatingStats[String(productId)] || { average: 0, count: 0 };
   const rounded = Math.round(stats.average);
-  return `<div class="dss-rating-widget ${compact ? "compact" : ""}" data-rating-product="${esc(productId)}" onclick="event.stopPropagation()">
+  return `<div class="dss-rating-widget ${compact ? "compact" : ""}" data-rating-product="${esc(productId)}">
     <span class="dss-rating-stars" role="group" aria-label="Vlerëso produktin">
       ${[1,2,3,4,5].map(n => `<button type="button" class="dss-rating-star ${n <= rounded ? "filled" : ""}" data-rating="${n}" aria-label="${n} yje" title="Vlerëso me ${n} yje">★</button>`).join("")}
     </span>
