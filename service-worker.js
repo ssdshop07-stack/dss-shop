@@ -1,5 +1,5 @@
 /* DSS Shop — automatic updates */
-const CACHE_NAME = "dss-shop-v2";
+const CACHE_NAME = "dss-shop-v3";
 const APP_FILES = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", event => {
