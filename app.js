@@ -887,7 +887,7 @@ function render() {
         </div>
 
         <div class="cat">${esc(p.category || "")}</div>
-        <div style="display:inline-block;margin:5px 0 2px;padding:4px 7px;border-radius:5px;font-size:11px;font-weight:bold;background:${p.product_condition === "used" ? "#5a421b" : "#173e2b"};color:${p.product_condition === "used" ? "#ffd27a" : "#8ff0b0"}">${p.product_condition === "used" ? t("usedCondition") : t("newCondition")}</div>
+        <div style="display:inline-block;margin:5px 0 2px;padding:4px 7px;border-radius:5px;font-size:11px;font-weight:bold;background:${p.product_condition === "used" ? "#fff3d6" : "#d9fbe7"};color:${p.product_condition === "used" ? "#925f08" : "#087f46"};border:1px solid ${p.product_condition === "used" ? "#f2d28a" : "#91e6b6"};box-shadow:0 1px 3px rgba(8,127,70,.08)">${p.product_condition === "used" ? t("usedCondition") : t("newCondition")}</div>
         <h3>${esc(p.name)}</h3>
 
         ${priceHtml}
