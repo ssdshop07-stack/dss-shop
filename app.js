@@ -548,6 +548,16 @@ window.openProductDetails = function (p) {
       #productDetailsModal #detailsName{font-size:clamp(22px,3vw,30px);line-height:1.25;letter-spacing:-.4px;margin:0 44px 10px 0;overflow-wrap:anywhere;text-transform:uppercase}
       #productDetailsModal .dss-detail-stars{display:flex;align-items:center;gap:12px;color:#606875;margin:0 0 18px;font-size:14px}
       #productDetailsModal .dss-detail-stars .stars{color:#d29b13;font-size:22px;letter-spacing:2px;white-space:nowrap}
+      .dss-rating-widget{display:flex;align-items:center;gap:5px;margin:7px 0;color:#737373;font-size:12px}
+      .dss-rating-stars{display:inline-flex;gap:1px}
+      .dss-rating-star{border:0;background:transparent;color:#c9cdd3;padding:0 1px;font-size:20px;line-height:1.2;cursor:pointer}
+      .dss-rating-star.filled{color:#f5b301}
+      .dss-rating-star:hover,.dss-rating-star:focus-visible{color:#ff9800;transform:scale(1.12)}
+      .dss-rating-star:disabled{cursor:wait;opacity:.65}
+      .dss-rating-widget.compact{margin:3px 0}
+      .dss-rating-widget.compact .dss-rating-star{font-size:16px}
+      .dss-detail-rating-summary{font-size:12px;color:#606875}
+
       #productDetailsModal .dss-price-stock-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:15px 0;margin:0 0 18px}
       #productDetailsModal #detailsPrice{font-size:clamp(25px,5vw,34px);font-weight:800;color:#20242a;margin:0}
       #productDetailsModal #detailsStock{margin:0;border:1px solid #174a2c;border-radius:30px;padding:9px 13px;background:#092014;color:#20d16b;font-weight:800;white-space:nowrap}
@@ -660,6 +670,9 @@ window.openProductDetails = function (p) {
     if (productsSection) productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  modal.dataset.productId = String(p.id);
+  updateDetailRating(p);
+
   image.src = p.image_url || "";
   image.alt = p.name || "DSS Shop";
   image.parentElement.style.display = p.image_url ? "flex" : "none";
@@ -725,6 +738,81 @@ window.openProductDetails = function (p) {
 /* =========================================
    SHFAQJA E PRODUKTEVE
 ========================================= */
+
+let dssRatingStats = {};
+
+function ratingMarkup(productId, compact = false) {
+  const stats = dssRatingStats[String(productId)] || { average: 0, count: 0 };
+  const rounded = Math.round(stats.average);
+  return `<div class="dss-rating-widget ${compact ? "compact" : ""}" data-rating-product="${esc(productId)}" onclick="event.stopPropagation()">
+    <span class="dss-rating-stars" role="group" aria-label="Vlerëso produktin">
+      ${[1,2,3,4,5].map(n => `<button type="button" class="dss-rating-star ${n <= rounded ? "filled" : ""}" data-rating="${n}" aria-label="${n} yje" title="Vlerëso me ${n} yje">★</button>`).join("")}
+    </span>
+    <span class="dss-rating-count">${stats.count ? stats.average.toFixed(1) + " (" + stats.count + ")" : "Vlerëso"}</span>
+  </div>`;
+}
+
+async function loadProductRatings() {
+  try {
+    const { data, error } = await sb.from("product_ratings").select("product_id,rating");
+    if (error) throw error;
+    dssRatingStats = {};
+    (data || []).forEach(row => {
+      const key = String(row.product_id);
+      if (!dssRatingStats[key]) dssRatingStats[key] = { total: 0, count: 0, average: 0 };
+      dssRatingStats[key].total += Number(row.rating);
+      dssRatingStats[key].count++;
+      dssRatingStats[key].average = dssRatingStats[key].total / dssRatingStats[key].count;
+    });
+    render();
+    const modal = document.getElementById("productDetailsModal");
+    const activeId = modal?.dataset.productId;
+    if (activeId) {
+      const p = products.find(x => String(x.id) === String(activeId));
+      if (p) updateDetailRating(p);
+    }
+  } catch (error) {
+    console.warn("Vlerësimet e produkteve nuk u ngarkuan:", error.message || error);
+  }
+}
+
+async function submitProductRating(productId, rating) {
+  const widget = document.querySelectorAll(`.dss-rating-widget[data-rating-product="${CSS.escape(String(productId))}"]`);
+  widget.forEach(el => el.querySelectorAll("button").forEach(b => b.disabled = true));
+  try {
+    const { data: { user } = {} } = await sb.auth.getUser();
+    const row = { product_id: Number(productId), rating: Number(rating) };
+    if (user?.id) row.user_id = user.id;
+    const { error } = await sb.from("product_ratings").insert(row);
+    if (error) throw error;
+    toast("Faleminderit për vlerësimin!");
+    await loadProductRatings();
+  } catch (error) {
+    console.error("Vlerësimi dështoi:", error);
+    toast("Vlerësimi nuk u ruajt. Provo përsëri.");
+  } finally {
+    widget.forEach(el => el.querySelectorAll("button").forEach(b => b.disabled = false));
+  }
+}
+
+document.addEventListener("click", event => {
+  const star = event.target.closest(".dss-rating-star");
+  if (!star) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const widget = star.closest(".dss-rating-widget");
+  if (widget) submitProductRating(widget.dataset.ratingProduct, star.dataset.rating);
+});
+
+function updateDetailRating(p) {
+  const modal = document.getElementById("productDetailsModal");
+  if (!modal || !p) return;
+  const holder = modal.querySelector(".dss-detail-stars");
+  const stats = dssRatingStats[String(p.id)] || { average: 0, count: 0 };
+  if (holder) {
+    holder.innerHTML = ratingMarkup(p.id) + `<span class="dss-detail-rating-summary">${stats.count ? stats.average.toFixed(1) + " / 5 · " + stats.count + " vlerësime" : "Bëhu i pari që vlerëson"}</span>`;
+  }
+}
 
 function render() {
   const searchEl = $("#search");
@@ -801,6 +889,7 @@ function render() {
         <div class="cat">${esc(p.category || "")}</div>
         <div style="display:inline-block;margin:5px 0 2px;padding:4px 7px;border-radius:5px;font-size:11px;font-weight:bold;background:${p.product_condition === "used" ? "#5a421b" : "#173e2b"};color:${p.product_condition === "used" ? "#ffd27a" : "#8ff0b0"}">${p.product_condition === "used" ? t("usedCondition") : t("newCondition")}</div>
         <h3>${esc(p.name)}</h3>
+        ${ratingMarkup(p.id, true)}
 
         ${priceHtml}
 
@@ -1553,3 +1642,4 @@ async function loadBanners() {
 applyLanguage();
 load();
 loadBanners();
+loadProductRatings();
