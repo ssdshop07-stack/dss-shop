@@ -1641,7 +1641,7 @@ if (orderForm) {
       toast(t("orderSuccess") + orderId);
 
       window.open(
-        "https://wa.me/?text=" + encodeURIComponent(message),
+        "https://wa.me/355684398803?text=" + encodeURIComponent(message),
         "_blank"
       );
     } catch (error) {
