@@ -572,10 +572,10 @@ window.openProductDetails = function (p) {
 
       #productDetailsModal .dss-price-stock-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:15px 0;margin:0 0 18px}
       #productDetailsModal #detailsPrice{font-size:clamp(25px,5vw,34px);font-weight:800;color:#20242a;margin:0}
-      #productDetailsModal #detailsStock{margin:0;border:1px solid #164b2d;border-radius:30px;padding:9px 13px;background:#071d12;color:#08c965;font-weight:800;white-space:nowrap}
-      #productDetailsModal #detailsPersonalDiscount{display:none;align-items:center;justify-content:space-between;gap:12px;background:#071d12;border:1px solid #164b2d;border-radius:14px;padding:16px;margin:0 0 22px;color:#08c965;font-size:15px;font-weight:bold}
-      #productDetailsModal #detailsPersonalDiscount .discount-sub{display:block;color:#187c42;font-weight:normal;font-size:13px;margin-top:4px}
-      #productDetailsModal #detailsPersonalDiscount .discount-price{font-size:25px;white-space:nowrap}
+      #productDetailsModal #detailsStock{margin:0;border:1px solid #bbf7d0;border-radius:30px;padding:9px 13px;background:#ecfdf3;color:#15803d;font-weight:800;white-space:nowrap}
+      #productDetailsModal #detailsPersonalDiscount{display:none;align-items:center;justify-content:space-between;gap:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;padding:16px;margin:0 0 22px;color:#15803d;font-size:15px;font-weight:bold}
+      #productDetailsModal #detailsPersonalDiscount .discount-sub{display:block;color:#166534;font-weight:normal;font-size:13px;margin-top:4px}
+      #productDetailsModal #detailsPersonalDiscount .discount-price{font-size:25px;white-space:nowrap;color:#15803d}
       #productDetailsModal .dss-detail-meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
       #productDetailsModal .dss-detail-meta p{margin:0;background:#f5f6f8;border:1px solid #e2e5e9;border-radius:8px;padding:9px 11px;color:#4b5563;font-size:12px}\n      #productDetailsModal #detailsStock{background:#092c1b;border-color:#14532d;color:#08c965;font-weight:800}
       #productDetailsModal #detailsDescriptionTitle{font-size:16px;margin:20px 0 8px}
