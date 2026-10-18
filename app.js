@@ -43,7 +43,14 @@ window.addEventListener("popstate", () => {
 
 window.dssCloseProductDetails = function () {
   const detailModal = document.getElementById("productDetailsModal");
-  if (dssDetailHistoryOpen) {
+  const url = new URL(window.location.href);
+  const isDirectProductUrl = url.searchParams.has("product");
+  if (isDirectProductUrl && !window.history.state?.dssProductDetails) {
+    url.searchParams.delete("product");
+    window.history.replaceState(window.history.state || {}, "", url.pathname + url.search + url.hash);
+    if (detailModal) detailModal.style.display = "none";
+    dssDetailHistoryOpen = false;
+  } else if (dssDetailHistoryOpen) {
     dssDetailHistoryOpen = false;
     window.history.back();
   } else if (detailModal) {
@@ -723,10 +730,59 @@ window.openProductDetails = function (p) {
   modal.querySelector("#shareCopy").textContent = language === "sq" ? "Kopjo linkun" : "Copy link";
   modal.querySelector("#detailsAdd").textContent = t("add");
 
-  const shareUrl = window.location.href.split("#")[0] + "#product-" + encodeURIComponent(String(p.id ?? p.name ?? ""));
+  const shareUrlObject = new URL(window.location.href);
+  shareUrlObject.hash = "";
+  shareUrlObject.searchParams.set("product", String(p.id));
+  const shareUrl = shareUrlObject.toString();
   const shareText = (p.name || "DSS Shop") + " — " + (p.category || "") + " | " + money(basePrice(p)) + " | DSS Shop";
 
-  modal.querySelector("#shareFacebook").onclick = () => window.open("https://www.facebook.com/share/1HYfafBQqb/", "_blank", "noopener,noreferrer");
+  // Give each product its own shareable URL and product-specific metadata.
+  const pageTitle = (p.name || "Produkt") + " | DSS Shop";
+  document.title = pageTitle;
+  const setMeta = (selector, attr, value) => {
+    let node = document.head.querySelector(selector);
+    if (!node) {
+      node = document.createElement("meta");
+      const match = selector.match(/\[(name|property)="([^"]+)"\]/);
+      if (match) node.setAttribute(match[1], match[2]);
+      document.head.appendChild(node);
+    }
+    node.setAttribute("content", value || "");
+  };
+  setMeta('meta[name="description"]', "name", String(p.name || "Produkt DSS Shop") + " — " + String(p.description || p.category || "Shiko çmimin dhe disponueshmërinë në DSS Shop").slice(0, 140));
+  setMeta('meta[property="og:title"]', "property", pageTitle);
+  setMeta('meta[property="og:description"]', "property", String(p.description || p.category || "Porosit online në DSS Shop").slice(0, 180));
+  setMeta('meta[property="og:url"]', "property", shareUrl);
+  setMeta('meta[property="og:image"]', "property", p.image_url || "");
+  setMeta('meta[name="twitter:title"]', "name", pageTitle);
+  setMeta('meta[name="twitter:description"]', "name", String(p.description || p.category || "Porosit online në DSS Shop").slice(0, 180));
+  let canonical = document.head.querySelector('link[rel="canonical"]');
+  if (canonical) canonical.href = shareUrl;
+  let productSchema = document.getElementById("dssDynamicProductSchema");
+  if (!productSchema) {
+    productSchema = document.createElement("script");
+    productSchema.id = "dssDynamicProductSchema";
+    productSchema.type = "application/ld+json";
+    document.head.appendChild(productSchema);
+  }
+  productSchema.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": p.name || "Produkt DSS Shop",
+    "image": p.image_url ? [p.image_url] : [],
+    "description": String(p.description || p.category || "Produkt në DSS Shop"),
+    "sku": p.sku || String(p.id),
+    "category": p.category || "",
+    "offers": {
+      "@type": "Offer",
+      "url": shareUrl,
+      "priceCurrency": "EUR",
+      "price": String(basePrice(p)),
+      "availability": Number(p.stock || 0) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+    }
+  });
+
+  modal.querySelector("#shareFacebook").onclick = () => window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(shareUrl), "_blank", "noopener,noreferrer");
   modal.querySelector("#shareInstagram").onclick = () => window.open("https://www.instagram.com/pro.security.golem/", "_blank", "noopener,noreferrer");
   modal.querySelector("#shareCopy").onclick = async () => {
     try {
@@ -742,7 +798,11 @@ window.openProductDetails = function (p) {
   };
 
   if (modal.style.display !== "flex" && !dssDetailHistoryOpen) {
-    window.history.pushState({ ...(window.history.state || {}), dssProductDetails: true }, "", window.location.href);
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("product") !== String(p.id)) {
+      url.searchParams.set("product", String(p.id));
+      window.history.pushState({ ...(window.history.state || {}), dssProductDetails: true }, "", url.pathname + url.search + url.hash);
+    }
     dssDetailHistoryOpen = true;
   }
   modal.style.display = "flex";
@@ -1075,6 +1135,18 @@ async function load() {
   refreshCartPrices();
   render();
   renderCart();
+
+  // Open the requested product when someone visits a shared product URL.
+  const requestedProductId = new URLSearchParams(window.location.search).get("product");
+  if (requestedProductId) {
+    const requestedProduct = products.find(p => String(p.id) === String(requestedProductId));
+    if (requestedProduct) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("product", String(requestedProduct.id));
+      window.history.replaceState({ ...(window.history.state || {}), dssDirectProductLink: true }, "", url.pathname + url.search + url.hash);
+      window.openProductDetails(requestedProduct);
+    }
+  }
 }
 
 /* =========================================
