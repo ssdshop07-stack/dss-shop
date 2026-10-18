@@ -6,8 +6,13 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://ssdshop07-stack.github.io/dss-shop/account.html</loc>
+    <loc>https://ssdshop07-stack.github.io/dss-shop/product-dahua-dhi-nvr2108hs-4ks3.html</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ssdshop07-stack.github.io/dss-shop/dss-product-vto6521h-d.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
 </urlset>
