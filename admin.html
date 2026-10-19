@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#155eef">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="DSS Admin">
+  <link rel="manifest" href="./admin-manifest.json?v=1">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./favicon.png">
   <title>DSS Shop | Admin</title>
 
   <style>
@@ -312,5 +319,16 @@
     }
   });
 </script>
+  <script>
+    // Regjistron PWA-në e veçantë të panelit Admin.
+    if ("serviceWorker" in navigator && location.protocol === "https:") {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("./admin-sw.js?v=1")
+          .catch(function (error) {
+            console.warn("DSS Admin PWA nuk u regjistrua:", error);
+          });
+      });
+    }
+  </script>
 </body>
 </html>
