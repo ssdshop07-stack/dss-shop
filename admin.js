@@ -1064,10 +1064,14 @@
       <article style="padding:12px 0;border-bottom:1px solid #ddd">
         <strong>Email: ${esc(item.email || "—")}</strong>
         <p>Statusi: <strong>${esc(item.status || "i panjohur")}</strong> · Regjistruar: ${esc(item.created_at ? new Date(item.created_at).toLocaleString("sq-AL") : "—")}</p>
-        ${item.status === "pending" ? `
-          <button type="button" data-approval="${esc(item.user_id)}" data-status="approved">Aprovo llogarinë</button>
-          <button type="button" class="danger" data-approval="${esc(item.user_id)}" data-status="rejected">Refuzo</button>
-        ` : ""}
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
+          ${item.status === "pending" ? `
+            <button type="button" data-approval="${esc(item.user_id)}" data-status="approved">Aprovo llogarinë</button>
+            <button type="button" class="danger" data-approval="${esc(item.user_id)}" data-status="rejected">Refuzo</button>
+          ` : ""}
+          ${item.status === "approved" ? `<button type="button" class="danger" data-approval="${esc(item.user_id)}" data-status="rejected">Hiq aksesin</button>` : ""}
+          <button type="button" class="danger" data-delete-customer="${esc(item.user_id)}">Fshi llogarinë</button>
+        </div>
       </article>
     `).join("");
 
@@ -1106,6 +1110,37 @@
           alert(message);
           buttons.forEach(b => { b.disabled = false; });
           button.textContent = oldText;
+        }
+      });
+    });
+
+    el.querySelectorAll("[data-delete-customer]").forEach(button => {
+      button.addEventListener("click", async () => {
+        const id = button.dataset.deleteCustomer;
+        const article = button.closest("article");
+        const email = article?.querySelector("strong")?.textContent || "këtë klient";
+        if (!confirm("A je i sigurt që dëshiron të fshish përgjithmonë " + email + "? Ky veprim nuk mund të zhbëhet. Porositë e klientit nuk fshihen nga kjo procedurë.")) return;
+        button.disabled = true;
+        const previousText = button.textContent;
+        button.textContent = "Po fshihet...";
+        try {
+          const { data: sessionData } = await db.auth.getSession();
+          const token = sessionData?.session?.access_token;
+          if (!token) throw new Error("Sesioni i administratorit ka skaduar. Hyr përsëri.");
+          const { data, error } = await db.functions.invoke("admin-delete-customer", {
+            body: { user_id: id },
+            headers: { Authorization: "Bearer " + token }
+          });
+          if (error) throw error;
+          if (!data?.success) throw new Error(data?.error || "Fshirja nuk u konfirmua.");
+          msg("loginMsg", "Llogaria e klientit u fshi.");
+          await loadCustomerApprovals();
+        } catch (e) {
+          const message = "Fshirja dështoi: " + (e.message || "Gabim i panjohur");
+          msg("loginMsg", message, true);
+          alert(message);
+          button.disabled = false;
+          button.textContent = previousText;
         }
       });
     });
