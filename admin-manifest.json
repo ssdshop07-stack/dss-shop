@@ -1,0 +1,27 @@
+{
+  "id": "./admin.html",
+  "name": "DSS Shop Admin",
+  "short_name": "DSS Admin",
+  "description": "Paneli i administrimit të DSS Shop",
+  "lang": "sq-AL",
+  "start_url": "./admin.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f5f9",
+  "theme_color": "#155eef",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./favicon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
