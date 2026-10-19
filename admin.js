@@ -1146,6 +1146,34 @@
     });
   }
 
+  /* KLIENTET ONLINE */
+  async function loadOnlineCustomers() {
+    const el = $("onlineCustomers");
+    if (!el) return;
+    el.textContent = "Po kontrollohen klientët online...";
+    const cutoff = new Date(Date.now() - 90000).toISOString();
+    const { data, error } = await db.from("customer_presence")
+      .select("user_id,email,last_seen")
+      .gte("last_seen", cutoff)
+      .order("last_seen", { ascending: false });
+    if (error) {
+      el.textContent = "Gabim gjatë ngarkimit: " + error.message;
+      return;
+    }
+    const users = data || [];
+    if (!users.length) {
+      el.textContent = "Nuk ka klientë të identifikuar online për momentin.";
+      return;
+    }
+    el.innerHTML = users.map(user => {
+      const seconds = Math.max(0, Math.floor((Date.now() - new Date(user.last_seen).getTime()) / 1000));
+      const ago = seconds < 10 ? "tani" : "para " + seconds + " sekondash";
+      return '<article style="padding:12px 0;border-bottom:1px solid #d0d5dd;overflow-wrap:anywhere">' +
+        '<strong style="color:#067647">🟢 ' + esc(user.email || "Klient") + '</strong>' +
+        '<p style="margin:6px 0 0">Aktiviteti i fundit: ' + ago + '</p></article>';
+    }).join("");
+  }
+
   /* PANELI */
 
   function showPanel() {
@@ -1161,7 +1189,8 @@
       ["bannersAdmin", loadBanners],
       ["categoriesAdmin", loadCategories],
       ["trafficStats", loadTraffic],
-      ["customerApprovals", loadCustomerApprovals]
+      ["customerApprovals", loadCustomerApprovals],
+      ["onlineCustomers", loadOnlineCustomers]
     ];
 
     tasks.forEach(([targetId, loader]) => {
@@ -1209,6 +1238,10 @@
     listen("refreshApprovals", "click", async function () {
       try { await loadCustomerApprovals(); } catch (e) { msg("loginMsg", "Gabim gjatë ngarkimit të kërkesave: " + e.message, true); }
     });
+    listen("refreshOnlineCustomers", "click", loadOnlineCustomers);
+    setInterval(() => {
+      if ($("panel") && !$("panel").hidden) loadOnlineCustomers();
+    }, 30000);
 
     listen("loginForm", "submit", async function (event) {
       event.preventDefault();
