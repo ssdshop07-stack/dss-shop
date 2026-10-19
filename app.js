@@ -1178,6 +1178,7 @@ async function openAccount() {
       if (approved) {
         refreshCartPrices();
         render();
+        dssStartPresence();
       }
     } else {
       currentUser = null;
