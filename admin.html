@@ -157,6 +157,18 @@
     </section>
 
 
+    <!-- KLIENTET ONLINE -->
+    <section class="card" id="onlineCustomersManager" style="padding:0;overflow:hidden">
+      <details>
+        <summary style="cursor:pointer;padding:18px;font-size:18px;font-weight:bold">🟢 Klientët online</summary>
+        <div style="padding:0 18px 18px">
+          <p>Shfaq klientët e miratuar që kanë pasur aktivitet në 90 sekondat e fundit. Lista rifreskohet automatikisht çdo 30 sekonda.</p>
+          <button type="button" id="refreshOnlineCustomers" class="secondary">Rifresko klientët online</button>
+          <div id="onlineCustomers" aria-live="polite">Klientët online do të shfaqen këtu.</div>
+        </div>
+      </details>
+    </section>
+
     <!-- MIRATIMET: vendosur ne fillim te panelit -->
     <section class="card" id="customerApprovalManager" style="padding:0;overflow:hidden">
       <details>
@@ -290,7 +302,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./config.js?v=107"></script>
-<script src="./admin.js?v=20261016-approval-fix-1"></script>
+<script src="./admin.js?v=20261019-online-clients-1"></script>
 
 <script>
   window.addEventListener("error", function(event) {
