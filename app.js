@@ -1270,7 +1270,7 @@ async function finishCustomerLogin(user,successMessage){
     if(currentUser)await sb.auth.signOut();currentUser=null;customerApproved=false;
     refreshCartPrices();render();updateAccountUI(t("approvalPending"));return false;
   }
-  refreshCartPrices();render();updateAccountUI(successMessage||t("loginSuccess"));return true;
+  refreshCartPrices();render();dssStartPresence();updateAccountUI(successMessage||t("loginSuccess"));return true;
 }
 
 const accountForm=$("#accountForm");
@@ -1489,6 +1489,7 @@ sb.auth.getSession().then(async ({ data, error }) => {
 
   refreshCartPrices();
   render();
+  if (currentUser && customerApproved) dssStartPresence();
   updateAccountUI();
 });
 
@@ -1505,6 +1506,27 @@ sb.auth.onAuthStateChange((_event, session) => {
     updateAccountUI();
   }
 });
+
+/* PRANIA ONLINE: ruaj vetëm sesionet e klientëve të miratuar. */
+let dssPresenceTimer = null;
+async function dssUpdateCustomerPresence() {
+  if (!currentUser?.id || !customerApproved || document.visibilityState === "hidden") return;
+  const { error } = await sb.from("customer_presence").upsert({
+    user_id: currentUser.id,
+    email: currentUser.email || null,
+    last_seen: new Date().toISOString()
+  }, { onConflict: "user_id" });
+  if (error) console.warn("DSS presence update failed:", error.message);
+}
+function dssStartPresence() {
+  dssUpdateCustomerPresence();
+  if (dssPresenceTimer) clearInterval(dssPresenceTimer);
+  dssPresenceTimer = setInterval(dssUpdateCustomerPresence, 30000);
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") dssUpdateCustomerPresence();
+});
+
 
 /* =========================================
    KERKIMI, RENDITJA DHE SHPORTA
