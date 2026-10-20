@@ -1089,12 +1089,16 @@ async function loadCategoriesUI() {
     }
 
     selectedCategory = "all";
+    const section = document.querySelector("#categoriesSection");
+    if (section) section.classList.add("dss-categories-ready");
     container.querySelectorAll(".category-btn").forEach((button) => {
       button.classList.remove("active");
     });
   } catch (error) {
     // Supabase category errors should not make the category row disappear.
     container.innerHTML = fallbackMarkup;
+    const section = document.querySelector("#categoriesSection");
+    if (section) section.classList.add("dss-categories-ready");
     console.error("Kategoritë nuk u ngarkuan nga Supabase; u rikthyen kategoritë rezervë:", error);
   }
 }
