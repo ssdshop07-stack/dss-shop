@@ -728,7 +728,7 @@ window.openProductDetails = function (p) {
   installVideo.src = videoId ? "https://www.youtube-nocookie.com/embed/" + videoId : "";
   installLink.href = videoId ? "https://www.youtube.com/watch?v=" + videoId : "";
   modal.querySelector("#shareCopy").textContent = language === "sq" ? "Kopjo linkun" : "Copy link";
-  modal.querySelector("#detailsAdd").textContent = t("add");
+  modal.querySelector("#detailsAdd").textContent = t("order");
 
   const shareUrlObject = new URL(window.location.href);
   shareUrlObject.hash = "";
@@ -795,6 +795,13 @@ window.openProductDetails = function (p) {
   modal.querySelector("#detailsAdd").onclick = () => {
     window.add(p);
     window.dssCloseProductDetails();
+    const cartBox = document.querySelector("#cart");
+    if (cartBox) cartBox.classList.add("open");
+    const orderForm = document.querySelector("#orderForm");
+    if (orderForm) {
+      orderForm.classList.add("dss-order-visible");
+      setTimeout(() => orderForm.scrollIntoView({ behavior: "smooth", block: "start" }), 180);
+    }
   };
 
   if (modal.style.display !== "flex" && !dssDetailHistoryOpen) {
