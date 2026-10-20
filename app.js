@@ -1104,7 +1104,8 @@ async function loadCategoriesUI() {
 ========================================= */
 
 async function load() {
-  await loadCategoriesUI();
+  // Start category loading without blocking the product request; both fetch in parallel.
+  const categoriesLoading = loadCategoriesUI();
 
   try {
     if (
@@ -1139,6 +1140,7 @@ async function load() {
     }
   }
 
+  await categoriesLoading;
   refreshCartPrices();
   render();
   renderCart();
