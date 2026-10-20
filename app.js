@@ -965,8 +965,8 @@ function render() {
         ${priceHtml}
 
         <button type="button"
-          onclick='event.stopPropagation();add(${encodedProduct})'>
-          ${t("add")}
+          onclick='event.stopPropagation();add(${encodedProduct});const cartBox=document.querySelector("#cart");if(cartBox)cartBox.classList.add("open");const orderForm=document.querySelector("#orderForm");if(orderForm){orderForm.classList.add("dss-order-visible");setTimeout(()=>orderForm.scrollIntoView({behavior:"smooth",block:"start"}),120)}'>
+          ${t("order")}
         </button>
       </article>
     `;
