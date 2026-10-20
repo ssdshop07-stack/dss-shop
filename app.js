@@ -1284,6 +1284,11 @@ if(accountForm)accountForm.addEventListener("submit",async(e)=>{
       if(!password||password.length<6)throw new Error("Fjalëkalimi duhet të ketë të paktën 6 karaktere.");
       const {data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:window.location.origin+window.location.pathname.replace(/[^/]*$/,"account.html")}});
       if(error)throw error;
+      if(data.user){
+        sb.functions.invoke("notify-new-customer",{body:{user_id:data.user.id}})
+          .then(({error:notifyError})=>{if(notifyError)console.error("DSS signup email notification failed:",notifyError.message);})
+          .catch((notifyError)=>console.error("DSS signup email notification failed:",notifyError));
+      }
       if(data.session&&data.user)await finishCustomerLogin(data.user,t("signupSuccess"));else{accountMode="login";updateAccountUI(t("registered"));}
     }else{
       if(!password)throw new Error("Shkruaj fjalëkalimin.");
@@ -1640,6 +1645,11 @@ if (orderForm) {
 
         return;
       }
+
+      // Njoftimi me email dërgohet në sfond; dështimi i email-it nuk anulon porosinë.
+      sb.functions.invoke("notify-new-order",{body:{order_id:orderId}})
+        .then(({error:notifyError})=>{if(notifyError)console.error("DSS order email notification failed:",notifyError.message);})
+        .catch((notifyError)=>console.error("DSS order email notification failed:",notifyError));
 
       const total = cart.reduce(
         (a, x) => a + x.price * x.qty,
