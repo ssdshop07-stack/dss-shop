@@ -1144,14 +1144,20 @@ async function loadCategoriesUI() {
 
     selectedCategory = "all";
     const section = document.querySelector("#categoriesSection");
-    if (section) section.classList.add("dss-categories-ready");
+    if (section) {
+      section.classList.add("dss-categories-ready");
+      section.style.visibility = "visible";
+    }
     container.querySelectorAll(".category-btn").forEach((button) => {
       button.classList.toggle("active", normalizeCategory(button.dataset.category) === normalizeCategory(selectedCategory));
     });
   } catch (error) {
     renderAdminCategoryFallback();
     const section = document.querySelector("#categoriesSection");
-    if (section) section.classList.add("dss-categories-ready");
+    if (section) {
+      section.classList.add("dss-categories-ready");
+      section.style.visibility = "visible";
+    }
     console.error("Kategoritë nuk u ngarkuan nga Supabase; u rikthyen kategoritë rezervë:", error);
   }
 }
