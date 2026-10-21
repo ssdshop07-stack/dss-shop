@@ -1052,6 +1052,11 @@ async function loadCategoriesUI() {
 
   // Keep the categories already in index.html as a safe fallback.
   const fallbackMarkup = container.innerHTML;
+  const normalizeCategory = (value) => String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
   // Ruaj fotot e kategorive nga index.html, që kategoritë pa image_url në
   // Supabase të mos shfaqen pa foto.
   const fallbackButtons = Array.from(container.querySelectorAll(".category-btn"));
@@ -1086,17 +1091,11 @@ async function loadCategoriesUI() {
 
     if (error) throw error;
 
-    const normalize = (value) => String(value || "")
-      .normalize("NFD")
-      .replace(/[\\u0300-\\u036f]/g, "")
-      .toLowerCase()
-      .trim();
-
     const rows = data || [];
     const activeCategories = rows.filter((category) =>
       category.active !== false &&
       String(category.name || "").trim() &&
-      !["te gjitha", "te gjitha produktet", "all"].includes(normalize(category.name))
+      !["te gjitha", "te gjitha produktet", "all"].includes(normalizeCategory(category.name))
     );
 
     // An empty table must not erase the categories already shown on the shop.
