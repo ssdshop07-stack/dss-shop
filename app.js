@@ -1081,41 +1081,11 @@ async function loadCategoriesUI() {
   };
 
   try {
-    let data = null;
-    let categoryError = null;
-
-    // First try the Supabase JS client.
-    const result = await sb
+    const { data, error } = await sb
       .from("categories")
       .select("name, image_url, active, sort_order")
       .order("sort_order", { ascending: true });
-    data = result.data;
-    categoryError = result.error;
-
-    // If the JS query fails or returns no rows, retry through the public REST endpoint.
-    // This keeps the storefront from silently showing the outdated hard-coded categories.
-    if (categoryError || !Array.isArray(data) || data.length === 0) {
-      try {
-        const baseUrl = String(window.DSS_SUPABASE_URL || "").replace(/\\/+$/, "");
-        const apiKey = String(window.DSS_SUPABASE_KEY || "");
-        if (baseUrl && apiKey) {
-          const response = await fetch(
-            baseUrl + "/rest/v1/categories?select=name,image_url,active,sort_order&active=eq.true&order=sort_order.asc",
-            { headers: { apikey: apiKey, Authorization: "Bearer " + apiKey, Accept: "application/json" }, cache: "no-store" }
-          );
-          if (response.ok) {
-            const retryData = await response.json();
-            if (Array.isArray(retryData) && retryData.length) {
-              data = retryData;
-              categoryError = null;
-            }
-          }
-        }
-      } catch (retryError) {
-        console.warn("REST retry for categories failed:", retryError);
-      }
-    }
-    if (categoryError) throw categoryError;
+    if (error) throw error;
 
     const activeCategories = (data || []).filter((category) =>
       category.active !== false &&
@@ -1124,8 +1094,9 @@ async function loadCategoriesUI() {
     );
 
     if (!activeCategories.length) {
-      container.innerHTML = "";
-      console.warn("Nuk u kthyen kategori aktive nga Supabase; nuk shfaqen më kategoritë e vjetra rezervë.");
+      container.innerHTML = fallbackMarkup;
+      console.warn("Tabela categories është bosh; po përdoren kategoritë rezervë nga index.html.");
+
     } else {
       container.innerHTML = activeCategories.map((category, index) => {
         const name = String(category.name || "").trim();
