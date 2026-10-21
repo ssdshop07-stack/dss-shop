@@ -446,7 +446,8 @@
 
 
     /* Mos shfaq kategoritë rezervë përpara se të ngarkohen fotot e sakta nga Supabase */
-    #categoriesSection:not(.dss-categories-ready) #categories{visibility:hidden!important}
+    /* Categories stay visible even if JavaScript loads slowly. */
+    #categoriesSection #categories{visibility:visible!important;opacity:1!important}
 
     /* DSS FIX: rikthe fotot e kategorive dhe siguro pamjen e profilit */
     #categoriesSection .category-btn img{
