@@ -1105,18 +1105,34 @@ async function loadCategoriesUI() {
     } else {
       container.innerHTML = activeCategories.map((category, index) => {
         const name = String(category.name || "").trim();
-        return `<button type="button" class="category-btn${index === 0 ? " active" : ""}" data-category="${esc(name)}">
-          <img src="${esc(category.image_url || categoryImageFallback(name, index))}" alt="${esc(name)}" loading="eager" decoding="async" onerror="this.onerror=null;this.src='${esc(categoryImageFallback(name, index))}'">
+        const fallbackImage = categoryImageFallback(name, index);
+        const savedImage = String(category.image_url || "").trim();
+        const image = savedImage || fallbackImage;
+        return `<button type="button" class="category-btn" data-category="${esc(name)}">
+          <img src="${esc(image)}" data-fallback-image="${esc(fallbackImage)}" alt="${esc(name)}" loading="eager" decoding="async">
           <span>${esc(name)}</span>
         </button>`;
       }).join("");
+
+      // Handle failed image URLs outside inline HTML. If a stored URL is expired,
+      // malformed, or points to a missing object, show the matching built-in image.
+      container.querySelectorAll(".category-btn img").forEach((img) => {
+        img.addEventListener("error", () => {
+          const fallback = img.dataset.fallbackImage || "";
+          if (fallback && img.src !== fallback) {
+            img.src = fallback;
+          } else {
+            img.style.visibility = "hidden";
+          }
+        }, { once: true });
+      });
     }
 
     selectedCategory = "all";
     const section = document.querySelector("#categoriesSection");
     if (section) section.classList.add("dss-categories-ready");
     container.querySelectorAll(".category-btn").forEach((button) => {
-      button.classList.remove("active");
+      button.classList.toggle("active", normalizeCategory(button.dataset.category) === normalizeCategory(selectedCategory));
     });
   } catch (error) {
     // Supabase category errors should not make the category row disappear.
