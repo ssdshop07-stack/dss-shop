@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin.html
 Disallow: /admin.js
 
-Sitemap: https://ssdshop07-stack.github.io/dss-shop/sitemap.xml
+Sitemap: https://dss-shop.pages.dev/sitemap.xml
