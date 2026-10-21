@@ -605,6 +605,54 @@
     #accountBox #accountClose::before,#accountBox #accountClose::after{content:none!important;display:none!important}
   </style>
 
+
+  <style id="dss-modern-home-v1">
+    :root{color-scheme:light;--bg:#fff;--panel:#fff;--text:#10264a;--muted:#68778d;--red:#e50925}
+    html,body{background:#fff!important;color:#142847!important}
+    header{background:#fff!important;border-bottom:1px solid #e5eaf1!important;box-shadow:0 2px 10px #12264a08}
+    .wrap{width:min(1200px,94%)}
+    .categories-section{padding-top:24px;padding-bottom:28px}
+    .categories-section h2,.toolbar h2{color:#142847;font-weight:800;letter-spacing:-.5px}
+    .categories-section h2:after{content:"";display:block;width:92px;height:5px;background:#e50925;border-radius:9px;margin-top:14px}
+    .categories{display:flex!important;gap:14px!important;overflow-x:auto;padding:4px 2px 14px!important;scroll-snap-type:x proximity}
+    .category-btn{flex:0 0 178px!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;padding:7px!important;background:#fff!important;color:#142847!important;border:1px solid #e2e8f0!important;border-radius:18px!important;box-shadow:0 5px 16px #13294b0b!important;overflow:hidden;scroll-snap-align:start}
+    .category-btn img{width:100%!important;height:132px!important;object-fit:contain!important;border:0!important;border-radius:12px!important;background:#f3f6fa!important}
+    .category-btn span{font-size:15px!important;text-align:left!important;min-height:0!important;padding:12px 8px 9px!important;line-height:1.25!important;color:#10264a!important}
+    .category-btn.active{border:1px solid #e2e8f0!important;color:#10264a!important;background:#fff!important}
+    .category-btn.active img{border:0!important}
+    .category-btn[data-category="all"],.category-btn[data-category="Të gjitha"],.category-btn[data-category="All"]{display:none!important}
+    #products{padding-top:8px}
+    .toolbar{gap:10px!important}
+    .toolbar input,.toolbar select{background:#fff!important;color:#26364d!important;border:1px solid #dce3ed!important;border-radius:13px!important;min-height:54px!important}
+    .grid{gap:14px!important}
+    .card{background:#fff!important;border:1px solid #e1e8f1!important;border-radius:17px!important;padding:10px!important;box-shadow:0 4px 15px #13294b08}
+    .pic{background:#f5f7fa!important;border-radius:13px!important;height:190px!important}
+    .card h3{color:#10264a!important;font-size:16px!important}
+    .price{color:#10264a!important}
+    .cat{color:#e50925!important}
+    .card button{border-radius:11px!important;background:#e50925!important}
+    .search-float{background:#0878f9!important;box-shadow:0 5px 16px #0878f944!important}
+    .whatsapp-contact{box-shadow:0 5px 16px #25d36644!important}
+    .bottom-nav{background:#fff!important;border-top:1px solid #e3e9f1!important;box-shadow:0 -4px 14px #10264a08}
+    .bottom-nav a,.bottom-nav button{color:#526075!important}
+    .bottom-nav .home-link{color:#e50925!important}
+    .header-actions button,.main-cart-btn{background:#fff!important;color:#142847!important;border-color:#dfe6ef!important}
+    @media(max-width:650px){
+      .categories-section{padding-top:20px;padding-bottom:24px}
+      .categories-section h2{font-size:25px!important;margin-bottom:18px!important}
+      .categories{gap:12px!important}
+      .category-btn{flex-basis:158px!important}
+      .category-btn img{height:112px!important}
+      .category-btn span{font-size:14px!important;padding:10px 7px 8px!important}
+      .grid{gap:10px!important}
+      .card{padding:8px!important}
+      .pic{height:145px!important}
+      .card h3{font-size:14px!important}
+      .price{font-size:18px!important}
+      .toolbar input,.toolbar select{min-height:50px!important}
+    }
+  </style>
+
 </head>
 <body>
   <header>
@@ -711,7 +759,7 @@
     <button type="button" id="bottomCartBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"></path></svg><span id="bottomCartLabel">Shporta</span></button>
     <button type="button" id="profileBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"></circle><path d="M4 21v-2a8 8 0 0 1 16 0v2"></path></svg><span id="profileLabel">Profili</span></button>
   </div>
-  <script src="app.js?v=20261021-category-images-fix-5"></script>
+  <script src="app.js?v=20261021-modern-home-1"></script>
   <script>
     /* Kategorite levizin automatikisht nga e majta ne te djathte; ndalen perkohesisht kur perdoruesi prek rreshtin. */
     (function () {
