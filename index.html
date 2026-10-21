@@ -798,20 +798,7 @@
 <main>
     <section id="categoriesSection" class="wrap categories-section" style="visibility:hidden">
       <h2 id="categoriesTitle">Shfletoni kategoritë tona</h2>
-      <div class="categories" id="categories">
-        <button type="button" class="category-btn active" data-category="all"><img src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="All products"><span>Të gjitha</span></button>
-        <button type="button" class="category-btn" data-category="Kamera IP"><img src="https://images.unsplash.com/photo-1557324232-b8917d3c3dcb?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="IP cameras"><span>Kamera IP</span></button>
-        <button type="button" class="category-btn" data-category="Kamera Wi-Fi"><img src="https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Wi-Fi cameras"><span>Kamera Wi-Fi</span></button>
-        <button type="button" class="category-btn" data-category="Kamera analoge"><img src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Analog cameras"><span>Kamera analoge</span></button>
-        <button type="button" class="category-btn" data-category="DVR/XVR"><img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="DVR and XVR"><span>DVR/XVR</span></button>
-        <button type="button" class="category-btn" data-category="NVR"><img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="NVR"><span>NVR</span></button>
-        <button type="button" class="category-btn" data-category="Komplete kamerash"><img src="https://images.unsplash.com/photo-1557324232-b8917d3c3dcb?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Camera kits"><span>Komplete kamerash</span></button>
-        <button type="button" class="category-btn" data-category="Alarme"><img src="https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Alarms"><span>Alarme</span></button>
-        <button type="button" class="category-btn" data-category="Kontroll aksesi"><img src="https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Access control"><span>Kontroll aksesi</span></button>
-        <button type="button" class="category-btn" data-category="Interfonë"><img src="https://images.unsplash.com/photo-1557324232-b8917d3c3dcb?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Intercoms"><span>Interfonë</span></button>
-        <button type="button" class="category-btn" data-category="Pajisje rrjeti"><img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Network devices"><span>Pajisje rrjeti</span></button>
-        <button type="button" class="category-btn" data-category="Aksesorë"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&amp;fit=crop&amp;w=400&amp;q=80" alt="Accessories"><span>Aksesorë</span></button>
-      </div>
+      <div class="categories" id="categories" aria-live="polite"></div>
     </section>
     
     
@@ -880,7 +867,7 @@
     <button type="button" id="bottomCartBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"></path></svg><span id="bottomCartLabel">Shporta</span></button>
     <button type="button" id="profileBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"></circle><path d="M4 21v-2a8 8 0 0 1 16 0v2"></path></svg><span id="profileLabel">Profili</span></button>
   </div>
-  <script src="app.js?v=20261021-hide-stale-categories-3"></script>
+  <script src="app.js?v=20261021-empty-static-categories-4"></script>
   <script>
     /* Kategorite levizin automatikisht nga e majta ne te djathte; ndalen perkohesisht kur perdoruesi prek rreshtin. */
     (function () {
