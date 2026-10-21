@@ -1051,6 +1051,30 @@ async function loadCategoriesUI() {
   if (!container) return;
 
   const fallbackMarkup = container.innerHTML;
+  const adminCategoryFallback = [
+    ["NVR","1791814279792-k3nn4nk.jpg"],
+    ["DVR/XVR","1791814209732-l2rzqgg.webp"],
+    ["Ip Camera","1791814504900-21u0gcm.jpg"],
+    ["Alarme","1791814138267-v3b1hmu.png"],
+    ["WI-FI Kamera","1791814066479-wp76d9d.webp"],
+    ["Audio","1791814546563-6e27flj.jpg"],
+    ["Storage","1791880844762-py9y8u1.jpg"],
+    ["Kabllo & Rrjet","1791880758927-m2wptpz.png"],
+    ["Power","1792136947096-o90enuw.webp"],
+    ["Access Control","1791878069772-yqoki5s.jpg"],
+    ["Rack Cabinet","1791877272450-f6wyow4.png"],
+    ["Switch & PoE","1791877398137-gn3oupx.jpg"],
+    ["Video Citofon","1791880668390-kpbd481.jpg"],
+    ["RUTERA","1792138084273-gmhmtfr.jpg"],
+    ["Aksesorë","1792124355625-pr6ptan.png"],
+    ["CCTV Kamera","1792138959063-f177hfc.webp"]
+  ];
+  const renderAdminCategoryFallback = () => {
+    const base = "https://mwimgsccsccltzrtedcq.supabase.co/storage/v1/object/public/product-image/categories/";
+    container.innerHTML = adminCategoryFallback.map(function(item) {
+      return '<button type="button" class="category-btn" data-category="' + esc(item[0]) + '" ><img src="' + base + item[1] + '" alt="' + esc(item[0]) + '" loading="eager" decoding="async"><span>' + esc(item[0]) + '</span></button>';
+    }).join("");
+  };
   const normalizeCategory = (value) => String(value || "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -1094,8 +1118,8 @@ async function loadCategoriesUI() {
     );
 
     if (!activeCategories.length) {
-      container.innerHTML = fallbackMarkup;
-      console.warn("Tabela categories është bosh; po përdoren kategoritë rezervë nga index.html.");
+      renderAdminCategoryFallback();
+      console.warn("Nuk u kthyen kategori aktive nga Supabase; u përdor lista rezervë e sinkronizuar me Admin.");
 
     } else {
       container.innerHTML = activeCategories.map((category, index) => {
@@ -1125,7 +1149,7 @@ async function loadCategoriesUI() {
       button.classList.toggle("active", normalizeCategory(button.dataset.category) === normalizeCategory(selectedCategory));
     });
   } catch (error) {
-    container.innerHTML = fallbackMarkup;
+    renderAdminCategoryFallback();
     const section = document.querySelector("#categoriesSection");
     if (section) section.classList.add("dss-categories-ready");
     console.error("Kategoritë nuk u ngarkuan nga Supabase; u rikthyen kategoritë rezervë:", error);
