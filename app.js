@@ -1050,23 +1050,16 @@ async function loadCategoriesUI() {
   const container = document.querySelector("#categories");
   if (!container) return;
 
-  // Keep the categories already in index.html as a safe fallback.
-  const fallbackMarkup = container.innerHTML;
   const normalizeCategory = (value) => String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-  // Ruaj fotot e kategorive nga index.html, që kategoritë pa image_url në
-  // Supabase të mos shfaqen pa foto.
-  const fallbackButtons = Array.from(container.querySelectorAll(".category-btn"));
-  const fallbackImages = fallbackButtons
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+  const fallbackMarkup = container.innerHTML;
+  const fallbackImages = Array.from(container.querySelectorAll(".category-btn"))
     .filter((button) => normalizeCategory(button.dataset.category) !== "all")
     .map((button) => ({
       name: String(button.dataset.category || ""),
       image: button.querySelector("img")?.getAttribute("src") || ""
-    }))
-    .filter((item) => item.image);
+    })).filter((item) => item.image);
+
   const categoryImageFallback = (name, index) => {
     const normalized = normalizeCategory(name);
     const exact = fallbackImages.find((item) => normalizeCategory(item.name) === normalized);
@@ -1074,9 +1067,9 @@ async function loadCategoriesUI() {
     const lower = String(name || "").toLowerCase();
     const matching = fallbackImages.find((item) => {
       const n = item.name.toLowerCase();
-      return ((lower.includes("kamera") || lower.includes("camera")) && (n.includes("kamera") || n.includes("camera"))) ||
+      return (((lower.includes("kamera") || lower.includes("camera")) && (n.includes("kamera") || n.includes("camera"))) ||
         ((lower.includes("dvr") || lower.includes("nvr") || lower.includes("xvr")) && (n.includes("dvr") || n.includes("nvr"))) ||
-        ((lower.includes("alarm")) && n.includes("alarm")) ||
+        (lower.includes("alarm") && n.includes("alarm")) ||
         ((lower.includes("akses") || lower.includes("access")) && (n.includes("akses") || n.includes("access"))) ||
         ((lower.includes("rrjet") || lower.includes("network")) && (n.includes("rrjet") || n.includes("network")));
     });
@@ -1084,49 +1077,55 @@ async function loadCategoriesUI() {
   };
 
   try {
-    const { data, error } = await sb
-      .from("categories")
+    let rows = null;
+    const { data, error } = await sb.from("categories")
       .select("name, image_url, active, sort_order")
       .order("sort_order", { ascending: true });
+    if (!error && Array.isArray(data)) {
+      rows = data;
+    } else {
+      console.warn("Supabase client category query failed; trying REST fallback:", error);
+      const base = String(window.DSS_SUPABASE_URL || "").replace(/\/+$/, "");
+      const key = String(window.DSS_SUPABASE_KEY || "");
+      if (base && key) {
+        const response = await fetch(base + "/rest/v1/categories?select=name,image_url,active,sort_order&order=sort_order.asc", {
+          headers: { apikey: key, Authorization: "Bearer " + key }
+        });
+        if (!response.ok) throw new Error("REST categories request failed: HTTP " + response.status);
+        rows = await response.json();
+      } else {
+        throw error || new Error("Supabase config is missing");
+      }
+    }
 
-    if (error) throw error;
-
-    const rows = data || [];
-    const activeCategories = rows.filter((category) =>
+    const activeCategories = (rows || []).filter((category) =>
       category.active !== false &&
       String(category.name || "").trim() &&
       !["te gjitha", "te gjitha produktet", "all"].includes(normalizeCategory(category.name))
     );
 
-    // An empty table must not erase the categories already shown on the shop.
     if (!activeCategories.length) {
-      container.innerHTML = fallbackMarkup;
-      console.warn("Tabela categories është bosh; po përdoren kategoritë rezervë nga index.html.");
-    } else {
-      container.innerHTML = activeCategories.map((category, index) => {
-        const name = String(category.name || "").trim();
-        const fallbackImage = categoryImageFallback(name, index);
-        const savedImage = String(category.image_url || "").trim();
-        const image = savedImage || fallbackImage;
-        return `<button type="button" class="category-btn" data-category="${esc(name)}">
-          <img src="${esc(image)}" data-fallback-image="${esc(fallbackImage)}" alt="${esc(name)}" loading="eager" decoding="async">
-          <span>${esc(name)}</span>
-        </button>`;
-      }).join("");
-
-      // Handle failed image URLs outside inline HTML. If a stored URL is expired,
-      // malformed, or points to a missing object, show the matching built-in image.
-      container.querySelectorAll(".category-btn img").forEach((img) => {
-        img.addEventListener("error", () => {
-          const fallback = img.dataset.fallbackImage || "";
-          if (fallback && img.src !== fallback) {
-            img.src = fallback;
-          } else {
-            img.style.visibility = "hidden";
-          }
-        }, { once: true });
-      });
+      throw new Error("Supabase returned no active categories");
     }
+
+    container.innerHTML = activeCategories.map((category, index) => {
+      const name = String(category.name || "").trim();
+      const fallbackImage = categoryImageFallback(name, index);
+      const savedImage = String(category.image_url || "").trim();
+      const image = savedImage || fallbackImage;
+      return `<button type="button" class="category-btn" data-category="${esc(name)}">
+        <img src="${esc(image)}" data-fallback-image="${esc(fallbackImage)}" alt="${esc(name)}" loading="eager" decoding="async">
+        <span>${esc(name)}</span>
+      </button>`;
+    }).join("");
+
+    container.querySelectorAll(".category-btn img").forEach((img) => {
+      img.addEventListener("error", () => {
+        const fallback = img.dataset.fallbackImage || "";
+        if (fallback && img.src !== fallback) img.src = fallback;
+        else img.style.visibility = "hidden";
+      }, { once: true });
+    });
 
     selectedCategory = "all";
     const section = document.querySelector("#categoriesSection");
@@ -1135,11 +1134,10 @@ async function loadCategoriesUI() {
       button.classList.toggle("active", normalizeCategory(button.dataset.category) === normalizeCategory(selectedCategory));
     });
   } catch (error) {
-    // Supabase category errors should not make the category row disappear.
     container.innerHTML = fallbackMarkup;
     const section = document.querySelector("#categoriesSection");
     if (section) section.classList.add("dss-categories-ready");
-    console.error("Kategoritë nuk u ngarkuan nga Supabase; u rikthyen kategoritë rezervë:", error);
+    console.error("Categories failed to load from Supabase:", error);
   }
 }
 
