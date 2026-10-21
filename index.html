@@ -671,6 +671,17 @@
     #categories .category-btn.active img{border:0!important}
     @media(min-width:651px){#categories .category-btn{flex-basis:150px!important}#categories .category-btn img{height:120px!important;min-height:120px!important;max-height:120px!important}}
 
+  
+    /* DSS category cards: override legacy high-specificity rules */
+    #categoriesSection #categories.categories{display:flex!important;flex-flow:row nowrap!important;gap:12px!important;overflow-x:auto!important;align-items:stretch!important;padding:4px 2px 14px!important}
+    #categoriesSection #categories .category-btn{box-sizing:border-box!important;display:flex!important;flex:0 0 158px!important;width:158px!important;max-width:158px!important;min-width:158px!important;height:auto!important;min-height:0!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;gap:0!important;padding:8px!important;overflow:hidden!important;background:#fff!important;border:1px solid #e2e8f0!important;border-radius:14px!important;color:#10264a!important;white-space:normal!important}
+    #categoriesSection #categories .category-btn::before,#categoriesSection #categories .category-btn::after{display:none!important;content:none!important}
+    #categoriesSection #categories .category-btn img{box-sizing:border-box!important;display:block!important;position:static!important;float:none!important;flex:none!important;width:100%!important;max-width:100%!important;min-width:0!important;height:112px!important;min-height:112px!important;max-height:112px!important;margin:0!important;padding:0!important;object-fit:contain!important;object-position:center!important;visibility:visible!important;opacity:1!important;background:#f5f7fa!important;border:0!important;border-radius:9px!important;transform:none!important}
+    #categoriesSection #categories .category-btn span{box-sizing:border-box!important;display:block!important;position:static!important;width:100%!important;height:auto!important;min-height:34px!important;margin:0!important;padding:9px 2px 2px!important;overflow:visible!important;visibility:visible!important;opacity:1!important;color:#10264a!important;font-size:13px!important;font-weight:700!important;line-height:1.25!important;text-align:center!important;white-space:normal!important;overflow-wrap:anywhere!important;background:transparent!important;transform:none!important}
+    #categoriesSection #categories .category-btn.active{border:2px solid #e50925!important;background:#fff!important}
+    #categoriesSection #categories .category-btn.active img{border:0!important}
+    @media(min-width:651px){#categoriesSection #categories .category-btn{flex-basis:150px!important;width:150px!important;min-width:150px!important;max-width:150px!important}#categoriesSection #categories .category-btn img{height:120px!important;min-height:120px!important;max-height:120px!important}}
+
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
