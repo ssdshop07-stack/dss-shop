@@ -1052,6 +1052,31 @@ async function loadCategoriesUI() {
 
   // Keep the categories already in index.html as a safe fallback.
   const fallbackMarkup = container.innerHTML;
+  // Ruaj fotot e kategorive nga index.html, që kategoritë pa image_url në
+  // Supabase të mos shfaqen pa foto.
+  const fallbackButtons = Array.from(container.querySelectorAll(".category-btn"));
+  const fallbackImages = fallbackButtons
+    .filter((button) => normalizeCategory(button.dataset.category) !== "all")
+    .map((button) => ({
+      name: String(button.dataset.category || ""),
+      image: button.querySelector("img")?.getAttribute("src") || ""
+    }))
+    .filter((item) => item.image);
+  const categoryImageFallback = (name, index) => {
+    const normalized = normalizeCategory(name);
+    const exact = fallbackImages.find((item) => normalizeCategory(item.name) === normalized);
+    if (exact) return exact.image;
+    const lower = String(name || "").toLowerCase();
+    const matching = fallbackImages.find((item) => {
+      const n = item.name.toLowerCase();
+      return ((lower.includes("kamera") || lower.includes("camera")) && (n.includes("kamera") || n.includes("camera"))) ||
+        ((lower.includes("dvr") || lower.includes("nvr") || lower.includes("xvr")) && (n.includes("dvr") || n.includes("nvr"))) ||
+        ((lower.includes("alarm")) && n.includes("alarm")) ||
+        ((lower.includes("akses") || lower.includes("access")) && (n.includes("akses") || n.includes("access"))) ||
+        ((lower.includes("rrjet") || lower.includes("network")) && (n.includes("rrjet") || n.includes("network")));
+    });
+    return matching?.image || fallbackImages[index % Math.max(fallbackImages.length, 1)]?.image || "";
+  };
 
   try {
     const { data, error } = await sb
@@ -1082,7 +1107,7 @@ async function loadCategoriesUI() {
       container.innerHTML = activeCategories.map((category, index) => {
         const name = String(category.name || "").trim();
         return `<button type="button" class="category-btn${index === 0 ? " active" : ""}" data-category="${esc(name)}">
-          ${category.image_url ? `<img src="${esc(category.image_url)}" alt="${esc(name)}" loading="lazy">` : ""}
+          <img src="${esc(category.image_url || categoryImageFallback(name, index))}" alt="${esc(name)}" loading="lazy">
           <span>${esc(name)}</span>
         </button>`;
       }).join("");
