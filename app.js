@@ -1107,7 +1107,7 @@ async function loadCategoriesUI() {
       container.innerHTML = activeCategories.map((category, index) => {
         const name = String(category.name || "").trim();
         return `<button type="button" class="category-btn${index === 0 ? " active" : ""}" data-category="${esc(name)}">
-          <img src="${esc(category.image_url || categoryImageFallback(name, index))}" alt="${esc(name)}" loading="lazy">
+          <img src="${esc(category.image_url || categoryImageFallback(name, index))}" alt="${esc(name)}" loading="lazy" onerror="this.onerror=null;this.src='${esc(categoryImageFallback(name, index))}'">
           <span>${esc(name)}</span>
         </button>`;
       }).join("");
