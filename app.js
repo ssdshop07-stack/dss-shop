@@ -721,7 +721,7 @@ window.openProductDetails = function (p) {
     : (language === "sq" ? "Keni zbritje personale: -" + customerDiscountPercent + "%" : "Your personal discount: -" + customerDiscountPercent + "%");
   personalDiscount.querySelector(".discount-sub").textContent = language === "sq" ? "Aplikohet automatikisht në checkout" : "Applied automatically at checkout";
   modal.querySelector("#detailsDiscountPrice").textContent = money(hasProductSale ? salePrice : finalCustomerPrice);
-  personalDiscount.style.display = (hasProductSale || customerApproved) ? "flex" : "none";
+  personalDiscount.style.display = (hasProductSale || (customerApproved && customerDiscountPercent > 0)) ? "flex" : "none";
   modal.querySelector("#detailsDescriptionTitle").textContent = t("description");
   modal.querySelector("#detailsDescription").textContent = description || t("noDescription");
   const installGuide = modal.querySelector("#detailsInstallGuide");
@@ -942,7 +942,7 @@ function render() {
     const price = basePrice(p);
     const discounted = customerPrice(price);
 
-    const priceHtml = customerApproved
+    const priceHtml = (customerApproved && customerDiscountPercent > 0)
       ? `<div class="price">
           <span style="color:#aaa;text-decoration:line-through;font-size:14px">
             ${money(price)}
@@ -1305,7 +1305,7 @@ function updateAccountUI(message) {
     const discount = document.createElement("div");
     discount.className = "dss-profile-discount";
     discount.textContent = customerApproved
-      ? "Keni zbritje personale " + customerDiscountPercent + "%"
+      ? (customerDiscountPercent > 0 ? "Keni zbritje personale " + customerDiscountPercent + "%" : "Nuk ke ulje personale të caktuar.")
       : "Llogaria është në pritje të miratimit";
 
     const note = document.createElement("div");
