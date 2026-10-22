@@ -1051,7 +1051,7 @@
     el.textContent = "Po ngarkohen kërkesat...";
     const { data, error } = await db
       .from("customer_approvals")
-      .select("user_id,email,status,created_at")
+      .select("user_id,email,status,discount_percent,created_at")
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -1064,6 +1064,14 @@
       <article style="padding:12px 0;border-bottom:1px solid #ddd">
         <strong>Email: ${esc(item.email || "—")}</strong>
         <p>Statusi: <strong>${esc(item.status || "i panjohur")}</strong> · Regjistruar: ${esc(item.created_at ? new Date(item.created_at).toLocaleString("sq-AL") : "—")}</p>
+        <label style="display:block;margin:10px 0 4px;font-weight:bold">Ulje personale e klientit</label>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <select data-customer-discount="${esc(item.user_id)}" aria-label="Përqindja e uljes për ${esc(item.email || "klientin")}" style="max-width:180px;margin:0">
+            ${[0,5,10,15,20].map(value => `<option value="${value}" ${Number(item.discount_percent ?? 10) === value ? "selected" : ""}>${value === 0 ? "Pa ulje (0%)" : value + "%"}</option>`).join("")}
+          </select>
+          <button type="button" data-save-customer-discount="${esc(item.user_id)}">Ruaj uljen</button>
+        </div>
+        <p style="font-size:13px;color:#667085">Ulja aplikohet vetëm kur llogaria është e aprovuar.</p>
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
           ${item.status === "pending" ? `
             <button type="button" data-approval="${esc(item.user_id)}" data-status="approved">Aprovo llogarinë</button>
@@ -1074,6 +1082,37 @@
         </div>
       </article>
     `).join("");
+
+    el.querySelectorAll("[data-save-customer-discount]").forEach(button => {
+      button.addEventListener("click", async () => {
+        const id = button.dataset.saveCustomerDiscount;
+        const select = el.querySelector('[data-customer-discount="' + id + '"]');
+        const value = Number(select?.value);
+        if (![0, 5, 10, 15, 20].includes(value)) {
+          alert("Zgjidh 0%, 5%, 10%, 15% ose 20%.");
+          return;
+        }
+        button.disabled = true;
+        const oldText = button.textContent;
+        button.textContent = "Po ruhet...";
+        try {
+          const { data: updated, error } = await db
+            .from("customer_approvals")
+            .update({ discount_percent: value })
+            .eq("user_id", id)
+            .select("user_id,discount_percent")
+            .maybeSingle();
+          if (error) throw error;
+          if (!updated) throw new Error("Nuk u ndryshua asnjë rresht. Kontrollo hyrjen si administrator.");
+          msg("loginMsg", "Ulja personale u ruajt: " + value + "%.");
+          await loadCustomerApprovals();
+        } catch (e) {
+          alert("Nuk u ruajt ulja: " + (e.message || "Gabim i panjohur"));
+          button.disabled = false;
+          button.textContent = oldText;
+        }
+      });
+    });
 
     el.querySelectorAll("[data-approval]").forEach(button => {
       button.addEventListener("click", async () => {
