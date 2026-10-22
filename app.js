@@ -17,6 +17,7 @@ let cart = JSON.parse(localStorage.getItem("dss_cart") || "[]");
 let selectedCategory = "all";
 let currentUser = null;
 let customerApproved = false;
+let customerDiscountPercent = 0;
 let accountMode = "signup";
 let language = localStorage.getItem("dss_language") || "sq";
 let dssDetailHistoryOpen = false;
@@ -424,18 +425,19 @@ function basePrice(p) {
 
 function customerPrice(price) {
   return customerApproved
-    ? Math.round(Number(price) * 90) / 100
+    ? Math.round(Number(price) * (100 - customerDiscountPercent)) / 100
     : Number(price);
 }
 
 async function checkCustomerApproval(user) {
   customerApproved = false;
+  customerDiscountPercent = 0;
   if (!user?.id) return false;
 
   try {
     const result = await Promise.race([
       sb.from("customer_approvals")
-        .select("status")
+        .select("status,discount_percent")
         .eq("user_id", user.id)
         .maybeSingle(),
       new Promise((resolve) => setTimeout(
@@ -450,6 +452,10 @@ async function checkCustomerApproval(user) {
     }
 
     customerApproved = result.data?.status === "approved";
+    customerDiscountPercent = customerApproved
+      ? ([0, 5, 10, 15, 20].includes(Number(result.data?.discount_percent))
+        ? Number(result.data.discount_percent) : 10)
+      : 0;
     return customerApproved;
   } catch (error) {
     console.error("DSS approval check failed:", error?.message || error);
@@ -712,7 +718,7 @@ window.openProductDetails = function (p) {
   const personalDiscount = modal.querySelector("#detailsPersonalDiscount");
   personalDiscount.querySelector(".discount-title").textContent = hasProductSale
     ? (language === "sq" ? "Keni zbritje: -" + discountPercent + "%" : "You save: -" + discountPercent + "%")
-    : (language === "sq" ? "Keni zbritje personale: -10%" : "Your personal discount: -10%");
+    : (language === "sq" ? "Keni zbritje personale: -" + customerDiscountPercent + "%" : "Your personal discount: -" + customerDiscountPercent + "%");
   personalDiscount.querySelector(".discount-sub").textContent = language === "sq" ? "Aplikohet automatikisht në checkout" : "Applied automatically at checkout";
   modal.querySelector("#detailsDiscountPrice").textContent = money(hasProductSale ? salePrice : finalCustomerPrice);
   personalDiscount.style.display = (hasProductSale || customerApproved) ? "flex" : "none";
@@ -943,7 +949,7 @@ function render() {
           </span>
           <br>
           ${money(discounted)}
-          <span style="color:#35d07f;font-size:12px">-10%</span>
+          <span style="color:#35d07f;font-size:12px">-${customerDiscountPercent}%</span>
         </div>`
       : `<div class="price">${money(price)}</div>`;
 
@@ -1299,7 +1305,7 @@ function updateAccountUI(message) {
     const discount = document.createElement("div");
     discount.className = "dss-profile-discount";
     discount.textContent = customerApproved
-      ? "Keni zbritje personale 10%"
+      ? "Keni zbritje personale " + customerDiscountPercent + "%"
       : "Llogaria është në pritje të miratimit";
 
     const note = document.createElement("div");
@@ -1737,7 +1743,7 @@ if (orderForm) {
         `\nEmri: ${order.customer_name}` +
         `\nTel: ${order.phone}` +
         `\nAdresa: ${order.address}` +
-        (currentUser ? "\nUlje klienti: 10%" : "");
+        (currentUser && customerApproved ? "\nUlje klienti: " + customerDiscountPercent + "%" : "");
 
       cart = [];
       save();
