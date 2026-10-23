@@ -1067,7 +1067,7 @@
         <label style="display:block;margin:10px 0 4px;font-weight:bold">Ulje personale e klientit</label>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <select data-customer-discount="${esc(item.user_id)}" aria-label="Përqindja e uljes për ${esc(item.email || "klientin")}" style="max-width:180px;margin:0">
-            ${[0,5,10,15,20].map(value => `<option value="${value}" ${Number(item.discount_percent ?? 10) === value ? "selected" : ""}>${value === 0 ? "Pa ulje (0%)" : value + "%"}</option>`).join("")}
+            ${[0,5,10,15,20,25,30].map(value => `<option value="${value}" ${Number(item.discount_percent ?? 10) === value ? "selected" : ""}>${value === 0 ? "Pa ulje (0%)" : value + "%"}</option>`).join("")}
           </select>
           <button type="button" data-save-customer-discount="${esc(item.user_id)}">Ruaj uljen</button>
         </div>
@@ -1088,8 +1088,8 @@
         const id = button.dataset.saveCustomerDiscount;
         const select = el.querySelector('[data-customer-discount="' + id + '"]');
         const value = Number(select?.value);
-        if (![0, 5, 10, 15, 20].includes(value)) {
-          alert("Zgjidh 0%, 5%, 10%, 15% ose 20%.");
+        if (![0, 5, 10, 15, 20, 25, 30].includes(value)) {
+          alert("Zgjidh 0%, 5%, 10%, 15%, 20%, 25% ose 30%.");
           return;
         }
         button.disabled = true;
