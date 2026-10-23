@@ -45,9 +45,11 @@ window.addEventListener("popstate", () => {
 window.dssCloseProductDetails = function () {
   const detailModal = document.getElementById("productDetailsModal");
   const url = new URL(window.location.href);
-  const isDirectProductUrl = url.searchParams.has("product");
+  const isNamedProductUrl = /^\/p\/.+-\d+\/?$/.test(url.pathname);
+  const isDirectProductUrl = url.searchParams.has("product") || isNamedProductUrl;
   if (isDirectProductUrl && !window.history.state?.dssProductDetails) {
     url.searchParams.delete("product");
+    if (isNamedProductUrl) url.pathname = "/";
     window.history.replaceState(window.history.state || {}, "", url.pathname + url.search + url.hash);
     if (detailModal) detailModal.style.display = "none";
     dssDetailHistoryOpen = false;
@@ -736,9 +738,9 @@ window.openProductDetails = function (p) {
   modal.querySelector("#shareCopy").textContent = language === "sq" ? "Kopjo linkun" : "Copy link";
   modal.querySelector("#detailsAdd").textContent = t("order");
 
-  const shareUrlObject = new URL(window.location.href);
-  shareUrlObject.hash = "";
-  shareUrlObject.searchParams.set("product", String(p.id));
+  const shareUrlObject = new URL(window.location.origin);
+  const productSlug = String(p.name || "produkt").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "produkt";
+  shareUrlObject.pathname = "/p/" + productSlug + "-" + String(p.id);
   const shareUrl = shareUrlObject.toString();
   const shareText = (p.name || "DSS Shop") + " — " + (p.category || "") + " | " + money(basePrice(p)) + " | DSS Shop";
 
@@ -812,7 +814,10 @@ window.openProductDetails = function (p) {
 
   if (modal.style.display !== "flex" && !dssDetailHistoryOpen) {
     const url = new URL(window.location.href);
-    if (url.searchParams.get("product") !== String(p.id)) {
+    const namedRoute = /^\/p\/.+-\d+\/?$/.test(url.pathname);
+    if (namedRoute) {
+      url.searchParams.delete("product");
+    } else if (url.searchParams.get("product") !== String(p.id)) {
       url.searchParams.set("product", String(p.id));
       window.history.pushState({ ...(window.history.state || {}), dssProductDetails: true }, "", url.pathname + url.search + url.hash);
     }
@@ -1215,12 +1220,13 @@ async function load() {
   renderCart();
 
   // Open the requested product when someone visits a shared product URL.
-  const requestedProductId = new URLSearchParams(window.location.search).get("product");
+  const requestedProductId = new URLSearchParams(window.location.search).get("product") || (window.location.pathname.match(/^\/p\/.+-([0-9]+)\/?$/) || [])[1];
   if (requestedProductId) {
     const requestedProduct = products.find(p => String(p.id) === String(requestedProductId));
     if (requestedProduct) {
       const url = new URL(window.location.href);
-      url.searchParams.set("product", String(requestedProduct.id));
+      if (!/^\/p\/.+-\d+\/?$/.test(url.pathname)) url.searchParams.set("product", String(requestedProduct.id));
+      else url.searchParams.delete("product");
       window.history.replaceState({ ...(window.history.state || {}), dssDirectProductLink: true }, "", url.pathname + url.search + url.hash);
       window.openProductDetails(requestedProduct);
     }
