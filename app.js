@@ -45,7 +45,7 @@ window.addEventListener("popstate", () => {
 window.dssCloseProductDetails = function () {
   const detailModal = document.getElementById("productDetailsModal");
   const url = new URL(window.location.href);
-  const isDirectProductUrl = url.searchParams.has("product") || /^\/p\/[^/]+$/.test(url.pathname);
+  const isDirectProductUrl = url.searchParams.has("product");
   if (isDirectProductUrl && !window.history.state?.dssProductDetails) {
     url.searchParams.delete("product");
     window.history.replaceState(window.history.state || {}, "", url.pathname + url.search + url.hash);
@@ -736,8 +736,10 @@ window.openProductDetails = function (p) {
   modal.querySelector("#shareCopy").textContent = language === "sq" ? "Kopjo linkun" : "Copy link";
   modal.querySelector("#detailsAdd").textContent = t("order");
 
-  const slug = String(p.name || "produkt").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "produkt";
-  const shareUrl = window.location.origin + "/p/" + slug + "-" + encodeURIComponent(String(p.id));
+  const shareUrlObject = new URL(window.location.href);
+  shareUrlObject.hash = "";
+  shareUrlObject.searchParams.set("product", String(p.id));
+  const shareUrl = shareUrlObject.toString();
   const shareText = (p.name || "DSS Shop") + " — " + (p.category || "") + " | " + money(basePrice(p)) + " | DSS Shop";
 
   // Give each product its own shareable URL and product-specific metadata.
@@ -1213,8 +1215,7 @@ async function load() {
   renderCart();
 
   // Open the requested product when someone visits a shared product URL.
-  const slugMatch = window.location.pathname.match(/^\/p\/.+-([0-9]+)\/?$/);
-  const requestedProductId = new URLSearchParams(window.location.search).get("product") || (slugMatch ? slugMatch[1] : null);
+  const requestedProductId = new URLSearchParams(window.location.search).get("product");
   if (requestedProductId) {
     const requestedProduct = products.find(p => String(p.id) === String(requestedProductId));
     if (requestedProduct) {
