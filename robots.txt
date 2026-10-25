@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 Disallow: /admin.js
+Disallow: /account.html
 
 Sitemap: https://dss-shop.pages.dev/sitemap.xml
