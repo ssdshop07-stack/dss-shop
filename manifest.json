@@ -1,12 +1,12 @@
 {
-  "name": "DSS Shop | Security & Technology",
+  "name": "DSS Shop",
   "short_name": "DSS Shop",
-  "description": "DSS Shop — Dyqan online për kamera sigurie, DVR/NVR, alarme, rrjetëzim dhe kontroll aksesi.",
-  "start_url": "./",
+  "description": "DSS Shop — Security & Technology",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "theme_color": "#111827",
   "orientation": "portrait",
   "icons": [
     {
