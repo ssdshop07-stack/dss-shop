@@ -126,7 +126,7 @@ function patchIndex(html, products, cats) {
   html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${esc(TITLE)}</title>`);
   html = html.replace(/<meta\s+name=["']description["'][^>]*>/i, `<meta name="description" content="${esc(DESC)}">`);
   // Keep existing JSON-LD on the storefront; avoid inserting duplicate Organization/WebSite schema.
-  const links = `<!-- SEO-LINKS-START --><nav id="seo-catalog" class="seo-catalog wrap" aria-label="Katalogu i produkteve"><h2>Katalogu i produkteve</h2>${[...cats.entries()].map(([c,list])=>`<p><b><a href="/k/${list[0]._cslug}.html">${esc(c)}</a></b>: ${list.map(p=>`<a href="/p/${p._slug}.html">${esc(p.name)}</a>`).join(" · ")}</p>`).join("\n")} </nav><!-- SEO-LINKS-END -->`;
+  const links = `<!-- SEO-LINKS-START --><section id="seo-catalog" class="wrap" aria-label="Katalogu i produkteve" style="padding:18px 0 100px;font-size:13px;color:#aaa"><h2>Katalogu i produkteve</h2>${[...cats.entries()].map(([c,list])=>`<p><b><a href="/k/${list[0]._cslug}.html">${esc(c)}</a></b>: ${list.map(p=>`<a href="/p/${p._slug}.html">${esc(p.name)}</a>`).join(" · ")}</p>`).join("\n")} </section><!-- SEO-LINKS-END -->`;
   const endMain = html.toLowerCase().lastIndexOf("</main>");
   if (endMain >= 0) html = html.slice(0,endMain) + links + html.slice(endMain);
   else html = html.replace(/<\/body>/i, links + "\n</body>");
