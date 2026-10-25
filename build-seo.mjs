@@ -80,21 +80,21 @@ function head({ title, desc, path, image, extra = "" }) {
 }
 const foot = `<footer><div class="wrap">© DSS Shop — Security &amp; Technology · <a href="/">Kryesore</a> · <a href="https://wa.me/${WHATSAPP}" rel="noopener">WhatsApp +${WHATSAPP}</a></div></footer></body></html>`;
 
-const card = (p) => `<li><a href="/p/${p._slug}.html"><div class="t">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(p.name)}" loading="lazy">` : ""}</div><b>${esc(p.name)}</b><span>€${money(priceOf(p))}</span></a></li>`;
+const card = (p) => `<li><a href="/p/${p._slug}"><div class="t">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(p.name)}" loading="lazy">` : ""}</div><b>${esc(p.name)}</b><span>€${money(priceOf(p))}</span></a></li>`;
 
 function productPage(p, related) {
-  const path = `/p/${p._slug}.html`;
+  const path = `/p/${p._slug}`;
   const price = priceOf(p);
   const inStock = p.stock === null || p.stock === undefined ? true : Number(p.stock) > 0;
   const condition = p.product_condition === "used" ? "used" : "new";
   const { intro, items } = bullets(p.description);
   const desc = (`${p.name} — ${p.category}. Çmimi €${money(price)}.` + (intro ? ` ${intro}` : "")).slice(0, 158);
   const ld = { "@context":"https://schema.org","@type":"Product",name:p.name,sku:p.sku || String(p.id),category:p.category,description:String(p.description || p.name).replace(/\s+/g," ").slice(0,500),...(p.image_url ? {image:[p.image_url]} : {}),brand:{"@type":"Brand",name:"DSS Shop"},offers:{"@type":"Offer",url:SITE+path,priceCurrency:"EUR",price:money(price),availability:inStock?"https://schema.org/InStock":"https://schema.org/OutOfStock",itemCondition:condition==="used"?"https://schema.org/UsedCondition":"https://schema.org/NewCondition",seller:{"@type":"Organization",name:"DSS Shop"}}};
-  const crumbs = {"@context":"https://schema.org","@type":"BreadcrumbList",itemListElement:[{"@type":"ListItem",position:1,name:"Kryesore",item:SITE+"/"},{"@type":"ListItem",position:2,name:p.category,item:SITE+`/k/${p._cslug}.html`},{"@type":"ListItem",position:3,name:p.name,item:SITE+path}]};
+  const crumbs = {"@context":"https://schema.org","@type":"BreadcrumbList",itemListElement:[{"@type":"ListItem",position:1,name:"Kryesore",item:SITE+"/"},{"@type":"ListItem",position:2,name:p.category,item:SITE+`/k/${p._cslug}`},{"@type":"ListItem",position:3,name:p.name,item:SITE+path}]};
   const extra = `<script type="application/ld+json">${jsonForHtml(ld)}</script><script type="application/ld+json">${jsonForHtml(crumbs)}</script>`;
   const waText = encodeURIComponent(`Përshëndetje, dua të porosis: ${p.name} (${p.sku || p.id}) — €${money(price)}`);
   return head({title:`${p.name} | DSS Shop`,desc,path,image:p.image_url,extra})+`
-<main class="wrap"><div class="crumbs"><a href="/">Kryesore</a> › <a href="/k/${p._cslug}.html">${esc(p.category)}</a> › ${esc(p.name)}</div>
+<main class="wrap"><div class="crumbs"><a href="/">Kryesore</a> › <a href="/k/${p._cslug}">${esc(p.category)}</a> › ${esc(p.name)}</div>
 <div class="product"><div class="pic">${p.image_url ? `<img src="${esc(p.image_url)}" alt="${esc(p.name)}">` : ""}</div><div>
 <h1>${esc(p.name)}</h1><div class="meta"><span class="badge">${esc(p.category)}</span><span class="badge">${condition==="used"?"I përdorur":"I ri"}</span>${p.sku?`<span class="badge">SKU: ${esc(p.sku)}</span>`:""}</div>
 <div class="price">€${money(price)}</div><div class="${inStock?"ok":"no"}">${inStock?"● Në stok":"● Jo në stok"}</div>
@@ -104,8 +104,8 @@ ${intro?`<h2>Përshkrimi</h2><p>${esc(intro)}</p>`:""}${items.length?`<h2>Karakt
 }
 
 function categoryPage(cat, list) {
-  const path = `/k/${list[0]._cslug}.html`;
-  const ld = {"@context":"https://schema.org","@type":"CollectionPage",name:cat,url:SITE+path,mainEntity:{"@type":"ItemList",itemListElement:list.map((p,i)=>({"@type":"ListItem",position:i+1,url:SITE+`/p/${p._slug}.html`,name:p.name}))}};
+  const path = `/k/${list[0]._cslug}`;
+  const ld = {"@context":"https://schema.org","@type":"CollectionPage",name:cat,url:SITE+path,mainEntity:{"@type":"ItemList",itemListElement:list.map((p,i)=>({"@type":"ListItem",position:i+1,url:SITE+`/p/${p._slug}`,name:p.name}))}};
   return head({title:`${cat} — çmime dhe oferta | DSS Shop`,desc:`${cat} në DSS Shop: ${list.length} produkte me porosi online në Shqipëri. Shiko çmimet dhe porosit me WhatsApp.`,path,image:list.find(p=>p.image_url)?.image_url,extra:`<script type="application/ld+json">${jsonForHtml(ld)}</script>`})+`
 <main class="wrap"><div class="crumbs"><a href="/">Kryesore</a> › ${esc(cat)}</div><h1>${esc(cat)}</h1><ul class="grid">${list.map(card).join("")}</ul></main>${foot}`;
 }
@@ -126,7 +126,7 @@ function patchIndex(html, products, cats) {
   html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${esc(TITLE)}</title>`);
   html = html.replace(/<meta\s+name=["']description["'][^>]*>/i, `<meta name="description" content="${esc(DESC)}">`);
   // Keep existing JSON-LD on the storefront; avoid inserting duplicate Organization/WebSite schema.
-  const links = `<!-- SEO-LINKS-START --><section id="seo-catalog" class="wrap" aria-label="Katalogu i produkteve" style="padding:18px 0 100px;font-size:13px;color:#aaa"><h2>Katalogu i produkteve</h2>${[...cats.entries()].map(([c,list])=>`<p><b><a href="/k/${list[0]._cslug}.html">${esc(c)}</a></b>: ${list.map(p=>`<a href="/p/${p._slug}.html">${esc(p.name)}</a>`).join(" · ")}</p>`).join("\n")} </section><!-- SEO-LINKS-END -->`;
+  const links = `<!-- SEO-LINKS-START --><section id="seo-catalog" class="wrap" aria-label="Katalogu i produkteve" style="padding:18px 0 100px;font-size:13px;color:#aaa"><h2>Katalogu i produkteve</h2>${[...cats.entries()].map(([c,list])=>`<p><b><a href="/k/${list[0]._cslug}">${esc(c)}</a></b>: ${list.map(p=>`<a href="/p/${p._slug}">${esc(p.name)}</a>`).join(" · ")}</p>`).join("\n")} </section><!-- SEO-LINKS-END -->`;
   const endMain = html.toLowerCase().lastIndexOf("</main>");
   if (endMain >= 0) html = html.slice(0,endMain) + links + html.slice(endMain);
   else html = html.replace(/<\/body>/i, links + "\n</body>");
@@ -134,6 +134,17 @@ function patchIndex(html, products, cats) {
 }
 
 const raw = await loadProducts();
+
+// --- Pastrim: hiq faqet e vjetra të gjeneruara më parë në rrënjë (duplikate me të dhëna të vjetra) ---
+// Ndikon vetëm në skedarët e deploy-it, jo në repository.
+const KEEP_HTML = new Set(["index.html", "account.html", "admin.html"]);
+for (const f of await readdir(".")) {
+  if (f.endsWith(".html") && !KEEP_HTML.has(f) && !f.startsWith("google")) await rm(f, { force: true });
+}
+await rm("sitemap.txt", { force: true });
+// functions/p/[slug].js ndërpret URL-të /p/... dhe kthen faqen kryesore; faqet statike e zëvendësojnë.
+await rm("functions/p", { recursive: true, force: true });
+
 const used = new Set();
 const products = raw.map(p => {
   let slug = `${slugify(p.name) || "produkt"}-${p.id}`.toLowerCase();
@@ -168,7 +179,7 @@ for (const [cat,list] of cats) await writeFile(`k/${list[0]._cslug}.html`,catego
 const today = new Date().toISOString().slice(0,10);
 const xml = (s) => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const urlEntry = (loc,lastmod,freq,priority) => `  <url><loc>${xml(loc)}</loc><lastmod>${String(lastmod||today).slice(0,10)}</lastmod><changefreq>${freq}</changefreq><priority>${priority}</priority></url>`;
-const entries = [urlEntry(SITE+"/",today,"daily","1.0"),...[...cats.values()].map(list=>urlEntry(`${SITE}/k/${list[0]._cslug}.html`,today,"weekly","0.8")),...products.map(p=>urlEntry(`${SITE}/p/${p._slug}.html`,p.updated_at||today,"weekly","0.7"))];
+const entries = [urlEntry(SITE+"/",today,"daily","1.0"),...[...cats.values()].map(list=>urlEntry(`${SITE}/k/${list[0]._cslug}`,today,"weekly","0.8")),...products.map(p=>urlEntry(`${SITE}/p/${p._slug}`,p.updated_at||today,"weekly","0.7"))];
 await writeFile("sitemap.xml",`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries.join("\n")}\n</urlset>\n`);
 await writeFile("robots.txt",`User-agent: *\nAllow: /\nDisallow: /admin.html\nDisallow: /admin.js\nDisallow: /account.html\n\nSitemap: ${SITE}/sitemap.xml\n`);
 if (existsSync("index.html")) await writeFile("index.html",patchIndex(await readFile("index.html","utf8"),products,cats));
