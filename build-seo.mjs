@@ -125,10 +125,6 @@ function patchIndex(html, products, cats) {
   html = html.replace(/<!-- SEO-LINKS-START -->[\s\S]*?<!-- SEO-LINKS-END -->\s*/g, "");
   html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${esc(TITLE)}</title>`);
   html = html.replace(/<meta\s+name=["']description["'][^>]*>/i, `<meta name="description" content="${esc(DESC)}">`);
-  html = setMeta(html, "canonical", SITE + "/", "link");
-  html = setMeta(html, "name", "index,follow,max-image-preview:large");
-  html = setMeta(html, "property", "website");
-  html = setMeta(html, "property", "DSS Shop");
   // Keep existing JSON-LD on the storefront; avoid inserting duplicate Organization/WebSite schema.
   const links = `<!-- SEO-LINKS-START --><nav id="seo-catalog" class="seo-catalog wrap" aria-label="Katalogu i produkteve"><h2>Katalogu i produkteve</h2>${[...cats.entries()].map(([c,list])=>`<p><b><a href="/k/${list[0]._cslug}.html">${esc(c)}</a></b>: ${list.map(p=>`<a href="/p/${p._slug}.html">${esc(p.name)}</a>`).join(" · ")}</p>`).join("\n")} </nav><!-- SEO-LINKS-END -->`;
   const endMain = html.toLowerCase().lastIndexOf("</main>");
