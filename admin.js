@@ -728,6 +728,35 @@
 
       if (result.error) throw result.error;
 
+      // Njofto klientët e aprovuar vetëm kur publikohet produkt i ri.
+      if (!editingProduct && row.active) {
+        try {
+          const { data: customers, error: customersError } = await db
+            .from("customer_approvals")
+            .select("user_id")
+            .eq("status", "approved");
+          if (customersError) throw customersError;
+          const recipients = (customers || []).filter(x => x.user_id);
+          if (recipients.length) {
+            const isOffer = row.sale_price !== null && row.sale_price < row.price;
+            const { error: notifyError } = await db.from("customer_notifications").insert(
+              recipients.map(x => ({
+                user_id: x.user_id,
+                notification_type: isOffer ? "offer" : "product",
+                title: isOffer ? "Ofertë e re në DSS Shop" : "Produkt i ri në DSS Shop",
+                message: isOffer
+                  ? row.name + " tani është në ofertë. Çmimi promocional: €" + Number(row.sale_price).toFixed(2) + "."
+                  : "Shtuam një produkt të ri: " + row.name + ".",
+                product_id: result.data?.[0]?.id || null
+              }))
+            );
+            if (notifyError) console.warn("Njoftimet e produktit nuk u ruajtën:", notifyError.message);
+          }
+        } catch (notificationError) {
+          console.warn("Njoftimet e produktit nuk u dërguan:", notificationError.message);
+        }
+      }
+
       editingProduct = null;
       productPhoto = "";
 
@@ -1033,6 +1062,17 @@
 
           if (error) throw error;
 
+          if (previous && previous.user_id && previous.status !== select.value) {
+            const labels = { new: "E re", processing: "Në përpunim", completed: "Përfunduar", cancelled: "Anuluar" };
+            const { error: notificationError } = await db.from("customer_notifications").insert({
+              user_id: previous.user_id,
+              notification_type: "order",
+              title: "Përditësim i porosisë #" + previous.id,
+              message: "Statusi i porosisë ndryshoi në: " + (labels[select.value] || select.value) + ".",
+              order_id: previous.id
+            });
+            if (notificationError) console.warn("Njoftimi i porosisë nuk u ruajt:", notificationError.message);
+          }
           msg("loginMsg", "Statusi i porosisë u ndryshua.");
         } catch (e) {
           alert("Gabim gjatë ndryshimit të statusit: " + e.message);
