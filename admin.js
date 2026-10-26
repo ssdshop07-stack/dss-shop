@@ -724,7 +724,7 @@
 
       const result = editingProduct
         ? await db.from("products").update(row).eq("id", editingProduct)
-        : await db.from("products").insert(row);
+        : await db.from("products").insert(row).select("id");
 
       if (result.error) throw result.error;
 
