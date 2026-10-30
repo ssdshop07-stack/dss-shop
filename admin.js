@@ -1128,7 +1128,7 @@
         const id = button.dataset.saveCustomerDiscount;
         const select = el.querySelector('[data-customer-discount="' + id + '"]');
         const value = Number(select?.value);
-        if (![0, 5, 10, 15, 20, 25, 30].includes(value)) {
+        if (![0, 5, 10, 15, 20, 25, 30, 35, 40].includes(value)) {
           alert("Zgjidh 0%, 5%, 10%, 15%, 20%, 25%, 30%, 35% ose 40%.");
           return;
         }
