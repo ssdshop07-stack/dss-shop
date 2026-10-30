@@ -455,7 +455,7 @@ async function checkCustomerApproval(user) {
 
     customerApproved = result.data?.status === "approved";
     customerDiscountPercent = customerApproved
-      ? ([0, 5, 10, 15, 20, 25, 30].includes(Number(result.data?.discount_percent))
+      ? ([0, 5, 10, 15, 20, 25, 30, 35, 40].includes(Number(result.data?.discount_percent))
         ? Number(result.data.discount_percent) : 10)
       : 0;
     return customerApproved;
