@@ -1076,6 +1076,152 @@ async function submitProductReview(event, productId) {
   }
 }
 
+
+/* =========================================
+   KRAHASIMI I PRODUKTEVE — maksimumi 3
+========================================= */
+let compareProductIds = [];
+
+function getComparedProducts() {
+  return compareProductIds
+    .map(id => products.find(p => String(p.id) === String(id)))
+    .filter(Boolean)
+    .slice(0, 3);
+}
+
+function ensureCompareUI() {
+  if (document.getElementById("dssCompareStyles")) return;
+  const style = document.createElement("style");
+  style.id = "dssCompareStyles";
+  style.textContent = `
+    .dss-compare-btn{width:100%;margin-top:7px;padding:10px 8px;border:1px solid #d8dde4;border-radius:8px;background:#fff;color:#303640;font-size:13px;font-weight:700}
+    .dss-compare-btn.active{border-color:#e50914;background:#fff0f1;color:#d20c19}
+    .dss-compare-bar{position:fixed;z-index:1200;left:50%;bottom:16px;transform:translateX(-50%);width:min(680px,calc(100% - 24px));display:flex;align-items:center;gap:10px;padding:11px 13px;background:#17191d;color:#fff;border:1px solid #3b4048;border-radius:13px;box-shadow:0 8px 30px #0003}
+    .dss-compare-bar[hidden]{display:none}
+    .dss-compare-count{font-size:13px;color:#e5e7eb;flex:1}
+    .dss-compare-bar button{border:0;border-radius:8px;padding:10px 13px;font-weight:700}
+    .dss-compare-open{background:#e50914;color:#fff}.dss-compare-clear{background:#30343b;color:#fff}
+    .dss-compare-overlay{position:fixed;inset:0;z-index:2500;background:#0009;display:flex;align-items:center;justify-content:center;padding:12px}
+    .dss-compare-panel{width:min(100%,900px);max-height:90dvh;overflow:auto;background:#fff;color:#20242a;border-radius:16px;padding:18px;box-shadow:0 18px 60px #0005}
+    .dss-compare-head{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #e5e7eb;padding-bottom:12px}
+    .dss-compare-head h2{font-size:21px;margin:0}.dss-compare-head button{border:0;background:#f1f3f5;border-radius:50%;width:38px;height:38px;font-size:24px}
+    .dss-compare-table-wrap{overflow-x:auto;margin-top:14px}
+    .dss-compare-table{width:100%;min-width:540px;border-collapse:collapse;font-size:14px}
+    .dss-compare-table th,.dss-compare-table td{padding:12px 10px;border-bottom:1px solid #e8eaee;text-align:left;vertical-align:middle}
+    .dss-compare-table th:first-child,.dss-compare-table td:first-child{width:120px;color:#68707b;font-weight:700}
+    .dss-compare-product{text-align:center!important;min-width:135px}
+    .dss-compare-product img{width:100px;height:92px;object-fit:contain;background:#f5f6f8;border-radius:9px;display:block;margin:0 auto 8px}
+    .dss-compare-product strong{display:block;line-height:1.35}
+    .dss-compare-price{font-size:18px;font-weight:800;color:#d20c19}
+    .dss-compare-remove{margin-top:8px;border:1px solid #e5b8bc;border-radius:7px;padding:6px 9px;background:#fff;color:#c51621;font-size:12px}
+    @media(max-width:650px){.dss-compare-bar{bottom:76px;gap:7px;padding:9px}.dss-compare-bar button{padding:9px 10px;font-size:12px}.dss-compare-count{font-size:12px}}
+  `;
+  document.head.appendChild(style);
+
+  const bar = document.createElement("div");
+  bar.id = "dssCompareBar";
+  bar.className = "dss-compare-bar";
+  bar.hidden = true;
+  bar.innerHTML = '<span class="dss-compare-count" id="dssCompareCount">0 produkte të zgjedhura</span><button type="button" class="dss-compare-clear" id="dssCompareClear">Pastro</button><button type="button" class="dss-compare-open" id="dssCompareOpen">Krahaso</button>';
+  document.body.appendChild(bar);
+
+  const overlay = document.createElement("div");
+  overlay.id = "dssCompareOverlay";
+  overlay.className = "dss-compare-overlay";
+  overlay.hidden = true;
+  overlay.style.display = "none";
+  overlay.innerHTML = '<section class="dss-compare-panel" role="dialog" aria-modal="true" aria-labelledby="dssCompareTitle"><div class="dss-compare-head"><h2 id="dssCompareTitle">Krahasimi i produkteve</h2><button type="button" id="dssCompareClose" aria-label="Mbyll">×</button></div><div id="dssCompareContent"></div></section>';
+  document.body.appendChild(overlay);
+
+  document.getElementById("dssCompareOpen").addEventListener("click", openProductComparison);
+  document.getElementById("dssCompareClear").addEventListener("click", () => {
+    compareProductIds = [];
+    render();
+    updateCompareUI();
+  });
+  document.getElementById("dssCompareClose").addEventListener("click", closeProductComparison);
+  overlay.addEventListener("click", event => {
+    if (event.target === overlay) closeProductComparison();
+  });
+}
+
+function updateCompareUI() {
+  const bar = document.getElementById("dssCompareBar");
+  if (!bar) return;
+  const count = getComparedProducts().length;
+  bar.hidden = count === 0;
+  const label = document.getElementById("dssCompareCount");
+  if (label) label.textContent = count + (count === 1 ? " produkt i zgjedhur" : " produkte të zgjedhura");
+  const open = document.getElementById("dssCompareOpen");
+  if (open) open.disabled = count < 2;
+  document.querySelectorAll("[data-compare-id]").forEach(button => {
+    const selected = compareProductIds.includes(String(button.dataset.compareId));
+    button.classList.toggle("active", selected);
+    button.textContent = selected ? "✓ U zgjodh për krahasim" : "＋ Krahaso produktin";
+  });
+}
+
+function toggleCompareProduct(id) {
+  const key = String(id);
+  if (compareProductIds.includes(key)) {
+    compareProductIds = compareProductIds.filter(item => item !== key);
+  } else {
+    if (compareProductIds.length >= 3) {
+      toast("Mund të krahasosh maksimumi 3 produkte.");
+      return;
+    }
+    compareProductIds.push(key);
+  }
+  updateCompareUI();
+}
+
+function openProductComparison() {
+  const selected = getComparedProducts();
+  if (selected.length < 2) {
+    toast("Zgjidh të paktën 2 produkte për krahasim.");
+    return;
+  }
+  const rows = [
+    ["Kategoria", p => p.category || "—"],
+    ["Çmimi", p => '<span class="dss-compare-price">' + money(customerPrice(basePrice(p))) + '</span>'],
+    ["Gjendja", p => p.product_condition === "used" ? "E përdorur" : "E re"],
+    ["Stoku", p => Number(p.stock) > 0 ? "Në stok (" + Number(p.stock) + ")" : "Kontrollo disponueshmërinë"],
+    ["SKU", p => p.sku || "—"],
+    ["Përshkrimi", p => p.description || "Pa përshkrim të shtuar"]
+  ];
+  const head = '<tr><th>Produkti</th>' + selected.map(p =>
+    '<th class="dss-compare-product">' +
+    (p.image_url ? '<img src="' + esc(p.image_url) + '" alt="' + esc(p.name) + '">' : '') +
+    '<strong>' + esc(p.name) + '</strong>' +
+    '<button type="button" class="dss-compare-remove" data-compare-remove="' + esc(p.id) + '">Hiq</button></th>'
+  ).join("") + '</tr>';
+  const body = rows.map(([label, value]) =>
+    '<tr><td>' + label + '</td>' + selected.map(p => '<td>' + value(p) + '</td>').join("") + '</tr>'
+  ).join("");
+  const content = document.getElementById("dssCompareContent");
+  content.innerHTML = '<div class="dss-compare-table-wrap"><table class="dss-compare-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div><p style="color:#68707b;font-size:12px;margin:12px 0 0">Çmimet dhe stoku mund të ndryshojnë. Konfirmo disponueshmërinë para porosisë.</p>';
+  content.querySelectorAll("[data-compare-remove]").forEach(button => button.addEventListener("click", () => {
+    compareProductIds = compareProductIds.filter(id => id !== String(button.dataset.compareRemove));
+    closeProductComparison();
+    render();
+    updateCompareUI();
+    if (getComparedProducts().length >= 2) openProductComparison();
+  }));
+  const overlay = document.getElementById("dssCompareOverlay");
+  overlay.hidden = false;
+  overlay.style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function closeProductComparison() {
+  const overlay = document.getElementById("dssCompareOverlay");
+  if (overlay) {
+    overlay.hidden = true;
+    overlay.style.display = "none";
+  }
+  document.body.style.overflow = "";
+}
+
 function render() {
   const searchEl = $("#search");
   const q = (searchEl?.value || "").toLowerCase().trim();
@@ -1115,6 +1261,7 @@ function render() {
   const grid = $("#grid");
   if (!grid) return;
 
+  ensureCompareUI();
   grid.innerHTML = a.map((p) => {
     const price = basePrice(p);
     const discounted = customerPrice(price);
@@ -1158,9 +1305,15 @@ function render() {
           onclick='event.stopPropagation();add(${encodedProduct});const cartBox=document.querySelector("#cart");if(cartBox)cartBox.classList.add("open");const orderForm=document.querySelector("#orderForm");if(orderForm){orderForm.classList.add("dss-order-visible");setTimeout(()=>orderForm.scrollIntoView({behavior:"smooth",block:"start"}),120)}'>
           ${t("order")}
         </button>
+        <button type="button" class="dss-compare-btn ${compareProductIds.includes(String(p.id)) ? "active" : ""}"
+          data-compare-id="${esc(p.id)}"
+          onclick="event.stopPropagation();toggleCompareProduct('${esc(p.id)}')">
+          ${compareProductIds.includes(String(p.id)) ? "✓ U zgjodh për krahasim" : "＋ Krahaso produktin"}
+        </button>
       </article>
     `;
   }).join("") || `<p>${t("noProducts")}</p>`;
+  updateCompareUI();
 }
 
 /* =========================================
