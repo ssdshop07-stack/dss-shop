@@ -1500,7 +1500,7 @@ async function showAccountTab(tabName) {
           tabMessage.textContent = "Nuk ke ende porosi të lidhura me këtë llogari.";
           return;
         }
-        const labels = { new: "E re", processing: "Në përpunim", completed: "Përfunduar", cancelled: "Anuluar" };
+        const labels = { new: "E re", processing: "Në përpunim", shipped: "Dërguar", completed: "Përfunduar", cancelled: "Anuluar" };
         tabMessage.innerHTML = data.map((order) =>
           '<article style="padding:12px 0;border-bottom:1px solid #e5e7eb">' +
           '<strong>Porosia #' + esc(order.id) + '</strong>' +
