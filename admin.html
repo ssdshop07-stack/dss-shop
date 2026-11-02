@@ -327,6 +327,20 @@
       </form>
     </section>
 
+    <!-- HISTORIKU I KLIENTEVE -->
+    <section class="card" id="customerHistoryManager" style="padding:0;overflow:hidden">
+      <details>
+        <summary style="cursor:pointer;padding:18px;font-size:18px;font-weight:bold">👥 Historiku i klientëve dhe blerjeve</summary>
+        <div style="padding:0 18px 18px">
+          <p>Shfaq klientët sipas numrit të telefonit ose llogarisë. Porositë e anuluara shfaqen në histori, por nuk llogariten te shpenzimet.</p>
+          <input id="customerHistorySearch" type="search" placeholder="Kërko emër, telefon ose adresë" style="width:100%;box-sizing:border-box">
+          <button type="button" id="refreshCustomerHistory" class="secondary">Rifresko historikun</button>
+          <p id="customerHistorySummary" style="font-weight:600"></p>
+          <div id="customerHistory" aria-live="polite">Historiku do të shfaqet këtu.</div>
+        </div>
+      </details>
+    </section>
+
     <!-- POROSITE -->
     <section class="card" id="ordersManager" style="padding:0;overflow:hidden">
       <details>
@@ -342,7 +356,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./config.js?v=107"></script>
-<script src="./admin.js?v=20261102-review-email-v1"></script>
+<script src="./admin.js?v=20261102-customer-history-v1"></script>
 
 <script>
   window.addEventListener("error", function(event) {
