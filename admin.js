@@ -37,9 +37,16 @@
   }
 
   async function loadProductCosts() {
-    const { data, error } = await db.rpc("dss_admin_get_product_costs");
-    if (error) throw error;
-    productCosts = new Map((Array.isArray(data) ? data : []).map(x => [String(x.product_id), Number(x.cost_price)]));
+    // Kostoja është shtesë opsionale: nëse RPC i kostove dështon,
+    // lista dhe redaktimi i produkteve duhet të vazhdojnë normalisht.
+    try {
+      const { data, error } = await db.rpc("dss_admin_get_product_costs");
+      if (error) throw error;
+      productCosts = new Map((Array.isArray(data) ? data : []).map(x => [String(x.product_id), Number(x.cost_price)]));
+    } catch (error) {
+      console.warn("DSS: kostot nuk u ngarkuan; redaktimi i produkteve vazhdon:", error?.message || error);
+      productCosts = new Map();
+    }
     return productCosts;
   }
 
@@ -827,8 +834,12 @@
         const { error: costError } = await db.rpc("dss_admin_save_product_cost", {
           p_product_id: Number(savedProductId), p_cost_price: Number(costText)
         });
-        if (costError) throw costError;
-        productCosts.set(String(savedProductId), Number(costText));
+        if (costError) {
+          console.warn("Produkti u ruajt, por kostoja nuk u përditësua:", costError.message);
+          msg("productMsg", "Produkti u ruajt, por kostoja nuk u ruajt: " + costError.message, true);
+        } else {
+          productCosts.set(String(savedProductId), Number(costText));
+        }
       }
 
       // Njofto klientët e aprovuar vetëm kur publikohet produkt i ri.
