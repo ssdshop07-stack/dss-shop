@@ -12,6 +12,7 @@
   let busy = false;
   let categories = [];
   let productCosts = new Map();
+  let adminLiveChannel = null;
 
   function msg(id, text, error = false) {
     const el = $(id);
@@ -1323,6 +1324,65 @@
     }).join("");
   }
 
+  function showAdminLiveToast(title, detail) {
+    let host = document.getElementById("dssAdminLiveToasts");
+    if (!host) {
+      host = document.createElement("div");
+      host.id = "dssAdminLiveToasts";
+      host.style.cssText = "position:fixed;z-index:99999;top:12px;right:12px;left:12px;max-width:420px;margin-left:auto;display:grid;gap:8px;pointer-events:none";
+      document.body.appendChild(host);
+    }
+    const card = document.createElement("div");
+    card.style.cssText = "background:#101828;color:#fff;padding:14px 16px;border-radius:12px;box-shadow:0 8px 28px #0003;font:14px/1.45 Arial,sans-serif";
+    const heading = document.createElement("strong");
+    heading.textContent = title;
+    const body = document.createElement("div");
+    body.textContent = detail;
+    body.style.cssText = "margin-top:4px;color:#eaecf0";
+    card.append(heading, body);
+    host.appendChild(card);
+    setTimeout(() => card.remove(), 9000);
+    if ("Notification" in window && Notification.permission === "granted") {
+      try { new Notification(title, { body: detail }); } catch (_) {}
+    }
+  }
+
+  function startAdminLiveNotifications() {
+    if (adminLiveChannel) return;
+    adminLiveChannel = db
+      .channel("dss-admin-live-notifications")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "orders" }, payload => {
+        const order = payload.new || {};
+        showAdminLiveToast(
+          "Porosi e re #" + (order.id || ""),
+          (order.customer_name || "Klient") + " · " + price(order.total)
+        );
+        loadOrders().catch(error => console.error("DSS live order refresh:", error));
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "customer_approvals" }, payload => {
+        const customer = payload.new || {};
+        showAdminLiveToast(
+          "Klient i ri — kërkon miratim",
+          customer.email || "U regjistrua një klient i ri."
+        );
+        loadCustomerApprovals().catch(error => console.error("DSS live customer refresh:", error));
+      })
+      .subscribe((status, error) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("DSS Admin live notifications:", status, error || "");
+        }
+      });
+  }
+
+  async function stopAdminLiveNotifications() {
+    if (!adminLiveChannel) return;
+    const channel = adminLiveChannel;
+    adminLiveChannel = null;
+    try { await db.removeChannel(channel); } catch (error) {
+      console.warn("DSS Admin live channel close:", error);
+    }
+  }
+
   /* PANELI */
 
   function showPanel() {
@@ -1331,6 +1391,7 @@
     show("reset", false);
     show("panel", true);
     show("logout", true);
+    startAdminLiveNotifications();
 
     const tasks = [
       ["productsAdmin", loadProducts],
@@ -1502,6 +1563,7 @@
       show("panel", false);
       show("reset", false);
       show("logout", false);
+      await stopAdminLiveNotifications();
 
       $("loginForm").reset();
       msg("loginMsg", "Ke dalë nga llogaria.");
