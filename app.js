@@ -556,6 +556,39 @@ window.change = (i, d) => {
    DETAJET E PRODUKTIT
 ========================================= */
 
+function renderRelatedProducts(currentProduct) {
+  const section = document.getElementById("dssRelatedProducts");
+  const grid = section?.querySelector(".dss-related-grid");
+  if (!section || !grid) return;
+
+  const currentCategory = normalizeCategory(currentProduct?.category);
+  const related = products
+    .filter(item =>
+      String(item.id) !== String(currentProduct?.id) &&
+      currentCategory &&
+      normalizeCategory(item.category) === currentCategory
+    )
+    .slice(0, 4);
+
+  section.hidden = related.length === 0;
+  if (!related.length) {
+    grid.innerHTML = "";
+    return;
+  }
+
+  section.querySelector("h3").textContent =
+    language === "sq" ? "Produkte të ngjashme" : "Similar products";
+
+  grid.innerHTML = related.map(item => {
+    const encoded = JSON.stringify(item).replace(/</g, "\\u003c").replace(/'/g, "&#39;");
+    return `<button type="button" class="dss-related-card" onclick='window.openProductDetails(${encoded})'>
+      ${item.image_url ? `<img src="${esc(item.image_url)}" alt="${esc(item.name)}" loading="lazy">` : '<div style="height:112px;display:grid;place-items:center;background:#f5f7fa;border-radius:8px">DSS</div>'}
+      <strong>${esc(item.name || "Produkt")}</strong>
+      <span>${money(basePrice(item))}</span>
+    </button>`;
+  }).join("");
+}
+
 window.openProductDetails = function (p) {
   if (!p) return;
 
@@ -599,6 +632,14 @@ window.openProductDetails = function (p) {
       #productDetailsModal #detailsAdd{width:100%;min-height:48px;padding:14px;background:#e32636;color:#fff;border:0;border-radius:9px;font-weight:bold;font-size:15px;cursor:pointer}
       #productDetailsModal #detailsShare{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
       #productDetailsModal #detailsShare button{flex:1;min-width:95px;min-height:40px;padding:10px;background:#f5f6f8;color:#20242a;border:1px solid #dfe3e8;border-radius:8px;font-size:12px;font-weight:bold;cursor:pointer}
+      #productDetailsModal #dssRelatedProducts{margin:28px 0 4px;padding-top:22px;border-top:1px solid #e5e7eb}
+      #productDetailsModal #dssRelatedProducts h3{margin:0 0 14px;color:#142847;font-size:20px;font-weight:800}
+      #productDetailsModal .dss-related-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+      #productDetailsModal .dss-related-card{min-width:0;padding:9px;border:1px solid #e2e8f0;border-radius:12px;background:#fff;color:#142847;text-align:left;cursor:pointer}
+      #productDetailsModal .dss-related-card img{display:block;width:100%;height:112px;object-fit:contain;background:#f5f7fa;border-radius:8px}
+      #productDetailsModal .dss-related-card strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin:8px 0 5px;font-size:12px;line-height:1.35}
+      #productDetailsModal .dss-related-card span{font-size:14px;font-weight:800}
+      @media(max-width:650px){#productDetailsModal .dss-related-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}#productDetailsModal .dss-related-card img{height:125px}}
       #productDetailsModal #shareFacebook{background:#173b72;border-color:#24539a}
       #productDetailsModal #shareInstagram{background:#482044;border-color:#74305f}
       @media(max-width:650px){
@@ -666,6 +707,10 @@ window.openProductDetails = function (p) {
             </div>
           </section>
         </div>
+        <section id="dssRelatedProducts" aria-label="Produkte të ngjashme">
+          <h3>Produkte të ngjashme</h3>
+          <div class="dss-related-grid"></div>
+        </section>
       </div>`;
     document.body.appendChild(modal);
 
@@ -709,6 +754,7 @@ window.openProductDetails = function (p) {
   };
 
   modal.dataset.productId = String(p.id);
+  renderRelatedProducts(p);
   updateDetailRating(p);
   loadProductReviews(p.id);
 
