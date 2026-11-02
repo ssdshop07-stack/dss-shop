@@ -221,6 +221,19 @@
 
 
 
+    <!-- FITIMI REAL -->
+    <section class="card" id="profitDashboard">
+      <h2>Fitimi real</h2>
+      <p style="color:#667085">Llogaritja përdor koston e blerjes të ruajtur për çdo produkt. Porositë e anuluara përjashtohen.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:12px 0">
+        <label style="flex:1;min-width:130px">Nga data<input id="profitFrom" type="date" style="display:block;width:100%"></label>
+        <label style="flex:1;min-width:130px">Deri më<input id="profitTo" type="date" style="display:block;width:100%"></label>
+        <button type="button" id="refreshProfit">Llogarit</button>
+      </div>
+      <div id="profitSummary">Po përgatitet raporti...</div>
+      <div id="profitOrders" style="margin-top:14px"></div>
+    </section>
+
     <!-- PRODUKTET -->
     <section class="card">
       <h2>Produktet</h2>
@@ -247,6 +260,9 @@
         <label for="productPrice">Çmimi (€)</label>
         <input id="productPrice" type="number"
                min="0" step="0.01" required>
+
+        <label for="productCostPrice">Çmimi i blerjes / Kosto (€) — vetëm Admin</label>
+        <input id="productCostPrice" type="number" min="0" step="0.01" placeholder="P.sh. 65.00">
 
         <label for="productSalePrice">Çmimi promocional (€)</label>
         <input id="productSalePrice" type="number"
