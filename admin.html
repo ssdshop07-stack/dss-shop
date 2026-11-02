@@ -242,6 +242,15 @@
       <div id="stockAlerts">Po kontrollohet stoku...</div>
     </section>
 
+    <!-- MODERIMI I KOMENTEVE -->
+    <section class="card" id="productReviewModeration">
+      <h2>Komentet e klientëve</h2>
+      <p style="color:#667085">Shiko komentet e klientëve. Mund t’i fshehësh nga dyqani ose t’i rikthesh pa i fshirë përgjithmonë.</p>
+      <button type="button" id="refreshProductReviews">Rifresko komentet</button>
+      <p id="productReviewsAdminMsg" class="message" role="status"></p>
+      <div id="productReviewsAdmin">Komentet do të shfaqen këtu.</div>
+    </section>
+
     <!-- PRODUKTET -->
     <section class="card">
       <h2>Produktet</h2>
@@ -333,7 +342,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./config.js?v=107"></script>
-<script src="./admin.js?v=20261102-stock-alerts-v1"></script>
+<script src="./admin.js?v=20261102-review-moderation-v1"></script>
 
 <script>
   window.addEventListener("error", function(event) {
