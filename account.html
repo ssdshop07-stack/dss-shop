@@ -24,14 +24,15 @@
 .customer-bottom-nav{display:none}
 @media(max-width:650px){main{width:92%;margin:18px auto 100px}.customer-dashboard{padding:20px 16px;margin-bottom:24px}.customer-identity{gap:13px}.customer-avatar{width:72px;height:72px;flex-basis:72px}.customer-identity h2{font-size:22px}.customer-tabs{gap:8px;margin-right:-4px;padding-top:20px}.customer-tabs button{font-size:15px;padding:13px 12px}.account-heading{font-size:27px;margin:26px 0 22px}.panel{padding:18px}.customer-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:1000;display:flex;justify-content:space-around;align-items:center;background:#0b0b0b;border-top:1px solid #292929;padding:9px 10px calc(9px + env(safe-area-inset-bottom));min-height:70px}.customer-bottom-nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:#ccc;text-decoration:none;font-size:12px}.customer-bottom-nav a.active{color:#e50914}.customer-bottom-nav svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}body{padding-bottom:75px}}
 
-.tracking-panel{border-color:#28583a;background:linear-gradient(135deg,#122219,#171717 70%)}
+.tracking-panel{border-color:#333;background:#191919}
 .tracking-panel h2{margin-bottom:6px}.track-result-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
-.track-status{display:inline-block;padding:6px 10px;border-radius:20px;background:#292929;font-size:13px;font-weight:700}
+.track-status{display:inline-block;padding:6px 10px;border-radius:20px;background:#351216;color:#fff;border:1px solid #e50914;font-size:13px;font-weight:700}
 .track-steps{display:grid;gap:0;margin:18px 0 4px}.track-step{display:flex;gap:12px;min-height:54px;position:relative}
 .track-step:not(:last-child):before{content:"";position:absolute;left:10px;top:22px;bottom:-2px;width:2px;background:#444}
 .track-dot{width:22px;height:22px;flex:0 0 22px;border-radius:50%;border:2px solid #666;background:#111;z-index:1}
-.track-step.done .track-dot{background:#35d07f;border-color:#35d07f}.track-step.current .track-dot{border-color:#35d07f;box-shadow:0 0 0 4px #35d07f22}
+.track-step.done .track-dot{background:#e50914;border-color:#e50914}.track-step.current .track-dot{border-color:#e50914;box-shadow:0 0 0 4px #e5091422}
 .track-step strong{display:block;font-size:14px}.track-step small{display:block;color:#aaa;margin-top:3px}.track-items{margin:12px 0 0;padding-left:20px;color:#ddd}
+#trackOrderResult{background:#101010;border:1px solid #383838;color:#f5f5f5}#trackOrderResult.success{border-color:#e50914;color:#fff}#trackOrderResult.error{border-color:#e50914;color:#ff9ca2}
 </style>
 </head>
 <body>
