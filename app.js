@@ -1135,8 +1135,6 @@ function ensureCompareUI() {
   const style = document.createElement("style");
   style.id = "dssCompareStyles";
   style.textContent = `
-    .dss-favorite-btn{position:absolute;top:9px;right:9px;z-index:2;width:36px;height:36px;border:0;border-radius:50%;background:#fff;color:#707782;font-size:22px;line-height:1;box-shadow:0 2px 9px #0002}
-    .dss-favorite-btn.active{color:#e50914}
     .dss-favorites-toggle{border:1px solid #d8dde4;border-radius:8px;background:#fff;color:#303640;padding:9px 12px;font-weight:700;white-space:nowrap}
     .dss-favorites-toggle.active{border-color:#e50914;background:#fff0f1;color:#d20c19}
     .pic{position:relative}
@@ -1328,7 +1326,7 @@ function render() {
         onclick='window.openProductDetails(${encodedProduct})'
         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.openProductDetails(${encodedProduct})}"
         style="cursor:pointer">
-        <div class="pic">\n          <button type="button" class="dss-favorite-btn ${favoriteProductIds.includes(String(p.id)) ? "active" : ""}" aria-label="Shto ose hiq nga të preferuarat" aria-pressed="${favoriteProductIds.includes(String(p.id))}" onclick="event.stopPropagation();toggleFavoriteProduct('${esc(p.id)}')">${favoriteProductIds.includes(String(p.id)) ? "♥" : "♡"}</button>
+        <div class="pic">\n          
           ${p.image_url
             ? `<img src="${esc(p.image_url)}"
                     alt="${esc(p.name)}"
