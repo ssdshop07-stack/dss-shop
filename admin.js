@@ -1103,48 +1103,51 @@
 
   /* POROSITE */
 
-  async function loadOrders() {
+  let adminOrdersCache = [];
+
+  function renderOrders() {
     const el = $("orders");
     if (!el) return;
+    const search = String($("orderSearch")?.value || "").trim().toLowerCase();
+    const statusFilter = String($("orderStatusFilter")?.value || "all");
+    const rows = adminOrdersCache.filter(order => {
+      const matchesSearch = [order.id, order.customer_name, order.phone, order.address, order.notes]
+        .some(value => String(value || "").toLowerCase().includes(search));
+      return matchesSearch && (statusFilter === "all" || order.status === statusFilter);
+    });
 
-    el.textContent = "Po ngarkohen porositë...";
+    const summary = $("ordersSummary");
+    if (summary) {
+      const active = adminOrdersCache.filter(o => o.status !== "cancelled");
+      const total = active.reduce((sum, o) => sum + Number(o.total || 0), 0);
+      summary.textContent = adminOrdersCache.length + " porosi gjithsej · " +
+        active.length + " aktive · " + price(total) + " vlerë aktive";
+    }
 
-    const { data, error } = await db
-      .from("orders")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) throw error;
-
-    if (!data || !data.length) {
+    if (!adminOrdersCache.length) {
       el.textContent = "Nuk ka porosi.";
+      return;
+    }
+    if (!rows.length) {
+      el.textContent = "Nuk u gjet asnjë porosi me këto kritere.";
       return;
     }
 
     const statuses = [
-      ["new", "E re"],
-      ["processing", "Në përpunim"],
-      ["shipped", "Dërguar"],
-      ["completed", "Përfunduar"],
+      ["new", "E re"], ["processing", "Në përpunim"],
+      ["shipped", "Dërguar"], ["completed", "Përfunduar"],
       ["cancelled", "Anuluar"]
     ];
-
-    el.innerHTML = data.map(o => `
+    el.innerHTML = rows.map(o => `
       <article style="padding:12px 0;border-bottom:1px solid #ddd">
         <strong>Porosia #${esc(o.id)}</strong>
         <p>${esc(o.customer_name || "")} · ${esc(o.phone || "")}</p>
         <p>${esc(o.address || "")}</p>
-        <p>Totali: ${price(o.total)}</p>
-
-        <label>
-          Statusi:
+        ${o.notes ? `<p>Shënim: ${esc(o.notes)}</p>` : ""}
+        <p>Totali: <strong>${price(o.total)}</strong> · ${esc(o.created_at ? new Date(o.created_at).toLocaleString("sq-AL") : "")}</p>
+        <label>Statusi:
           <select data-order="${esc(o.id)}">
-            ${statuses.map(([value, label]) => `
-              <option value="${value}"
-                ${o.status === value ? "selected" : ""}>
-                ${label}
-              </option>
-            `).join("")}
+            ${statuses.map(([value,label]) => `<option value="${value}" ${o.status === value ? "selected" : ""}>${label}</option>`).join("")}
           </select>
         </label>
       </article>
@@ -1152,20 +1155,12 @@
 
     el.querySelectorAll("[data-order]").forEach(select => {
       select.addEventListener("change", async function () {
-        const previous = data.find(
-          o => String(o.id) === select.dataset.order
-        );
-
+        const previous = adminOrdersCache.find(o => String(o.id) === select.dataset.order);
         try {
-          const { error } = await db
-            .from("orders")
-            .update({ status: select.value })
-            .eq("id", select.dataset.order);
-
+          const { error } = await db.from("orders").update({ status: select.value }).eq("id", select.dataset.order);
           if (error) throw error;
-
           if (previous && previous.user_id && previous.status !== select.value) {
-            const labels = { new: "E re", processing: "Në përpunim", shipped: "Dërguar", completed: "Përfunduar", cancelled: "Anuluar" };
+            const labels = { new:"E re", processing:"Në përpunim", shipped:"Dërguar", completed:"Përfunduar", cancelled:"Anuluar" };
             const { error: notificationError } = await db.from("customer_notifications").insert({
               user_id: previous.user_id,
               notification_type: "order",
@@ -1175,13 +1170,25 @@
             });
             if (notificationError) console.warn("Njoftimi i porosisë nuk u ruajt:", notificationError.message);
           }
+          if (previous) previous.status = select.value;
           msg("loginMsg", "Statusi i porosisë u ndryshua.");
+          renderOrders();
         } catch (e) {
           alert("Gabim gjatë ndryshimit të statusit: " + e.message);
           if (previous) select.value = previous.status;
         }
       });
     });
+  }
+
+  async function loadOrders() {
+    const el = $("orders");
+    if (!el) return;
+    el.textContent = "Po ngarkohen porositë...";
+    const { data, error } = await db.from("orders").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    adminOrdersCache = data || [];
+    renderOrders();
   }
 
   /* HISTORIKU I KLIENTEVE */
@@ -1684,6 +1691,14 @@
     });
     listen("refreshApprovals", "click", async function () {
       try { await loadCustomerApprovals(); } catch (e) { msg("loginMsg", "Gabim gjatë ngarkimit të kërkesave: " + e.message, true); }
+    });
+    listen("orderSearch", "input", renderOrders);
+    listen("orderStatusFilter", "change", renderOrders);
+    listen("refreshOrders", "click", async function () {
+      try { await loadOrders(); } catch (e) {
+        const box = $("orders");
+        if (box) box.textContent = "Gabim gjatë ngarkimit: " + (e.message || "Gabim");
+      }
     });
     listen("refreshCustomerHistory", "click", async function () {
       try { await loadCustomerHistory(); } catch (e) {
