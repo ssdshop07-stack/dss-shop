@@ -279,7 +279,17 @@
                min="0" step="0.01" required>
 
         <label for="productCostPrice">Çmimi i blerjes / Kosto (€) — vetëm Admin</label>
-        <input id="productCostPrice" type="number" min="0" step="0.01" placeholder="P.sh. 65.00">
+        <input id="productCostPrice" type="number" min="0" step="0.01" placeholder="P.sh. 50.00">
+
+        <label>Shto fitimin mbi koston</label>
+        <div id="productMarkupChoices" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:-6px 0 14px">
+          <button type="button" data-product-markup="20" class="secondary" style="padding:10px 4px">+20%</button>
+          <button type="button" data-product-markup="25" class="secondary" style="padding:10px 4px">+25%</button>
+          <button type="button" data-product-markup="30" class="secondary" style="padding:10px 4px">+30%</button>
+          <button type="button" data-product-markup="35" class="secondary" style="padding:10px 4px">+35%</button>
+          <button type="button" data-product-markup="40" class="secondary" style="padding:10px 4px">+40%</button>
+        </div>
+        <small id="productMarkupResult" style="display:block;margin:-8px 0 14px;color:#067647">Shkruaj koston dhe zgjidh përqindjen. Çmimi i shitjes llogaritet automatikisht.</small>
 
         <label for="productSalePrice">Çmimi promocional (€)</label>
         <input id="productSalePrice" type="number"
@@ -369,7 +379,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./config.js?v=107"></script>
-<script src="./admin.js?v=20261102-order-invoice-v1"></script>
+<script src="./admin.js?v=20261102-product-markup-v1"></script>
 
 <script>
   window.addEventListener("error", function(event) {
