@@ -1465,9 +1465,11 @@ function updateAccountUI(message) {
   const submit = $("#accountSubmit");
   const switchBtn = $("#accountSwitch");
   const logout = $("#accountLogout");
+  const forgot = $("#accountForgot");
   if (!status || !form || !identifier || !password || !submit || !switchBtn || !logout) return;
 
   if (currentUser) {
+    if (forgot) forgot.hidden = true;
     status.innerHTML = "";
     const panel = document.createElement("div");
     panel.className = "dss-profile-panel";
@@ -1501,6 +1503,7 @@ function updateAccountUI(message) {
   }
 
   form.hidden = false;
+  if (forgot) forgot.hidden = accountMode !== "login";
   logout.hidden = true;
   identifier.type = "email";
   identifier.placeholder = "Email-i";
