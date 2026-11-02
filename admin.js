@@ -1184,6 +1184,60 @@
     });
   }
 
+  /* HISTORIKU I KLIENTEVE */
+  let customerHistoryRows = [];
+  function renderCustomerHistory() {
+    const box = $("customerHistory");
+    const search = String($("customerHistorySearch")?.value || "").trim().toLowerCase();
+    if (!box) return;
+    const rows = customerHistoryRows.filter(customer =>
+      [customer.customer_name, customer.phone, customer.address, customer.user_id]
+        .some(value => String(value || "").toLowerCase().includes(search))
+    );
+    if (!rows.length) {
+      box.textContent = customerHistoryRows.length ? "Nuk u gjet klient me këtë kërkim." : "Nuk ka ende histori porosish.";
+      return;
+    }
+    box.innerHTML = rows.map(customer => {
+      const orders = Array.isArray(customer.orders) ? customer.orders : [];
+      const history = orders.map(order => {
+        const labels = {new:"E re",processing:"Në përpunim",shipped:"Dërguar",completed:"Përfunduar",cancelled:"Anuluar"};
+        return `<div style="padding:8px 0;border-top:1px solid #eaecf0">
+          <strong>Porosia #${esc(order.id)}</strong> · ${price(order.total)}
+          <span style="color:#667085"> · ${esc(labels[order.status] || order.status || "—")}</span>
+          <small style="display:block;color:#667085">${esc(order.created_at ? new Date(order.created_at).toLocaleString("sq-AL") : "—")}</small>
+          <small style="display:block;color:#667085">${esc(order.address || "")}</small>
+        </div>`;
+      }).join("");
+      return `<article style="padding:12px 0;border-bottom:1px solid #d0d5dd">
+        <strong>${esc(customer.customer_name || "Klient pa emër")}</strong>
+        <p style="margin:5px 0">${esc(customer.phone || "Pa telefon")}</p>
+        <p style="margin:5px 0;color:#667085">${esc(customer.address || "")}</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin:8px 0">
+          <strong>Porosi: ${Number(customer.order_count || 0)}</strong>
+          <strong>Shpenzuar: ${price(customer.total_spent)}</strong>
+          <span style="color:#667085">Porosia e fundit: ${esc(customer.last_order_at ? new Date(customer.last_order_at).toLocaleDateString("sq-AL") : "—")}</span>
+        </div>
+        ${customer.user_id ? '<small style="color:#667085">Klient me llogari</small>' : '<small style="color:#667085">Porosi si vizitor</small>'}
+        <details style="margin-top:8px"><summary style="cursor:pointer;font-weight:600">Shiko porositë (${orders.length})</summary><div style="padding-top:8px">${history || "Nuk ka porosi."}</div></details>
+      </article>`;
+    }).join("");
+  }
+  async function loadCustomerHistory() {
+    const box = $("customerHistory");
+    if (box) box.textContent = "Po ngarkohet historiku i klientëve...";
+    const { data, error } = await db.rpc("dss_admin_customer_history");
+    if (error) throw error;
+    customerHistoryRows = Array.isArray(data) ? data : [];
+    renderCustomerHistory();
+    const summary = $("customerHistorySummary");
+    if (summary) {
+      const totalOrders = customerHistoryRows.reduce((sum,c) => sum + Number(c.order_count || 0),0);
+      const totalSpent = customerHistoryRows.reduce((sum,c) => sum + Number(c.total_spent || 0),0);
+      summary.textContent = customerHistoryRows.length + " klientë · " + totalOrders + " porosi aktive · " + price(totalSpent) + " gjithsej";
+    }
+  }
+
   /* MIRATIMI I LLOGARIVE TE KLIENTEVE */
 
   async function loadCustomerApprovals() {
@@ -1576,6 +1630,7 @@
       ["categoriesAdmin", loadCategories],
       ["trafficStats", loadTraffic],
       ["customerApprovals", loadCustomerApprovals],
+      ["customerHistory", loadCustomerHistory],
       ["onlineCustomers", loadOnlineCustomers],
       ["profitSummary", loadProfitReport],
       ["productReviewsAdmin", loadProductReviewsAdmin]
@@ -1630,6 +1685,13 @@
     listen("refreshApprovals", "click", async function () {
       try { await loadCustomerApprovals(); } catch (e) { msg("loginMsg", "Gabim gjatë ngarkimit të kërkesave: " + e.message, true); }
     });
+    listen("refreshCustomerHistory", "click", async function () {
+      try { await loadCustomerHistory(); } catch (e) {
+        const box = $("customerHistory");
+        if (box) box.textContent = "Gabim gjatë ngarkimit: " + (e.message || "Gabim");
+      }
+    });
+    listen("customerHistorySearch", "input", renderCustomerHistory);
     listen("refreshOnlineCustomers", "click", loadOnlineCustomers);
     setInterval(() => {
       if ($("panel") && !$("panel").hidden) loadOnlineCustomers();
