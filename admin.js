@@ -1456,7 +1456,7 @@
           <p style="white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 10px">${esc(review.review_text)}</p>
           <label style="display:block;font-weight:600;margin:10px 0 5px">Përgjigjja e administratorit</label>
           <textarea data-review-reply="${esc(review.id)}" maxlength="500" rows="3" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid #d0d5dd;border-radius:8px">${esc(review.admin_reply || "")}</textarea>
-          <button type="button" data-save-review-reply="${esc(review.id)}" style="margin:6px 8px 6px 0">Ruaj përgjigjen</button>
+          <button type="button" data-save-review-reply="${esc(review.id)}" data-original-reply="${esc(review.admin_reply || "")}" style="margin:6px 8px 6px 0">Ruaj përgjigjen</button>
           <button type="button" data-review-visibility="${esc(review.id)}" data-visible="${visible ? "true" : "false"}">
             ${visible ? "Fsheh komentin" : "Rikthe komentin"}
           </button>
@@ -1470,6 +1470,8 @@
         const id = button.dataset.saveReviewReply;
         const field = box.querySelector(`[data-review-reply="${id}"]`);
         const reply = String(field?.value || "").trim();
+        const previousReply = String(button.dataset.originalReply || "");
+        const shouldNotifyCustomer = Boolean(reply && reply !== previousReply);
         if (reply.length > 500) {
           if (status) status.textContent = "Përgjigjja nuk mund të kalojë 500 karaktere.";
           return;
@@ -1485,9 +1487,30 @@
             .maybeSingle();
           if (updateError) throw updateError;
           if (!updated) throw new Error("Përgjigjja nuk u ruajt. Kontrollo lejet e administratorit.");
+
+          button.dataset.originalReply = reply;
+          let notificationSent = false;
+          let notificationFailed = false;
+          if (shouldNotifyCustomer) {
+            const { data: notification, error: notificationError } = await db.functions.invoke(
+              "notify-review-reply",
+              { body: { review_id: Number(id) } }
+            );
+            notificationSent = !notificationError && notification?.ok === true;
+            notificationFailed = !notificationSent;
+            if (notificationError) console.error("DSS review reply email:", notificationError);
+            if (notification?.error) console.error("DSS review reply email:", notification.error);
+          }
+
           if (status) {
-            status.textContent = reply ? "Përgjigjja u ruajt." : "Përgjigjja u hoq.";
-            status.style.color = "#067647";
+            status.textContent = !reply
+              ? "Përgjigjja u hoq."
+              : notificationSent
+                ? "Përgjigjja u ruajt dhe klientit iu dërgua email."
+                : notificationFailed
+                  ? "Përgjigjja u ruajt, por emaili nuk u dërgua."
+                  : "Përgjigjja u ruajt.";
+            status.style.color = notificationFailed ? "#b54708" : "#067647";
           }
         } catch (error) {
           if (status) {
