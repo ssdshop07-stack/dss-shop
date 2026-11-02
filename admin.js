@@ -1064,7 +1064,7 @@
           if (error) throw error;
 
           if (previous && previous.user_id && previous.status !== select.value) {
-            const labels = { new: "E re", processing: "Në përpunim", completed: "Përfunduar", cancelled: "Anuluar" };
+            const labels = { new: "E re", processing: "Në përpunim", shipped: "Dërguar", completed: "Përfunduar", cancelled: "Anuluar" };
             const { error: notificationError } = await db.from("customer_notifications").insert({
               user_id: previous.user_id,
               notification_type: "order",
