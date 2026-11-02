@@ -929,7 +929,7 @@ async function loadProductReviews(productId) {
   try {
     const { data, error } = await sb
       .from("product_reviews")
-      .select("id,review_text,created_at")
+      .select("id,review_text,created_at,admin_reply")
       .eq("product_id", Number(productId))
       .eq("is_visible", true)
       .order("created_at", { ascending: false })
@@ -945,6 +945,7 @@ async function loadProductReviews(productId) {
             <strong style="font-size:13px;color:#344054">Klient DSS</strong>
             <small style="display:block;color:#98a2b3;margin:2px 0 6px">${esc(date)}</small>
             <p style="margin:0;color:#475467;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.55">${esc(review.review_text)}</p>
+            ${review.admin_reply ? `<div style="margin:10px 0 0 10px;padding:10px;border-left:3px solid #12b76a;background:#f8fafc;border-radius:6px"><strong style="display:block;font-size:12px;color:#067647;margin-bottom:4px">Përgjigjja e DSS Shop</strong><p style="margin:0;color:#344054;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.5">${esc(review.admin_reply)}</p></div>` : ""}
           </article>`;
         }).join("")
       : '<p style="margin:0;color:#667085;font-size:13px">Ende nuk ka komente për këtë produkt.</p>';
