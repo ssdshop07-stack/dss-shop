@@ -640,6 +640,17 @@ window.openProductDetails = function (p) {
             <div class="dss-detail-meta"><p id="detailsCondition"></p></div>
             <h3 id="detailsDescriptionTitle"></h3>
             <p id="detailsDescription"></p>
+            <section id="dssProductReviews" style="margin:22px 0;padding:16px;border:1px solid #e5e7eb;border-radius:12px;background:#fafafa">
+              <h3 style="margin:0 0 12px;font-size:18px;color:#20242a">Komentet e klientëve</h3>
+              <p id="dssReviewStatus" style="margin:0 0 10px;color:#667085;font-size:13px"></p>
+              <form id="dssReviewForm" hidden style="margin:12px 0">
+                <label for="dssReviewText" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px">Shkruaj përvojën tënde me produktin</label>
+                <textarea id="dssReviewText" rows="3" minlength="5" maxlength="500" required placeholder="Shkruaj koment (5–500 karaktere)..." style="display:block;width:100%;box-sizing:border-box;padding:11px;border:1px solid #d0d5dd;border-radius:9px;font:inherit;resize:vertical"></textarea>
+                <small style="display:block;color:#667085;margin:5px 0 9px">Komentet publikohen pa shfaqur email-in tënd.</small>
+                <button id="dssReviewSubmit" type="submit" style="padding:10px 15px;background:#087f46;color:#fff;border:0;border-radius:8px;font-weight:bold">Dërgo komentin</button>
+              </form>
+              <div id="dssProductReviewsList" aria-live="polite">Po ngarkohen komentet...</div>
+            </section>
             <section id="detailsInstallGuide" style="display:none;margin:20px 0;padding:14px;background:#17191f;border:1px solid #34353d;border-radius:12px">
               <h3 style="margin:0 0 12px;font-size:17px;color:#08c965">Udhëzime instalimi</h3>
               <div style="position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:9px;overflow:hidden">
@@ -699,6 +710,7 @@ window.openProductDetails = function (p) {
 
   modal.dataset.productId = String(p.id);
   updateDetailRating(p);
+  loadProductReviews(p.id);
 
   image.src = p.image_url || "";
   image.alt = p.name || "DSS Shop";
@@ -901,6 +913,118 @@ function updateDetailRating(p) {
   const stats = dssRatingStats[String(p.id)] || { average: 0, count: 0 };
   if (holder) {
     holder.innerHTML = ratingMarkup(p.id) + `<span class="dss-detail-rating-summary">${stats.count ? stats.average.toFixed(1) + " / 5 · " + stats.count + " vlerësime" : "Bëhu i pari që vlerëson"}</span>`;
+  }
+}
+
+async function loadProductReviews(productId) {
+  const list = document.getElementById("dssProductReviewsList");
+  const form = document.getElementById("dssReviewForm");
+  const status = document.getElementById("dssReviewStatus");
+  if (!list || !form || !status) return;
+
+  form.hidden = true;
+  status.textContent = "Po kontrollohet mundësia për të komentuar...";
+  list.textContent = "Po ngarkohen komentet...";
+
+  try {
+    const { data, error } = await sb
+      .from("product_reviews")
+      .select("id,review_text,created_at")
+      .eq("product_id", Number(productId))
+      .order("created_at", { ascending: false })
+      .limit(30);
+    if (error) throw error;
+
+    list.innerHTML = data?.length
+      ? data.map(review => {
+          const date = review.created_at
+            ? new Date(review.created_at).toLocaleDateString(language === "en" ? "en-GB" : "sq-AL")
+            : "";
+          return `<article style="padding:11px 0;border-top:1px solid #e5e7eb">
+            <strong style="font-size:13px;color:#344054">Klient DSS</strong>
+            <small style="display:block;color:#98a2b3;margin:2px 0 6px">${esc(date)}</small>
+            <p style="margin:0;color:#475467;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.55">${esc(review.review_text)}</p>
+          </article>`;
+        }).join("")
+      : '<p style="margin:0;color:#667085;font-size:13px">Ende nuk ka komente për këtë produkt.</p>';
+
+    const { data: authData, error: authError } = await sb.auth.getUser();
+    if (authError) throw authError;
+    const user = authData?.user;
+    if (!user) {
+      status.textContent = "Për të komentuar, duhet të hysh në një llogari DSS të miratuar.";
+      return;
+    }
+
+    const { data: approval, error: approvalError } = await sb
+      .from("customer_approvals")
+      .select("status")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (approvalError) throw approvalError;
+    if (approval?.status !== "approved") {
+      status.textContent = "Komentet lejohen vetëm për klientët me llogari të miratuar nga administratori.";
+      return;
+    }
+
+    const { data: existing, error: existingError } = await sb
+      .from("product_reviews")
+      .select("id")
+      .eq("product_id", Number(productId))
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (existingError) throw existingError;
+    if (existing) {
+      status.textContent = "Ke dërguar tashmë një koment për këtë produkt. Faleminderit!";
+      return;
+    }
+
+    status.textContent = "Vetëm klientët e miratuar mund të komentojnë. Lejohet një koment për produkt.";
+    form.hidden = false;
+    form.onsubmit = event => submitProductReview(event, productId);
+  } catch (error) {
+    console.warn("Komentet e produktit nuk u ngarkuan:", error);
+    status.textContent = "Nuk u kontrollua dot mundësia për të komentuar. Provo përsëri.";
+    if (!list.textContent || list.textContent === "Po ngarkohen komentet...") {
+      list.textContent = "Komentet nuk u ngarkuan.";
+    }
+  }
+}
+
+async function submitProductReview(event, productId) {
+  event.preventDefault();
+  const form = document.getElementById("dssReviewForm");
+  const field = document.getElementById("dssReviewText");
+  const button = document.getElementById("dssReviewSubmit");
+  const reviewText = String(field?.value || "").trim();
+  if (reviewText.length < 5 || reviewText.length > 500) {
+    toast("Komenti duhet të ketë 5–500 karaktere.");
+    return;
+  }
+
+  if (button) button.disabled = true;
+  try {
+    const { data: authData, error: authError } = await sb.auth.getUser();
+    if (authError) throw authError;
+    if (!authData?.user?.id) throw new Error("Hyr në llogarinë DSS për të komentuar.");
+
+    const { error } = await sb.from("product_reviews").insert({
+      product_id: Number(productId),
+      user_id: authData.user.id,
+      review_text: reviewText
+    });
+    if (error) throw error;
+
+    field.value = "";
+    toast("Faleminderit! Komenti yt u publikua.");
+    await loadProductReviews(productId);
+  } catch (error) {
+    console.error("Ruajtja e komentit dështoi:", error);
+    toast(error?.code === "23505"
+      ? "Ke dërguar tashmë një koment për këtë produkt."
+      : "Komenti nuk u ruajt. Kontrollo hyrjen në llogari dhe provo përsëri.");
+  } finally {
+    if (button) button.disabled = false;
   }
 }
 
