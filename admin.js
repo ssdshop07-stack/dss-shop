@@ -1414,6 +1414,88 @@
     }
   }
 
+
+  /* MODERIMI I KOMENTEVE */
+  async function loadProductReviewsAdmin() {
+    const box = $("productReviewsAdmin");
+    const status = $("productReviewsAdminMsg");
+    if (!box) return;
+    box.textContent = "Po ngarkohen komentet...";
+    if (status) status.textContent = "";
+
+    const { data: reviews, error } = await db
+      .from("product_reviews")
+      .select("id, product_id, review_text, created_at, is_visible")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw error;
+
+    if (!reviews || !reviews.length) {
+      box.textContent = "Nuk ka ende komente.";
+      return;
+    }
+
+    const productIds = [...new Set(reviews.map(r => r.product_id))];
+    const { data: products, error: productsError } = await db
+      .from("products")
+      .select("id, name")
+      .in("id", productIds);
+    if (productsError) throw productsError;
+    const names = new Map((products || []).map(p => [String(p.id), p.name]));
+
+    box.innerHTML = reviews.map(review => {
+      const visible = review.is_visible !== false;
+      const date = review.created_at ? new Date(review.created_at).toLocaleString("sq-AL") : "";
+      return `
+        <article style="padding:12px 0;border-bottom:1px solid #eaecf0">
+          <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap">
+            <strong>${esc(names.get(String(review.product_id)) || ("Produkti #" + review.product_id))}</strong>
+            <span style="font-size:12px;color:${visible ? "#067647" : "#b42318"}">${visible ? "Publik" : "I fshehur"}</span>
+          </div>
+          <small style="display:block;color:#667085;margin:4px 0 8px">${esc(date)} · Koment #${esc(review.id)}</small>
+          <p style="white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 10px">${esc(review.review_text)}</p>
+          <button type="button" data-review-visibility="${esc(review.id)}" data-visible="${visible ? "true" : "false"}">
+            ${visible ? "Fsheh komentin" : "Rikthe komentin"}
+          </button>
+        </article>
+      `;
+    }).join("");
+
+    box.querySelectorAll("[data-review-visibility]").forEach(button => {
+      button.addEventListener("click", async () => {
+        if (busy) return;
+        const id = button.dataset.reviewVisibility;
+        const nextVisible = button.dataset.visible !== "true";
+        if (!confirm(nextVisible ? "Dëshiron ta rikthesh këtë koment në dyqan?" : "Dëshiron ta fshehësh këtë koment nga klientët?")) return;
+        busy = true;
+        button.disabled = true;
+        try {
+          const { data: updated, error: updateError } = await db
+            .from("product_reviews")
+            .update({ is_visible: nextVisible })
+            .eq("id", id)
+            .select("id, is_visible")
+            .maybeSingle();
+          if (updateError) throw updateError;
+          if (!updated) throw new Error("Ndryshimi nuk u ruajt. Kontrollo lejet e administratorit.");
+          if (status) {
+            status.textContent = nextVisible ? "Komenti u rikthye në dyqan." : "Komenti u fsheh nga klientët.";
+            status.style.color = "#067647";
+          }
+          await loadProductReviewsAdmin();
+        } catch (error) {
+          if (status) {
+            status.textContent = "Gabim: " + (error.message || "Nuk u ruajt ndryshimi.");
+            status.style.color = "#b42318";
+          }
+          button.disabled = false;
+        } finally {
+          busy = false;
+        }
+      });
+    });
+  }
+
   /* PANELI */
 
   function showPanel() {
@@ -1432,7 +1514,8 @@
       ["trafficStats", loadTraffic],
       ["customerApprovals", loadCustomerApprovals],
       ["onlineCustomers", loadOnlineCustomers],
-      ["profitSummary", loadProfitReport]
+      ["profitSummary", loadProfitReport],
+      ["productReviewsAdmin", loadProductReviewsAdmin]
     ];
 
     tasks.forEach(([targetId, loader]) => {
@@ -1474,6 +1557,10 @@
     prepareCategorySelect();
 
     listen("categoryForm", "submit", saveCategory);
+    listen("refreshProductReviews", "click", async function () {
+      try { await loadProductReviewsAdmin(); } catch (e) { msg("productReviewsAdminMsg", "Gabim gjatë ngarkimit: " + e.message, true); }
+    });
+
     listen("refreshTraffic", "click", async function () {
       try { await loadTraffic(); } catch (e) { console.error(e); }
     });
