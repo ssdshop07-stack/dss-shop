@@ -575,6 +575,35 @@
     }
   }
 
+  /* PARALAJMERIMET E STOKUT */
+
+  function renderStockAlerts(products) {
+    const box = $("stockAlerts");
+    if (!box) return;
+    const active = (products || []).filter(p => p.active !== false);
+    const out = active.filter(p => Number(p.stock || 0) <= 0);
+    const low = active.filter(p => Number(p.stock || 0) > 0 && Number(p.stock || 0) <= 3);
+    const alerts = [...out, ...low].sort((a, b) => Number(a.stock || 0) - Number(b.stock || 0));
+    box.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px;margin-bottom:12px">
+        <div style="padding:12px;border:1px solid #fecdca;border-radius:10px;background:#fff5f4"><small>Pa stok</small><h3 style="margin:5px 0;color:#b42318">${out.length}</h3></div>
+        <div style="padding:12px;border:1px solid #fedf89;border-radius:10px;background:#fffaeb"><small>Stok i ulët (1–3)</small><h3 style="margin:5px 0;color:#b54708">${low.length}</h3></div>
+      </div>
+      ${alerts.length ? alerts.map(p => {
+        const stock = Number(p.stock || 0);
+        const empty = stock <= 0;
+        return `<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid #eee">
+          <div style="flex:1;min-width:160px"><strong>${esc(p.name)}</strong><div style="font-size:12px;color:#667085">${esc(p.category || "Pa kategori")} · SKU: ${esc(p.sku || "—")}</div></div>
+          <span style="font-weight:700;color:${empty ? "#b42318" : "#b54708"}">${empty ? "PA STOK" : "KANË MBETUR " + stock}</span>
+          <button type="button" data-stock-edit="${esc(p.id)}">Përditëso stokun</button>
+        </div>`;
+      }).join("") : '<p style="color:#067647;margin:0">Të gjitha produktet aktive kanë më shumë se 3 copë në stok.</p>'}
+    `;
+    box.querySelectorAll("[data-stock-edit]").forEach(button => {
+      button.addEventListener("click", () => editProduct(button.dataset.stockEdit));
+    });
+  }
+
   /* PRODUKTET */
 
   async function loadProducts() {
@@ -590,6 +619,8 @@
       .order("created_at", { ascending: false });
 
     if (error) throw error;
+
+    renderStockAlerts(data || []);
 
     if (!data || !data.length) {
       el.textContent = "Nuk ka produkte.";
@@ -632,7 +663,7 @@
                 <div>Gjendja: ${p.product_condition === "used" ? "E përdorur" : "E re"}</div>
                 <div>Çmimi i shitjes: ${price(p.sale_price ?? p.price)}</div>
                 <div>Kosto: ${productCosts.has(String(p.id)) ? price(productCosts.get(String(p.id))) : "E papërcaktuar"}</div>
-                <div>Stoku: ${Number(p.stock || 0)}</div>
+                <div style="font-weight:700;color:${Number(p.stock || 0) <= 0 ? "#b42318" : Number(p.stock || 0) <= 3 ? "#b54708" : "#067647"}">Stoku: ${Number(p.stock || 0)}${Number(p.stock || 0) <= 0 ? " — PA STOK" : Number(p.stock || 0) <= 3 ? " — STOK I ULËT" : ""}</div>
                 <div>Statusi: ${p.active ? "Aktiv" : "Joaktiv"}</div>
               </div>
               <button type="button" data-edit-product="${esc(p.id)}">Ndrysho</button>
