@@ -346,6 +346,19 @@
       <details>
         <summary style="cursor:pointer;padding:18px;font-size:18px;font-weight:bold">📁 Porositë</summary>
         <div style="padding:0 18px 18px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin:12px 0">
+            <input id="orderSearch" type="search" placeholder="Kërko nr. porosie, emër, telefon ose adresë" style="margin:0;min-width:0">
+            <select id="orderStatusFilter" style="margin:0">
+              <option value="all">Të gjitha statuset</option>
+              <option value="new">E re</option>
+              <option value="processing">Në përpunim</option>
+              <option value="shipped">Dërguar</option>
+              <option value="completed">Përfunduar</option>
+              <option value="cancelled">Anuluar</option>
+            </select>
+          </div>
+          <button type="button" id="refreshOrders" class="secondary">Rifresko porositë</button>
+          <p id="ordersSummary" style="font-weight:600"></p>
           <div id="orders">Porositë do të shfaqen këtu.</div>
         </div>
       </details>
@@ -356,7 +369,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./config.js?v=107"></script>
-<script src="./admin.js?v=20261102-customer-history-v1"></script>
+<script src="./admin.js?v=20261102-order-search-v1"></script>
 
 <script>
   window.addEventListener("error", function(event) {
