@@ -1215,7 +1215,11 @@
       </article>
     `).join("");
 
-    el.querySelectorAll("[data-print-invoice]").forEach(button => {\n      button.addEventListener("click", () => printOrderInvoice(button.dataset.printInvoice));\n    });\n\n    el.querySelectorAll("[data-order]").forEach(select => {
+    el.querySelectorAll("[data-print-invoice]").forEach(button => {
+      button.addEventListener("click", () => printOrderInvoice(button.dataset.printInvoice));
+    });
+
+    el.querySelectorAll("[data-order]").forEach(select => {
       select.addEventListener("change", async function () {
         const previous = adminOrdersCache.find(o => String(o.id) === select.dataset.order);
         try {
