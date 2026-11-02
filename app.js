@@ -931,6 +931,7 @@ async function loadProductReviews(productId) {
       .from("product_reviews")
       .select("id,review_text,created_at")
       .eq("product_id", Number(productId))
+      .eq("is_visible", true)
       .order("created_at", { ascending: false })
       .limit(30);
     if (error) throw error;
