@@ -215,6 +215,17 @@ const t = (key) =>
    NORMALIZIMI I KATEGORIVE
 ========================================= */
 
+function normalizeSearchText(value) {
+  return String(value || "").toLowerCase().normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "").replace(/wi[\s_-]*fi/g, "wifi")
+    .replace(/[^a-z0-9]+/g, " ").trim();
+}
+function searchAliases(term) {
+  const aliases = {cam:"kamera",camera:"kamera",cameras:"kamera",cctv:"kamera sigurie",
+    ipcam:"ip kamera",wireless:"wifi",recorder:"dvr nvr regjistrues",
+    harddisk:"hdd disk",hdd:"hard disk",alarm:"alarme",intercom:"interfon video citofon"};
+  return aliases[term] || term;
+}
 function normalizeCategory(value) {
   const original = String(value || "").trim();
 
@@ -430,6 +441,17 @@ function customerPrice(price) {
     ? Math.round(Number(price) * (100 - customerDiscountPercent)) / 100
     : Number(price);
 }
+function orderProductOnWhatsApp(product) {
+  if (!product) return;
+  const price = customerPrice(basePrice(product));
+  const url = new URL(window.location.origin);
+  const slug = String(product.name || "produkt").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"") || "produkt";
+  url.pathname = "/p/" + slug + "-" + String(product.id);
+  const message = "Përshëndetje DSS Shop! Dua të porosis këtë produkt:\n" + product.name +
+    "\nÇmimi: " + money(price) + "\nLinku: " + url.toString() +
+    "\nJu lutem më kontaktoni për konfirmimin e porosisë.";
+  window.open("https://wa.me/355684398803?text=" + encodeURIComponent(message),"_blank","noopener,noreferrer");
+}
 
 async function checkCustomerApproval(user) {
   customerApproved = false;
@@ -630,6 +652,7 @@ window.openProductDetails = function (p) {
       #productDetailsModal #detailsDescription{white-space:pre-wrap;line-height:1.7;color:#4b5563;font-size:14px;margin:0 0 20px;overflow-wrap:anywhere}
       #productDetailsModal #detailsInstallGuide iframe{display:block}
       #productDetailsModal #detailsAdd{width:100%;min-height:48px;padding:14px;background:#e32636;color:#fff;border:0;border-radius:9px;font-weight:bold;font-size:15px;cursor:pointer}
+      #productDetailsModal #detailsWhatsApp{width:100%;min-height:46px;margin-top:9px;padding:12px;background:#e8f8ee;color:#087f46;border:1px solid #a7e5bd;border-radius:9px;font-weight:bold;font-size:14px;cursor:pointer}
       #productDetailsModal #detailsShare{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}
       #productDetailsModal #detailsShare button{flex:1;min-width:95px;min-height:40px;padding:10px;background:#f5f6f8;color:#20242a;border:1px solid #dfe3e8;border-radius:8px;font-size:12px;font-weight:bold;cursor:pointer}
       #productDetailsModal #dssRelatedProducts{margin:28px 0 4px;padding-top:22px;border-top:1px solid #e5e7eb}
@@ -700,6 +723,7 @@ window.openProductDetails = function (p) {
               <a id="detailsInstallLink" href="" target="_blank" rel="noopener noreferrer" style="display:inline-block;margin-top:10px;color:#08c965;font-weight:bold;text-decoration:none">Hap videon në YouTube ↗</a>
             </section>
             <button id="detailsAdd" type="button"></button>
+            <button id="detailsWhatsApp" type="button">Porosit shpejt në WhatsApp</button>
             <div id="detailsShare">
               <button id="shareFacebook" type="button">Facebook</button>
               <button id="shareInstagram" type="button">Instagram</button>
@@ -858,6 +882,7 @@ window.openProductDetails = function (p) {
       window.prompt(language === "sq" ? "Kopjo linkun e produktit:" : "Copy product link:", shareUrl);
     }
   };
+  modal.querySelector("#detailsWhatsApp").onclick = () => orderProductOnWhatsApp(p);
   modal.querySelector("#detailsAdd").onclick = () => {
     window.add(p);
     window.dssCloseProductDetails();
@@ -1245,23 +1270,18 @@ function closeProductComparison() {
 
 function render() {
   const searchEl = $("#search");
-  const q = (searchEl?.value || "").toLowerCase().trim();
-  const normalizedSearch = normalizeCategory(q);
+  const q = (searchEl?.value || "").trim();
+  const normalizedSearch = normalizeSearchText(q);
+  const searchTerms = normalizedSearch.split(/\s+/).filter(Boolean).map(searchAliases);
 
-  let a = products.filter((p) => {\n    if (showFavoritesOnly && !favoriteProductIds.includes(String(p.id))) return false;
-    const name = String(p.name || "").toLowerCase();
-    const categoryText = String(p.category || "").toLowerCase();
-    const description = String(p.description || "").toLowerCase();
-
+  let a = products.filter((p) => {
+    if (showFavoritesOnly && !favoriteProductIds.includes(String(p.id))) return false;
+    const searchable = normalizeSearchText([p.name,p.category,p.description,p.sku,p.brand,p.model].filter(Boolean).join(" "));
     const category = normalizeCategory(p.category);
     const selected = normalizeCategory(selectedCategory);
-
-    const matchesSearch =
-      !q ||
-      name.includes(q) ||
-      categoryText.includes(q) ||
-      category.includes(normalizedSearch) ||
-      description.includes(q);
+    const matchesSearch = !searchTerms.length || searchTerms.every(term =>
+      term.split(/\s+/).every(part => searchable.includes(part))
+    );
 
     const matchesCategory =
       selected === "all" || category === selected;
@@ -1614,6 +1634,7 @@ async function openAccount() {
       if (approved) {
         refreshCartPrices();
         render();
+        prefillCheckoutProfile(sessionUser);
         dssStartPresence();
       }
     } else {
@@ -1704,13 +1725,24 @@ function updateAccountUI(message) {
   status.textContent = message || (accountMode === "signup" ? t("signupIntro") : t("loginIntro"));
 }
 
+async function prefillCheckoutProfile(user) {
+  if (!user?.id) return;
+  try {
+    const {data,error}=await sb.from("profiles").select("full_name,phone,address").eq("id",user.id).maybeSingle();
+    if(error||!data)return;
+    for(const [key,value] of Object.entries({name:data.full_name,phone:data.phone,address:data.address})){
+      const input=document.querySelector('#orderForm [name="'+key+'"]');
+      if(input&&!String(input.value||"").trim()&&value)input.value=value;
+    }
+  } catch(error){console.warn("DSS checkout autofill:",error?.message||error);}
+}
 async function finishCustomerLogin(user,successMessage){
   currentUser=user||null;const approved=await checkCustomerApproval(currentUser);
   if(!currentUser||!approved){
     if(currentUser)await sb.auth.signOut();currentUser=null;customerApproved=false;
     refreshCartPrices();render();updateAccountUI(t("approvalPending"));return false;
   }
-  refreshCartPrices();render();dssStartPresence();updateAccountUI(successMessage||t("loginSuccess"));return true;
+  refreshCartPrices();render();prefillCheckoutProfile(currentUser);dssStartPresence();updateAccountUI(successMessage||t("loginSuccess"));return true;
 }
 
 const accountForm=$("#accountForm");
