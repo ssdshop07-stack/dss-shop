@@ -234,6 +234,14 @@
       <div id="profitOrders" style="margin-top:14px"></div>
     </section>
 
+    <!-- PARALAJMERIMET E STOKUT -->
+    <section class="card" id="stockAlertDashboard">
+      <h2>Paralajmërimet e stokut</h2>
+      <p style="color:#667085">Shfaq produktet aktive pa stok ose me 1–3 copë. Përditësimi i stokut bëhet nga produkti dhe nuk ndryshon automatikisht rregullin ekzistues të porosive.</p>
+      <button type="button" id="refreshStock" onclick="document.getElementById('productsAdmin') && document.getElementById('productsAdmin').scrollIntoView({behavior:'smooth'});">Shiko produktet</button>
+      <div id="stockAlerts">Po kontrollohet stoku...</div>
+    </section>
+
     <!-- PRODUKTET -->
     <section class="card">
       <h2>Produktet</h2>
@@ -325,7 +333,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./config.js?v=107"></script>
-<script src="./admin.js?v=20261102-notifications-v1"></script>
+<script src="./admin.js?v=20261102-stock-alerts-v1"></script>
 
 <script>
   window.addEventListener("error", function(event) {
