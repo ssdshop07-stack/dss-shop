@@ -1023,6 +1023,7 @@
     const statuses = [
       ["new", "E re"],
       ["processing", "Në përpunim"],
+      ["shipped", "Dërguar"],
       ["completed", "Përfunduar"],
       ["cancelled", "Anuluar"]
     ];
