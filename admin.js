@@ -79,7 +79,7 @@
     const orders = Array.isArray(report.orders) ? report.orders : [];
     $("profitOrders").innerHTML = orders.length ? orders.map(o => `
       <article style="padding:10px 0;border-bottom:1px solid #eaecf0">
-        <strong>Porosia #${esc(o.id)}</strong> · ${esc(o.customer_name || "")}
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><strong>Porosia #${esc(o.id)}</strong><button type="button" data-print-invoice="${esc(o.id)}" class="secondary">🖨️ Printo faturën</button></div> · ${esc(o.customer_name || "")}
         <div style="font-size:13px;color:#667085">${esc(o.created_at ? new Date(o.created_at).toLocaleString("sq-AL") : "")} · ${esc(o.status || "")}</div>
         <div>Xhiro: ${price(o.total)} · Kosto: ${o.cost_complete ? price(o.cost_total) : "E papërcaktuar"} · <strong>Fitimi: ${o.cost_complete ? price(o.profit_total) : "—"}</strong></div>
       </article>`).join("") : "Nuk ka porosi në këtë periudhë.";
@@ -1105,6 +1105,68 @@
 
   let adminOrdersCache = [];
 
+  async function printOrderInvoice(orderId) {
+    const order = adminOrdersCache.find(o => String(o.id) === String(orderId));
+    if (!order) { alert("Porosia nuk u gjet."); return; }
+
+    // Hap dritaren menjëherë nga klikimi, që shfletuesi të mos bllokojë printimin.
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Lejo hapjen e dritareve (pop-ups) për këtë faqe dhe provo përsëri.");
+      return;
+    }
+
+    printWindow.document.write("<p style='font-family:Arial;padding:20px'>Po përgatitet fatura...</p>");
+    try {
+      const { data: items, error } = await db.from("order_items")
+        .select("product_name,sku,quantity,price,subtotal")
+        .eq("order_id", order.id)
+        .order("id", { ascending: true });
+      if (error) throw error;
+
+      const date = order.created_at ? new Date(order.created_at).toLocaleString("sq-AL") : "—";
+      const rows = (items || []).map(item => `
+        <tr>
+          <td>${esc(item.product_name || "Produkt")}${item.sku ? `<small style="display:block;color:#667085">SKU: ${esc(item.sku)}</small>` : ""}</td>
+          <td class="num">${Number(item.quantity || 0)}</td>
+          <td class="num">${price(item.price)}</td>
+          <td class="num">${price(item.subtotal ?? (Number(item.price || 0) * Number(item.quantity || 0)))}</td>
+        </tr>`).join("");
+
+      printWindow.document.open();
+      printWindow.document.write(`<!doctype html><html lang="sq"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Faturë porosie #${esc(order.id)} — DSS Shop</title>
+        <style>
+          *{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#172033;margin:0;padding:28px;max-width:850px;margin:auto}
+          .top{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border-bottom:2px solid #172033;padding-bottom:18px}
+          h1{margin:0 0 5px;font-size:27px}h2{font-size:20px;margin:26px 0 8px}
+          .muted{color:#667085;font-size:13px;line-height:1.6}.meta{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+          .meta div{padding:12px;background:#f7f8fa;border-radius:8px}
+          table{width:100%;border-collapse:collapse;margin-top:18px}th,td{padding:11px 8px;border-bottom:1px solid #e4e7ec;text-align:left;font-size:14px}
+          th{background:#f7f8fa}.num{text-align:right;white-space:nowrap}.total{margin:18px 0 0 auto;max-width:300px;display:flex;justify-content:space-between;font-size:20px;font-weight:bold;border-top:2px solid #172033;padding-top:12px}
+          .note{margin-top:18px;padding:12px;background:#f7f8fa;border-radius:8px;white-space:pre-wrap}
+          .footer{margin-top:38px;border-top:1px solid #e4e7ec;padding-top:14px;text-align:center}
+          .actions{margin:0 0 20px}button{padding:10px 16px;border:0;border-radius:6px;background:#155eef;color:white;font-size:15px}
+          @media print{body{padding:0}.actions{display:none}}
+          @media(max-width:520px){body{padding:14px}.meta{grid-template-columns:1fr}th,td{font-size:12px;padding:8px 4px}}
+        </style></head><body>
+        <div class="actions"><button onclick="window.print()">Printo faturën</button></div>
+        <header class="top"><div><h1>DSS SHOP</h1><strong>SECURITY &amp; TECHNOLOGY</strong><p class="muted">Kamera sigurie, DVR/NVR, alarme dhe rrjetëzim<br><a href="https://dss-shop.pages.dev/">dss-shop.pages.dev</a><br>Tel / WhatsApp: +355 68 439 8803</p></div>
+        <div style="text-align:right"><h2 style="margin:0">FATURË / POROSI</h2><strong>Nr. #${esc(order.id)}</strong><p class="muted">Data: ${esc(date)}</p></div></header>
+        <section class="meta"><div><strong>Klienti</strong><p>${esc(order.customer_name || "—")}<br>${esc(order.phone || "—")}</p></div>
+        <div><strong>Adresa e dërgesës</strong><p>${esc(order.address || "—")}</p></div></section>
+        <h2>Produktet</h2><table><thead><tr><th>Produkti</th><th class="num">Sasia</th><th class="num">Çmimi</th><th class="num">Nëntotali</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="4">Nuk u gjetën detajet e produkteve për këtë porosi.</td></tr>'}</tbody></table>
+        <div class="total"><span>Totali</span><span>${price(order.total)}</span></div>
+        <p class="muted" style="text-align:right">Pagesa: Para në dorë në momentin e dorëzimit (COD)</p>
+        ${order.notes ? `<div class="note"><strong>Shënim:</strong><br>${esc(order.notes)}</div>` : ""}
+        <footer class="footer muted">Faleminderit që zgjodhët DSS Shop!<br>Dokument porosie i gjeneruar nga sistemi DSS Shop.</footer>
+        <script>window.onload=function(){setTimeout(function(){window.print()},300)};</script></body></html>`);
+      printWindow.document.close();
+    } catch (e) {
+      printWindow.document.body.innerHTML = "<p style='font-family:Arial;padding:20px;color:#b42318'>Nuk u përgatit fatura: " + esc(e.message) + "</p>";
+    }
+  }
+
   function renderOrders() {
     const el = $("orders");
     if (!el) return;
@@ -1153,7 +1215,7 @@
       </article>
     `).join("");
 
-    el.querySelectorAll("[data-order]").forEach(select => {
+    el.querySelectorAll("[data-print-invoice]").forEach(button => {\n      button.addEventListener("click", () => printOrderInvoice(button.dataset.printInvoice));\n    });\n\n    el.querySelectorAll("[data-order]").forEach(select => {
       select.addEventListener("change", async function () {
         const previous = adminOrdersCache.find(o => String(o.id) === select.dataset.order);
         try {
