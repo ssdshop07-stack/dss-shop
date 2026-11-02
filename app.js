@@ -1555,6 +1555,19 @@ if(accountForm)accountForm.addEventListener("submit",async(e)=>{
 });
 const accountSwitch=$("#accountSwitch");
 if(accountSwitch)accountSwitch.addEventListener("click",()=>{accountMode=accountMode==="signup"?"login":"signup";updateAccountUI();});
+const accountForgot=$("#accountForgot");
+if(accountForgot)accountForgot.addEventListener("click",async()=>{
+  const email=$("#accountEmail")?.value.trim()||"";
+  if(!email){updateAccountUI("Shkruaj email-in në fushën më sipër dhe pastaj shtyp përsëri “Ke harruar fjalëkalimin?”.");$("#accountEmail")?.focus();return;}
+  accountForgot.disabled=true;
+  try{
+    const redirectTo=window.location.origin+window.location.pathname.replace(/[^/]*$/,"account.html");
+    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
+    if(error)throw error;
+    updateAccountUI("Nëse ky email është i regjistruar, do të marrësh një lidhje për rivendosjen e fjalëkalimit. Kontrollo edhe dosjen Spam.");
+  }catch(error){updateAccountUI("Nuk u dërgua kërkesa: "+(error.message||"Provo përsëri."));}
+  finally{accountForgot.disabled=false;}
+});
 
 const accountLogout = $("#accountLogout");
 
