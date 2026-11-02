@@ -1081,6 +1081,22 @@ async function submitProductReview(event, productId) {
    KRAHASIMI I PRODUKTEVE — maksimumi 3
 ========================================= */
 let compareProductIds = [];
+let favoriteProductIds = (() => {
+  try { const saved = JSON.parse(localStorage.getItem("dss_favorites") || "[]"); return Array.isArray(saved) ? saved.map(String) : []; }
+  catch (_) { return []; }
+})();
+let showFavoritesOnly = false;
+function saveFavoriteProducts() { try { localStorage.setItem("dss_favorites", JSON.stringify(favoriteProductIds)); } catch (e) { console.warn(e); } }
+function toggleFavoriteProduct(id) {
+  const key = String(id);
+  favoriteProductIds = favoriteProductIds.includes(key) ? favoriteProductIds.filter(x => x !== key) : [...favoriteProductIds, key];
+  saveFavoriteProducts(); render();
+}
+function updateFavoritesButton() {
+  const b = document.getElementById("dssFavoritesToggle"); if (!b) return;
+  b.classList.toggle("active", showFavoritesOnly);
+  b.textContent = (showFavoritesOnly ? "♥ Të preferuarat" : "♡ Të preferuarat") + " (" + favoriteProductIds.length + ")";
+}
 
 function getComparedProducts() {
   return compareProductIds
@@ -1094,6 +1110,11 @@ function ensureCompareUI() {
   const style = document.createElement("style");
   style.id = "dssCompareStyles";
   style.textContent = `
+    .dss-favorite-btn{position:absolute;top:9px;right:9px;z-index:2;width:36px;height:36px;border:0;border-radius:50%;background:#fff;color:#707782;font-size:22px;line-height:1;box-shadow:0 2px 9px #0002}
+    .dss-favorite-btn.active{color:#e50914}
+    .dss-favorites-toggle{border:1px solid #d8dde4;border-radius:8px;background:#fff;color:#303640;padding:9px 12px;font-weight:700;white-space:nowrap}
+    .dss-favorites-toggle.active{border-color:#e50914;background:#fff0f1;color:#d20c19}
+    .pic{position:relative}
     .dss-compare-btn{width:100%;margin-top:7px;padding:10px 8px;border:1px solid #d8dde4;border-radius:8px;background:#fff;color:#303640;font-size:13px;font-weight:700}
     .dss-compare-btn.active{border-color:#e50914;background:#fff0f1;color:#d20c19}
     .dss-compare-bar{position:fixed;z-index:1200;left:50%;bottom:16px;transform:translateX(-50%);width:min(680px,calc(100% - 24px));display:flex;align-items:center;gap:10px;padding:11px 13px;background:#17191d;color:#fff;border:1px solid #3b4048;border-radius:13px;box-shadow:0 8px 30px #0003}
@@ -1227,7 +1248,7 @@ function render() {
   const q = (searchEl?.value || "").toLowerCase().trim();
   const normalizedSearch = normalizeCategory(q);
 
-  let a = products.filter((p) => {
+  let a = products.filter((p) => {\n    if (showFavoritesOnly && !favoriteProductIds.includes(String(p.id))) return false;
     const name = String(p.name || "").toLowerCase();
     const categoryText = String(p.category || "").toLowerCase();
     const description = String(p.description || "").toLowerCase();
@@ -1287,7 +1308,7 @@ function render() {
         onclick='window.openProductDetails(${encodedProduct})'
         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.openProductDetails(${encodedProduct})}"
         style="cursor:pointer">
-        <div class="pic">
+        <div class="pic">\n          <button type="button" class="dss-favorite-btn ${favoriteProductIds.includes(String(p.id)) ? "active" : ""}" aria-label="Shto ose hiq nga të preferuarat" aria-pressed="${favoriteProductIds.includes(String(p.id))}" onclick="event.stopPropagation();toggleFavoriteProduct('${esc(p.id)}')">${favoriteProductIds.includes(String(p.id)) ? "♥" : "♡"}</button>
           ${p.image_url
             ? `<img src="${esc(p.image_url)}"
                     alt="${esc(p.name)}"
@@ -1319,6 +1340,12 @@ function render() {
 /* =========================================
    KLIKIMI I KATEGORIVE
 ========================================= */
+
+const favoritesToggle = document.getElementById("dssFavoritesToggle");
+if (favoritesToggle) favoritesToggle.addEventListener("click", () => {
+  showFavoritesOnly = !showFavoritesOnly; updateFavoritesButton(); render();
+  document.getElementById("products")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
 
 const categoryContainer = document.querySelector("#categories");
 if (categoryContainer) {
