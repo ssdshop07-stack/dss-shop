@@ -1425,7 +1425,7 @@
 
     const { data: reviews, error } = await db
       .from("product_reviews")
-      .select("id, product_id, review_text, created_at, is_visible")
+      .select("id, product_id, review_text, created_at, is_visible, admin_reply")
       .order("created_at", { ascending: false })
       .limit(100);
     if (error) throw error;
@@ -1454,12 +1454,52 @@
           </div>
           <small style="display:block;color:#667085;margin:4px 0 8px">${esc(date)} · Koment #${esc(review.id)}</small>
           <p style="white-space:pre-wrap;overflow-wrap:anywhere;margin:0 0 10px">${esc(review.review_text)}</p>
+          <label style="display:block;font-weight:600;margin:10px 0 5px">Përgjigjja e administratorit</label>
+          <textarea data-review-reply="${esc(review.id)}" maxlength="500" rows="3" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid #d0d5dd;border-radius:8px">${esc(review.admin_reply || "")}</textarea>
+          <button type="button" data-save-review-reply="${esc(review.id)}" style="margin:6px 8px 6px 0">Ruaj përgjigjen</button>
           <button type="button" data-review-visibility="${esc(review.id)}" data-visible="${visible ? "true" : "false"}">
             ${visible ? "Fsheh komentin" : "Rikthe komentin"}
           </button>
         </article>
       `;
     }).join("");
+
+    box.querySelectorAll("[data-save-review-reply]").forEach(button => {
+      button.addEventListener("click", async () => {
+        if (busy) return;
+        const id = button.dataset.saveReviewReply;
+        const field = box.querySelector(`[data-review-reply="${id}"]`);
+        const reply = String(field?.value || "").trim();
+        if (reply.length > 500) {
+          if (status) status.textContent = "Përgjigjja nuk mund të kalojë 500 karaktere.";
+          return;
+        }
+        busy = true;
+        button.disabled = true;
+        try {
+          const { data: updated, error: updateError } = await db
+            .from("product_reviews")
+            .update({ admin_reply: reply || null })
+            .eq("id", id)
+            .select("id, admin_reply")
+            .maybeSingle();
+          if (updateError) throw updateError;
+          if (!updated) throw new Error("Përgjigjja nuk u ruajt. Kontrollo lejet e administratorit.");
+          if (status) {
+            status.textContent = reply ? "Përgjigjja u ruajt." : "Përgjigjja u hoq.";
+            status.style.color = "#067647";
+          }
+        } catch (error) {
+          if (status) {
+            status.textContent = "Gabim: " + (error.message || "Përgjigjja nuk u ruajt.");
+            status.style.color = "#b42318";
+          }
+        } finally {
+          busy = false;
+          button.disabled = false;
+        }
+      });
+    });
 
     box.querySelectorAll("[data-review-visibility]").forEach(button => {
       button.addEventListener("click", async () => {
