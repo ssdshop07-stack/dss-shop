@@ -12,6 +12,7 @@
   let busy = false;
   let categories = [];
   let productCosts = new Map();
+  let selectedProductMarkup = null;
   let adminLiveChannel = null;
 
   function msg(id, text, error = false) {
@@ -709,6 +710,8 @@
       $("productPrice").value = data.price ?? "";
       await loadProductCosts();
       $("productCostPrice").value = productCosts.has(String(data.id)) ? productCosts.get(String(data.id)) : "";
+      selectedProductMarkup = null;
+      updateProductMarkupUI();
       $("productSalePrice").value = data.sale_price ?? "";
       $("productCondition").value = data.product_condition === "used" ? "used" : "new";
       $("productStock").value = data.stock ?? 0;
@@ -864,6 +867,8 @@
       $("productId").value = "";
       $("productStock").value = "0";
       $("productCostPrice").value = "";
+      selectedProductMarkup = null;
+      updateProductMarkupUI();
       $("productActive").checked = true;
       $("imagePreview").innerHTML = "";
       fillCategorySelect("");
@@ -1900,6 +1905,8 @@
       $("productForm").reset();
       $("productId").value = "";
       $("productStock").value = "0";
+      selectedProductMarkup = null;
+      updateProductMarkupUI();
       $("productActive").checked = true;
       $("imagePreview").innerHTML = "";
       $("productImage").value = "";
@@ -1918,6 +1925,40 @@
     });
 
     listen("productForm", "submit", saveProduct);
+
+    function updateProductMarkupUI() {
+      const cost = Number($("productCostPrice")?.value);
+      const validCost = $("productCostPrice")?.value.trim() !== "" && Number.isFinite(cost) && cost >= 0;
+      document.querySelectorAll("[data-product-markup]").forEach(button => {
+        const active = Number(button.dataset.productMarkup) === selectedProductMarkup;
+        button.style.background = active ? "#155eef" : "";
+        button.style.color = active ? "#fff" : "";
+        button.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+      const result = $("productMarkupResult");
+      if (!result) return;
+      if (selectedProductMarkup === null) {
+        result.textContent = "Shkruaj koston dhe zgjidh përqindjen. Çmimi i shitjes llogaritet automatikisht.";
+        return;
+      }
+      if (!validCost) {
+        result.textContent = "Shkruaj fillimisht çmimin e blerjes.";
+        return;
+      }
+      const salePrice = Math.round((cost * (1 + selectedProductMarkup / 100) + Number.EPSILON) * 100) / 100;
+      $("productPrice").value = salePrice.toFixed(2);
+      result.textContent = "Çmimi i shitjes: €" + salePrice.toFixed(2) + " (kosto €" + cost.toFixed(2) + " + " + selectedProductMarkup + "%).";
+    }
+
+    document.querySelectorAll("[data-product-markup]").forEach(button => {
+      button.addEventListener("click", function () {
+        selectedProductMarkup = Number(button.dataset.productMarkup);
+        updateProductMarkupUI();
+        if ($("productCostPrice").value.trim() === "") $("productCostPrice").focus();
+      });
+    });
+    listen("productCostPrice", "input", updateProductMarkupUI);
+
     const today = new Date();
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
     if ($("profitFrom")) $("profitFrom").value = localDateInput(firstDay);
