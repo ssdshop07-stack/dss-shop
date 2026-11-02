@@ -1182,12 +1182,12 @@ function openProductComparison() {
     return;
   }
   const rows = [
-    ["Kategoria", p => p.category || "—"],
+    ["Kategoria", p => esc(p.category || "—")],
     ["Çmimi", p => '<span class="dss-compare-price">' + money(customerPrice(basePrice(p))) + '</span>'],
     ["Gjendja", p => p.product_condition === "used" ? "E përdorur" : "E re"],
     ["Stoku", p => Number(p.stock) > 0 ? "Në stok (" + Number(p.stock) + ")" : "Kontrollo disponueshmërinë"],
-    ["SKU", p => p.sku || "—"],
-    ["Përshkrimi", p => p.description || "Pa përshkrim të shtuar"]
+    ["SKU", p => esc(p.sku || "—")],
+    ["Përshkrimi", p => esc(p.description || "Pa përshkrim të shtuar")]
   ];
   const head = '<tr><th>Produkti</th>' + selected.map(p =>
     '<th class="dss-compare-product">' +
