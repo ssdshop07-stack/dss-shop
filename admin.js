@@ -11,6 +11,7 @@
   let bannerPhoto = "";
   let busy = false;
   let categories = [];
+  let productCosts = new Map();
 
   function msg(id, text, error = false) {
     const el = $(id);
@@ -31,6 +32,56 @@
 
   function price(value) {
     return "€" + Number(value || 0).toFixed(2);
+  }
+
+  async function loadProductCosts() {
+    const { data, error } = await db.rpc("dss_admin_get_product_costs");
+    if (error) throw error;
+    productCosts = new Map((Array.isArray(data) ? data : []).map(x => [String(x.product_id), Number(x.cost_price)]));
+    return productCosts;
+  }
+
+  function localDateInput(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return y + "-" + m + "-" + d;
+  }
+
+  async function loadProfitReport() {
+    const fromValue = $("profitFrom")?.value;
+    const toValue = $("profitTo")?.value;
+    if (!fromValue || !toValue) return;
+    const from = new Date(fromValue + "T00:00:00");
+    const to = new Date(toValue + "T00:00:00");
+    to.setDate(to.getDate() + 1);
+    if (!Number.isFinite(from.getTime()) || !Number.isFinite(to.getTime()) || to <= from) {
+      msg("profitSummary", "Zgjidh një periudhë të vlefshme.", true);
+      return;
+    }
+    $("profitSummary").textContent = "Po llogaritet fitimi...";
+    $("profitOrders").textContent = "";
+    const { data, error } = await db.rpc("dss_admin_profit_report", {
+      p_from: from.toISOString(), p_to: to.toISOString()
+    });
+    if (error) throw error;
+    const report = data || {};
+    $("profitSummary").innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px">
+        <div style="padding:12px;border:1px solid #eaecf0;border-radius:10px"><small>Xhiro (pa anuluara)</small><h3>${price(report.revenue)}</h3></div>
+        <div style="padding:12px;border:1px solid #eaecf0;border-radius:10px"><small>Kosto e njohur</small><h3>${price(report.known_cost)}</h3></div>
+        <div style="padding:12px;border:1px solid #12b76a;border-radius:10px"><small>Fitimi i llogaritshëm</small><h3>${price(report.profit)}</h3></div>
+        <div style="padding:12px;border:1px solid #eaecf0;border-radius:10px"><small>Porosi aktive</small><h3>${Number(report.orders_count || 0)}</h3></div>
+      </div>
+      ${Number(report.incomplete_count || 0) ? `<p style="color:#b54708;margin-top:10px">Kujdes: ${Number(report.incomplete_count)} porosi kanë produkte pa kosto të regjistruar dhe nuk përfshihen te fitimi.</p>` : `<p style="color:#067647;margin-top:10px">Të gjitha porositë e periudhës kanë kosto të regjistruar.</p>`}
+    `;
+    const orders = Array.isArray(report.orders) ? report.orders : [];
+    $("profitOrders").innerHTML = orders.length ? orders.map(o => `
+      <article style="padding:10px 0;border-bottom:1px solid #eaecf0">
+        <strong>Porosia #${esc(o.id)}</strong> · ${esc(o.customer_name || "")}
+        <div style="font-size:13px;color:#667085">${esc(o.created_at ? new Date(o.created_at).toLocaleString("sq-AL") : "")} · ${esc(o.status || "")}</div>
+        <div>Xhiro: ${price(o.total)} · Kosto: ${o.cost_complete ? price(o.cost_total) : "E papërcaktuar"} · <strong>Fitimi: ${o.cost_complete ? price(o.profit_total) : "—"}</strong></div>
+      </article>`).join("") : "Nuk ka porosi në këtë periudhë.";
   }
 
   function show(id, visible) {
@@ -530,6 +581,7 @@
     if (!el) return;
 
     el.textContent = "Po ngarkohen produktet...";
+    await loadProductCosts();
 
     const { data, error } = await db
       .from("products")
@@ -577,7 +629,8 @@
                 <strong>${esc(p.name)}</strong>
                 <div>SKU: ${esc(p.sku || "—")}</div>
                 <div>Gjendja: ${p.product_condition === "used" ? "E përdorur" : "E re"}</div>
-                <div>Çmimi: ${price(p.sale_price ?? p.price)}</div>
+                <div>Çmimi i shitjes: ${price(p.sale_price ?? p.price)}</div>
+                <div>Kosto: ${productCosts.has(String(p.id)) ? price(productCosts.get(String(p.id))) : "E papërcaktuar"}</div>
                 <div>Stoku: ${Number(p.stock || 0)}</div>
                 <div>Statusi: ${p.active ? "Aktiv" : "Joaktiv"}</div>
               </div>
@@ -622,6 +675,8 @@
       fillCategorySelect(data.category || "");
 
       $("productPrice").value = data.price ?? "";
+      await loadProductCosts();
+      $("productCostPrice").value = productCosts.has(String(data.id)) ? productCosts.get(String(data.id)) : "";
       $("productSalePrice").value = data.sale_price ?? "";
       $("productCondition").value = data.product_condition === "used" ? "used" : "new";
       $("productStock").value = data.stock ?? 0;
@@ -681,6 +736,7 @@
       const priceText = $("productPrice").value.trim();
       const priceValue = Number(priceText);
       const sale = $("productSalePrice").value.trim();
+      const costText = $("productCostPrice").value.trim();
       const stock = Number($("productStock").value);
 
       if (!name || !category) {
@@ -698,6 +754,9 @@
       if (sale !== "" &&
           (!Number.isFinite(Number(sale)) || Number(sale) < 0)) {
         throw new Error("Kontrollo çmimin promocional.");
+      }
+      if (costText !== "" && (!Number.isFinite(Number(costText)) || Number(costText) < 0)) {
+        throw new Error("Kontrollo çmimin e blerjes.");
       }
 
       if (!Number.isInteger(stock) || stock < 0) {
@@ -727,6 +786,15 @@
         : await db.from("products").insert(row).select("id");
 
       if (result.error) throw result.error;
+
+      const savedProductId = editingProduct || result.data?.[0]?.id;
+      if (savedProductId && costText !== "") {
+        const { error: costError } = await db.rpc("dss_admin_save_product_cost", {
+          p_product_id: Number(savedProductId), p_cost_price: Number(costText)
+        });
+        if (costError) throw costError;
+        productCosts.set(String(savedProductId), Number(costText));
+      }
 
       // Njofto klientët e aprovuar vetëm kur publikohet produkt i ri.
       if (!editingProduct && row.active) {
@@ -763,6 +831,7 @@
       form.reset();
       $("productId").value = "";
       $("productStock").value = "0";
+      $("productCostPrice").value = "";
       $("productActive").checked = true;
       $("imagePreview").innerHTML = "";
       fillCategorySelect("");
@@ -1270,7 +1339,8 @@
       ["categoriesAdmin", loadCategories],
       ["trafficStats", loadTraffic],
       ["customerApprovals", loadCustomerApprovals],
-      ["onlineCustomers", loadOnlineCustomers]
+      ["onlineCustomers", loadOnlineCustomers],
+      ["profitSummary", loadProfitReport]
     ];
 
     tasks.forEach(([targetId, loader]) => {
@@ -1462,6 +1532,13 @@
     });
 
     listen("productForm", "submit", saveProduct);
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    if ($("profitFrom")) $("profitFrom").value = localDateInput(firstDay);
+    if ($("profitTo")) $("profitTo").value = localDateInput(today);
+    listen("refreshProfit", "click", async function () {
+      try { await loadProfitReport(); } catch (e) { msg("profitSummary", "Gabim gjatë llogaritjes: " + e.message, true); }
+    });
 
     listen("newBannerBtn", "click", function () {
       clearBannerForm();
