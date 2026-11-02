@@ -24,6 +24,14 @@
 .customer-bottom-nav{display:none}
 @media(max-width:650px){main{width:92%;margin:18px auto 100px}.customer-dashboard{padding:20px 16px;margin-bottom:24px}.customer-identity{gap:13px}.customer-avatar{width:72px;height:72px;flex-basis:72px}.customer-identity h2{font-size:22px}.customer-tabs{gap:8px;margin-right:-4px;padding-top:20px}.customer-tabs button{font-size:15px;padding:13px 12px}.account-heading{font-size:27px;margin:26px 0 22px}.panel{padding:18px}.customer-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:1000;display:flex;justify-content:space-around;align-items:center;background:#0b0b0b;border-top:1px solid #292929;padding:9px 10px calc(9px + env(safe-area-inset-bottom));min-height:70px}.customer-bottom-nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:#ccc;text-decoration:none;font-size:12px}.customer-bottom-nav a.active{color:#e50914}.customer-bottom-nav svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}body{padding-bottom:75px}}
 
+.tracking-panel{border-color:#28583a;background:linear-gradient(135deg,#122219,#171717 70%)}
+.tracking-panel h2{margin-bottom:6px}.track-result-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.track-status{display:inline-block;padding:6px 10px;border-radius:20px;background:#292929;font-size:13px;font-weight:700}
+.track-steps{display:grid;gap:0;margin:18px 0 4px}.track-step{display:flex;gap:12px;min-height:54px;position:relative}
+.track-step:not(:last-child):before{content:"";position:absolute;left:10px;top:22px;bottom:-2px;width:2px;background:#444}
+.track-dot{width:22px;height:22px;flex:0 0 22px;border-radius:50%;border:2px solid #666;background:#111;z-index:1}
+.track-step.done .track-dot{background:#35d07f;border-color:#35d07f}.track-step.current .track-dot{border-color:#35d07f;box-shadow:0 0 0 4px #35d07f22}
+.track-step strong{display:block;font-size:14px}.track-step small{display:block;color:#aaa;margin-top:3px}.track-items{margin:12px 0 0;padding-left:20px;color:#ddd}
 </style>
 </head>
 <body>
@@ -40,6 +48,14 @@
 </form>
 <button id="forgot" class="secondary" type="button" style="margin-top:10px;width:100%">Harrova fjalëkalimin</button>
 </section>
+<section class="panel tracking-panel" id="orderTrackingPanel">
+<h2>Gjurmimi i porosisë</h2>
+<p class="muted">Shkruaj numrin e porosisë dhe telefonin që përdore gjatë porositjes. Nuk nevojitet hyrja në llogari.</p>
+<form id="trackOrderForm"><div class="row">
+<div><label for="trackOrderId">Numri i porosisë</label><input id="trackOrderId" inputmode="numeric" pattern="[0-9]+" placeholder="p.sh. 125" required></div>
+<div><label for="trackOrderPhone">Telefoni i porosisë</label><input id="trackOrderPhone" type="tel" autocomplete="tel" placeholder="+355..." required></div>
+</div><button id="trackOrderButton" type="submit" style="margin-top:14px;width:100%">Gjurmo porosinë</button></form>
+<div id="trackOrderResult" class="message" role="status" aria-live="polite" hidden></div></section>
 <section id="profilePanel" hidden>
 <div class="customer-dashboard">
   <div class="customer-identity"><div class="customer-avatar" aria-hidden="true">♙</div><div><h2 id="customerDisplayName">Klienti DSS</h2><p>Klient</p><p id="customerDisplayEmail" class="muted" style="margin-top:5px;overflow-wrap:anywhere"></p></div></div>
@@ -77,7 +93,36 @@ function profileNotice(message,kind=""){const n=$("profileNotice");n.hidden=!mes
 function setMode(next){mode=next;$("signupTab").className=mode==="signup"?"":"secondary";$("loginTab").className=mode==="login"?"":"secondary";$("submitAuth").textContent=mode==="signup"?"Krijo llogari":"Hyr";$("password").autocomplete=mode==="signup"?"new-password":"current-password";notice("")}
 function showUser(){ $("authPanel").hidden=!!user;$("profilePanel").hidden=!user;if(user){$("customerDisplayName").textContent=$("fullName").value.trim()||user.user_metadata?.full_name||user.email?.split("@")[0]||"Klienti DSS";$("customerDisplayEmail").textContent=user.email||"";$("signedEmail").textContent="E kyçur si: "+user.email;const ic=$("installAppCard");if(ic)ic.hidden=false;loadProfile();loadOrders();loadOffers();loadNotifications();}}
 async function loadProfile(){if(!user)return;const uid=user.id,token=++profileLoadToken;const {data,error}=await sb.from("profiles").select("full_name,phone,address").eq("id",uid).maybeSingle();if(token!==profileLoadToken||!user||user.id!==uid)return;if(error){profileNotice("Nuk u lexuan të dhënat: "+error.message,"error");return}$("fullName").value=data?.full_name||"";$("phone").value=data?.phone||"";$("address").value=data?.address||"";$("customerDisplayName").textContent=data?.full_name||user.user_metadata?.full_name||user.email?.split("@")[0]||"Klienti DSS";}
-async function loadOrders(){const box=$("orders");box.innerHTML="<p class='muted'>Po ngarkohen porositë…</p>";const {data,error}=await sb.from("orders").select("id,created_at,total,status").eq("user_id",user.id).order("created_at",{ascending:false});if(error){box.innerHTML="<p class='error'>Nuk u lexuan porositë: "+escapeHtml(error.message)+"</p>";return}if(!data||!data.length){box.innerHTML="<p class='muted'>Nuk ke ende porosi të lidhura me këtë llogari.</p>";return}box.innerHTML=data.map(o=>'<div class="order"><div><strong>Porosia #'+escapeHtml(o.id)+'</strong><div class="muted">'+escapeHtml(new Date(o.created_at).toLocaleString("sq-AL"))+'</div></div><div><strong>€'+Number(o.total||0).toFixed(2)+'</strong><div class="pill">'+escapeHtml(({new:"E re",processing:"Në përpunim",completed:"Përfunduar",cancelled:"Anuluar"})[o.status]||o.status||"Në proces")+'</div></div></div>').join("")}
+
+function statusLabel(status){return ({new:"E re",processing:"Në përpunim",shipped:"Dërguar",completed:"Përfunduar",cancelled:"Anuluar"})[status]||status||"Në pritje"}
+function trackingMarkup(order){
+ const steps=[["new","Porosia u regjistrua","DSS Shop e mori porosinë"],["processing","Në përpunim","Porosia po përgatitet"],["shipped","Dërguar","Porosia është nisur drejt teje"],["completed","Përfunduar","Porosia është dorëzuar"]];
+ const idx=steps.findIndex(s=>s[0]===order.status);
+ const progress=order.status==="cancelled"?'<p class="error"><strong>Porosia është anuluar.</strong> Kontakto DSS Shop nëse ke pyetje.</p>':'<div class="track-steps">'+steps.map((s,i)=>'<div class="track-step '+(idx>=i?'done ':'')+(idx===i?'current':'')+'"><span class="track-dot"></span><div><strong>'+s[1]+'</strong><small>'+s[2]+'</small></div></div>').join("")+'</div>';
+ const items=Array.isArray(order.items)&&order.items.length?'<ul class="track-items">'+order.items.map(x=>'<li>'+escapeHtml(x.product_name)+' × '+Number(x.quantity||0)+'</li>').join("")+'</ul>':'';
+ return '<div class="track-result-head"><strong>Porosia #'+escapeHtml(order.id)+'</strong><span class="track-status">'+escapeHtml(statusLabel(order.status))+'</span></div><p class="muted">Data: '+escapeHtml(new Date(order.created_at).toLocaleString("sq-AL"))+' · Totali: €'+Number(order.total||0).toFixed(2)+'</p>'+progress+(items?'<strong>Produktet:</strong>'+items:'');
+}
+$("trackOrderForm").addEventListener("submit",async e=>{
+ e.preventDefault();const btn=$("trackOrderButton"),result=$("trackOrderResult");
+ btn.disabled=true;result.hidden=false;result.textContent="Po kërkojmë porosinë…";
+ try{
+  const id=String($("trackOrderId").value||"").trim(),phone=String($("trackOrderPhone").value||"").trim();
+  if(!/^\d+$/.test(id))throw new Error("Shkruaj numrin e saktë të porosisë.");
+  const {data,error}=await sb.rpc("dss_track_order",{p_order_id:Number(id),p_phone:phone});
+  if(error)throw error;
+  if(!data){result.textContent="Nuk u gjet porosi me këtë numër dhe telefon. Kontrollo të dhënat dhe provo përsëri.";return;}
+  result.innerHTML=trackingMarkup(data);
+ }catch(err){result.textContent="Gjurmimi nuk u krye: "+(err.message||"Provo përsëri.");}
+ finally{btn.disabled=false;}
+});
+
+async function loadOrders(){
+ const box=$("orders");box.innerHTML="<p class='muted'>Po ngarkohen porositë…</p>";
+ const {data,error}=await sb.from("orders").select("id,created_at,total,status").eq("user_id",user.id).order("created_at",{ascending:false});
+ if(error){box.innerHTML="<p class='error'>Nuk u lexuan porositë: "+escapeHtml(error.message)+"</p>";return;}
+ if(!data||!data.length){box.innerHTML="<p class='muted'>Nuk ke ende porosi të lidhura me këtë llogari.</p>";return;}
+ box.innerHTML=data.map(o=>'<div class="order"><div><strong>Porosia #'+escapeHtml(o.id)+'</strong><div class="muted">'+escapeHtml(new Date(o.created_at).toLocaleString("sq-AL"))+'</div></div><div><strong>€'+Number(o.total||0).toFixed(2)+'</strong><div class="pill">'+escapeHtml(statusLabel(o.status))+'</div></div></div>').join("");
+}
 async function loadNotifications(){
 const box=$("customerNotifications");if(!box||!user)return;
 box.innerHTML='<p class="muted">Po ngarkohen njoftimet…</p>';
