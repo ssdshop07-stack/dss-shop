@@ -4,3 +4,5 @@ DSS SHOP v4 — Supabase
 3. Publiko folderin ne GitHub Pages/hosting statik.
 4. Admin: admin.html. Login me perdoruesin e krijuar ne Supabase.
 5. Para perdorimit final, vendos politikat admin CRUD per products dhe admin read/update per orders/order_items ne Supabase.
+
+Cloudflare Pages AI: Workers AI binding variable name must be AI.
