@@ -436,14 +436,19 @@ function basePrice(p) {
   return Number(p.sale_price || p.price || 0);
 }
 
-function customerPrice(price) {
-  return customerApproved
-    ? Math.round(Number(price) * (100 - customerDiscountPercent)) / 100
+let customerPriceMap = {};
+function customerDiscountForProduct(productId) {
+  return Number(customerPriceMap[String(productId)]?.discount_percent || 0);
+}
+function customerPrice(price, productId) {
+  const item = productId == null ? null : customerPriceMap[String(productId)];
+  return customerApproved && item && Number.isFinite(Number(item.price))
+    ? Number(item.price)
     : Number(price);
 }
 function orderProductOnWhatsApp(product) {
   if (!product) return;
-  const price = customerPrice(basePrice(product));
+  const price = customerPrice(basePrice(product), product.id);
   const url = new URL(window.location.origin);
   const slug = String(product.name || "produkt").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"") || "produkt";
   url.pathname = "/p/" + slug + "-" + String(product.id);
@@ -456,6 +461,7 @@ function orderProductOnWhatsApp(product) {
 async function checkCustomerApproval(user) {
   customerApproved = false;
   customerDiscountPercent = 0;
+  customerPriceMap = {};
   if (!user?.id) return false;
 
   try {
@@ -480,6 +486,15 @@ async function checkCustomerApproval(user) {
       ? ([0, 5, 10, 15, 20, 25, 30, 35, 40, 45].includes(Number(result.data?.discount_percent))
         ? Number(result.data.discount_percent) : 10)
       : 0;
+    if (customerApproved) {
+      const pricing = await sb.rpc("dss_get_customer_prices");
+      if (pricing.error) {
+        console.error("DSS protected customer prices failed:", pricing.error.message);
+        customerDiscountPercent = 0;
+      } else {
+        customerPriceMap = pricing.data || {};
+      }
+    }
     return customerApproved;
   } catch (error) {
     console.error("DSS approval check failed:", error?.message || error);
@@ -505,7 +520,7 @@ function refreshCartPrices() {
     return {
       ...x,
       basePrice: base,
-      price: customerPrice(base)
+      price: customerPrice(base, product?.id ?? x.id)
     };
   });
 
@@ -791,7 +806,8 @@ window.openProductDetails = function (p) {
   const salePrice = Number(p.sale_price || 0);
   const hasProductSale = salePrice > 0 && regularPrice > salePrice;
   const effectivePrice = hasProductSale ? salePrice : regularPrice;
-  const finalCustomerPrice = customerPrice(effectivePrice);
+  const finalCustomerPrice = customerPrice(effectivePrice, p.id);
+  const appliedProductDiscount = customerDiscountForProduct(p.id);
   const discountPercent = hasProductSale ? Math.round((1 - salePrice / regularPrice) * 100) : 10;
   modal.querySelector("#detailsPrice").innerHTML = hasProductSale
     ? '<span style="text-decoration:line-through;color:#aaa;font-size:.58em;font-weight:500;display:block">' + money(regularPrice) + '</span>' + money(salePrice)
@@ -802,10 +818,10 @@ window.openProductDetails = function (p) {
   const personalDiscount = modal.querySelector("#detailsPersonalDiscount");
   personalDiscount.querySelector(".discount-title").textContent = hasProductSale
     ? (language === "sq" ? "Keni zbritje: -" + discountPercent + "%" : "You save: -" + discountPercent + "%")
-    : (language === "sq" ? "Keni zbritje personale: -" + customerDiscountPercent + "%" : "Your personal discount: -" + customerDiscountPercent + "%");
+    : (language === "sq" ? "Keni zbritje personale: -" + appliedProductDiscount + "%" : "Your personal discount: -" + appliedProductDiscount + "%");
   personalDiscount.querySelector(".discount-sub").textContent = language === "sq" ? "Aplikohet automatikisht në checkout" : "Applied automatically at checkout";
   modal.querySelector("#detailsDiscountPrice").textContent = money(hasProductSale ? salePrice : finalCustomerPrice);
-  personalDiscount.style.display = (hasProductSale || (customerApproved && customerDiscountPercent > 0)) ? "flex" : "none";
+  personalDiscount.style.display = (hasProductSale || (customerApproved && appliedProductDiscount > 0)) ? "flex" : "none";
   modal.querySelector("#detailsDescriptionTitle").textContent = t("description");
   modal.querySelector("#detailsDescription").textContent = description || t("noDescription");
   const installGuide = modal.querySelector("#detailsInstallGuide");
@@ -1227,7 +1243,7 @@ function openProductComparison() {
   }
   const rows = [
     ["Kategoria", p => esc(p.category || "—")],
-    ["Çmimi", p => '<span class="dss-compare-price">' + money(customerPrice(basePrice(p))) + '</span>'],
+    ["Çmimi", p => '<span class="dss-compare-price">' + money(customerPrice(basePrice(p), p.id)) + '</span>'],
     ["Gjendja", p => p.product_condition === "used" ? "E përdorur" : "E re"],
     ["Stoku", p => Number(p.stock) > 0 ? "Në stok (" + Number(p.stock) + ")" : "Kontrollo disponueshmërinë"],
     ["SKU", p => esc(p.sku || "—")],
@@ -1303,16 +1319,17 @@ function render() {
   ensureCompareUI();
   grid.innerHTML = a.map((p) => {
     const price = basePrice(p);
-    const discounted = customerPrice(price);
+    const discounted = customerPrice(price, p.id);
+    const productDiscount = customerDiscountForProduct(p.id);
 
-    const priceHtml = (customerApproved && customerDiscountPercent > 0)
+    const priceHtml = (customerApproved && productDiscount > 0)
       ? `<div class="price">
           <span style="color:#aaa;text-decoration:line-through;font-size:14px">
             ${money(price)}
           </span>
           <br>
           ${money(discounted)}
-          <span style="color:#35d07f;font-size:12px">-${customerDiscountPercent}%</span>
+          <span style="color:#35d07f;font-size:12px">-${productDiscount}%</span>
         </div>`
       : `<div class="price">${money(price)}</div>`;
 
@@ -1392,13 +1409,13 @@ window.add = (p) => {
   if (existing) {
     existing.qty++;
     existing.basePrice = base;
-    existing.price = customerPrice(base);
+    existing.price = customerPrice(base, p.id);
   } else {
     cart.push({
       id: p.id,
       name: p.name,
       basePrice: base,
-      price: customerPrice(base),
+      price: customerPrice(base, p.id),
       qty: 1
     });
   }
