@@ -51,6 +51,53 @@
 #trackOrderResult.success{border-color:#a7e5bd;color:#20242a}
 #trackOrderResult.error{border-color:#fecaca;color:#b4232c}
 @media(max-width:560px){#trackOrderForm .row{display:grid;grid-template-columns:1fr;gap:8px}#trackOrderForm label{margin-top:8px}}
+
+/* FINAL OVERRIDE: the complete standalone order-tracking card is light. */
+html body main #orderTrackingPanel,
+html body main #orderTrackingPanel.panel,
+html body main #orderTrackingPanel *:not(button):not(.track-dot) {
+  color-scheme: light !important;
+}
+html body main #orderTrackingPanel,
+html body main #orderTrackingPanel .message,
+html body main #orderTrackingPanel #trackOrderResult {
+  background-color: #ffffff !important;
+  color: #20242a !important;
+  border-color: #e5e7eb !important;
+}
+html body main #orderTrackingPanel h2,
+html body main #orderTrackingPanel label,
+html body main #orderTrackingPanel strong,
+html body main #orderTrackingPanel .track-step strong {
+  color: #20242a !important;
+}
+html body main #orderTrackingPanel p,
+html body main #orderTrackingPanel small,
+html body main #orderTrackingPanel .muted {
+  color: #5f6670 !important;
+}
+html body main #orderTrackingPanel input {
+  background: #ffffff !important;
+  color: #20242a !important;
+  border: 1px solid #d5d9df !important;
+}
+html body main #orderTrackingPanel button,
+html body main #orderTrackingPanel #trackOrderButton {
+  background: #e50914 !important;
+  color: #ffffff !important;
+}
+html body main #orderTrackingPanel .track-status {
+  background: #fff0f1 !important;
+  color: #b4232c !important;
+  border-color: #fecdd3 !important;
+}
+html body main #orderTrackingPanel .track-dot {
+  background: #ffffff !important;
+}
+html body main #orderTrackingPanel .track-step.done .track-dot {
+  background: #e50914 !important;
+}
+
 </style>
 </head>
 <body>
