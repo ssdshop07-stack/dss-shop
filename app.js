@@ -1384,7 +1384,7 @@ function render() {
         </button>
         <button type="button" class="dss-card-whatsapp" aria-label="Porosit në WhatsApp"
           style="width:100%;margin-top:7px;background:#25d366;color:#fff;border:0;border-radius:10px;padding:10px 8px;font-weight:700;cursor:pointer"
-          onclick='event.stopPropagation();orderProductOnWhatsApp(\${encodedProduct})'>💬 WhatsApp</button>
+          onclick='event.stopPropagation();orderProductOnWhatsApp(${encodedProduct})'>💬 WhatsApp</button>
         <button type="button" class="dss-compare-btn ${compareProductIds.includes(String(p.id)) ? "active" : ""}"
           data-compare-id="${esc(p.id)}"
           onclick="event.stopPropagation();toggleCompareProduct('${esc(p.id)}')">
