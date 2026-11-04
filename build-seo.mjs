@@ -41,25 +41,25 @@ async function loadProducts() {
 }
 
 const CSS = `
-:root{color-scheme:dark;--bg:#080808;--panel:#191919;--red:#e50914;--text:#f5f5f5;--muted:#aaa}
+:root{color-scheme:light;--bg:#fff;--panel:#fff;--red:#e50914;--text:#171717;--muted:#666}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;line-height:1.55}
-a{color:#fff}header{background:#090909;border-bottom:1px solid #292929}
+a{color:#222}header{background:#fff;border-bottom:1px solid #e5e7eb}
 .wrap{width:min(1100px,94%);margin:auto}.nav{display:flex;align-items:center;justify-content:space-between;min-height:64px;gap:12px}
 .brand img{height:40px;display:block;max-width:180px}.nav a.shop{background:var(--red);color:#fff;text-decoration:none;padding:9px 16px;border-radius:22px;font-size:14px}
 .crumbs{font-size:13px;color:var(--muted);padding:16px 0}.crumbs a{color:var(--muted)}
 .product{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;padding-bottom:32px}
-.pic{background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;min-height:280px;overflow:hidden}.pic img{width:100%;max-height:460px;object-fit:contain}
+.pic{background:#fff;border:1px solid #eee;border-radius:12px;display:flex;align-items:center;justify-content:center;min-height:280px;overflow:hidden}.pic img{width:100%;max-height:460px;object-fit:contain}
 h1{font-size:26px;margin:0 0 10px}.price{font-size:30px;font-weight:bold;margin:12px 0}.meta{color:var(--muted);font-size:14px}
-.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;margin:0 6px 6px 0;background:#222;border:1px solid #444}.ok{color:#4ade80}.no{color:#f87171}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;margin:0 6px 6px 0;background:#f5f5f5;border:1px solid #e5e7eb;color:#444}.ok{color:#15803d}.no{color:#dc2626}
 .btn{display:inline-block;margin:8px 8px 0 0;padding:13px 22px;border-radius:10px;background:var(--red);color:#fff;text-decoration:none;font-weight:bold}
-.btn.wa{background:#25d366;color:#071b0e}.btn.ghost{background:transparent;border:1px solid #555}
+.btn.wa{background:#25d366;color:#071b0e}.btn.ghost{background:#fff;border:1px solid #d1d5db;color:#222}
 ul.spec{padding-left:20px}h2{font-size:20px;margin:28px 0 10px}
 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding:0;list-style:none}
-.grid li{background:var(--panel);border:1px solid #303030;border-radius:12px;padding:10px;min-width:0}.grid a{text-decoration:none;display:block}
-.grid .t{background:#fff;border-radius:8px;height:130px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:8px}.grid img{width:100%;height:100%;object-fit:contain}
-.grid b{font-size:13px;display:block;line-height:1.35}.grid span{color:var(--muted);font-size:13px}
-.seo-catalog{border-top:1px solid #303030;margin-top:24px;padding:12px 0 24px;color:var(--muted);font-size:13px}.seo-catalog a{color:var(--muted)}
-footer{border-top:1px solid #292929;margin-top:40px;padding:22px 0;color:var(--muted);font-size:13px}
+.grid li{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px;min-width:0}.grid a{text-decoration:none;display:block}
+.grid .t{background:#fff;border:1px solid #f1f1f1;border-radius:8px;height:130px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:8px}.grid img{width:100%;height:100%;object-fit:contain}
+.grid b{font-size:13px;display:block;line-height:1.35;color:#171717}.grid span{color:var(--muted);font-size:13px}
+.seo-catalog{border-top:1px solid #e5e7eb;margin-top:24px;padding:12px 0 24px;color:var(--muted);font-size:13px}.seo-catalog a{color:#555}
+footer{border-top:1px solid #e5e7eb;margin-top:40px;padding:22px 0;color:var(--muted);font-size:13px}
 @media(max-width:800px){.product{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 `;
 
@@ -69,7 +69,7 @@ function head({ title, desc, path, image, extra = "" }) {
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title><meta name="description" content="${esc(desc)}">
 <link rel="canonical" href="${SITE}${path}">
-<meta name="robots" content="index,follow,max-image-preview:large"><meta name="theme-color" content="#080808">
+<meta name="robots" content="index,follow,max-image-preview:large"><meta name="theme-color" content="#ffffff">
 <link rel="icon" href="/favicon.png"><meta property="og:site_name" content="DSS Shop">
 <meta property="og:type" content="product"><meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${SITE}${path}">
