@@ -88,7 +88,9 @@ function productPage(p, related) {
   const inStock = p.stock === null || p.stock === undefined ? true : Number(p.stock) > 0;
   const condition = p.product_condition === "used" ? "used" : "new";
   const { intro, items } = bullets(p.description);
-  const brand = /\bdahua\b/i.test(p.name) ? "Dahua" : /\bimou\b/i.test(p.name) ? "IMOU" : /\bezviz\b/i.test(p.name) ? "EZVIZ" : /\bzte\b/i.test(p.name) ? "ZTE" : "";\n  const title = `${p.name} ${brand && !p.name.toLowerCase().includes(brand.toLowerCase()) ? brand : ""} | ${p.category} në Shqipëri | DSS Shop`.replace(/\\s+/g, " ").slice(0, 68);\n  const desc = (`${p.name} në DSS Shop. ${p.category} në Shqipëri, me çmim €${money(price)} dhe porosi online. ` + (intro || "Shiko detajet dhe porosit me WhatsApp.")).slice(0, 158);
+  const brand = /\bdahua\b/i.test(p.name) ? "Dahua" : /\bimou\b/i.test(p.name) ? "IMOU" : /\bezviz\b/i.test(p.name) ? "EZVIZ" : /\bzte\b/i.test(p.name) ? "ZTE" : "";
+  const title = `${p.name} ${brand && !p.name.toLowerCase().includes(brand.toLowerCase()) ? brand : ""} | ${p.category} në Shqipëri | DSS Shop`.replace(/\s+/g, " ").slice(0, 68);
+  const desc = (`${p.name} në DSS Shop. ${p.category} në Shqipëri, me çmim €${money(price)} dhe porosi online. ` + (intro || "Shiko detajet dhe porosit me WhatsApp.")).slice(0, 158);
   const ld = { "@context":"https://schema.org","@type":"Product",name:p.name,sku:p.sku || String(p.id),category:p.category,description:String(p.description || p.name).replace(/\s+/g," ").slice(0,500),...(p.image_url ? {image:[p.image_url]} : {}),brand:{"@type":"Brand",name:"DSS Shop"},offers:{"@type":"Offer",url:SITE+path,priceCurrency:"EUR",price:money(price),availability:inStock?"https://schema.org/InStock":"https://schema.org/OutOfStock",itemCondition:condition==="used"?"https://schema.org/UsedCondition":"https://schema.org/NewCondition",seller:{"@type":"Organization",name:"DSS Shop"}}};
   const crumbs = {"@context":"https://schema.org","@type":"BreadcrumbList",itemListElement:[{"@type":"ListItem",position:1,name:"Kryesore",item:SITE+"/"},{"@type":"ListItem",position:2,name:p.category,item:SITE+`/k/${p._cslug}`},{"@type":"ListItem",position:3,name:p.name,item:SITE+path}]};
   const extra = `<script type="application/ld+json">${jsonForHtml(ld)}</script><script type="application/ld+json">${jsonForHtml(crumbs)}</script>`;
@@ -106,7 +108,8 @@ ${intro?`<h2>Përshkrimi</h2><p>${esc(intro)}</p>`:""}${items.length?`<h2>Karakt
 function categoryPage(cat, list) {
   const path = `/k/${list[0]._cslug}`;
   const ld = {"@context":"https://schema.org","@type":"CollectionPage",name:cat,url:SITE+path,mainEntity:{"@type":"ItemList",itemListElement:list.map((p,i)=>({"@type":"ListItem",position:i+1,url:SITE+`/p/${p._slug}`,name:p.name}))}};
-  const categoryIntro = `Zbulo ${cat.toLowerCase()} në DSS Shop. Krahaso modelet, kontrollo çmimet dhe porosit online në Shqipëri me ndihmën tonë në WhatsApp.`;\n  return head({title:`${cat} në Shqipëri | Çmime dhe oferta | DSS Shop`,desc:`${categoryIntro} ${list.length} produkte në katalog.`,path,image:list.find(p=>p.image_url)?.image_url,extra:`<script type="application/ld+json">${jsonForHtml(ld)}</script>`})+`
+  const categoryIntro = `Zbulo ${cat.toLowerCase()} në DSS Shop. Krahaso modelet, kontrollo çmimet dhe porosit online në Shqipëri me ndihmën tonë në WhatsApp.`;
+  return head({title:`${cat} në Shqipëri | Çmime dhe oferta | DSS Shop`,desc:`${categoryIntro} ${list.length} produkte në katalog.`,path,image:list.find(p=>p.image_url)?.image_url,extra:`<script type="application/ld+json">${jsonForHtml(ld)}</script>`})+`
 <main class="wrap"><div class="crumbs"><a href="/">Kryesore</a> › ${esc(cat)}</div><h1>${esc(cat)} në Shqipëri</h1><p>${esc(categoryIntro)}</p><ul class="grid">${list.map(card).join("")}</ul></main>${foot}`;
 }
 
