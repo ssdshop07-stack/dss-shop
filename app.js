@@ -432,6 +432,15 @@ function money(n) {
   return "€" + Number(n || 0).toFixed(2);
 }
 
+// GA4 event helper: analytics must never interrupt shopping or order submission.
+function trackDssEvent(eventName, params = {}) {
+  try {
+    if (typeof window.gtag === "function") window.gtag("event", eventName, params);
+  } catch (error) {
+    console.warn("DSS Analytics event failed:", eventName, error);
+  }
+}
+
 function basePrice(p) {
   return Number(p.sale_price || p.price || 0);
 }
@@ -455,6 +464,13 @@ function orderProductOnWhatsApp(product) {
   const message = "Përshëndetje DSS Shop! Dua të porosis këtë produkt:\n" + product.name +
     "\nÇmimi: " + money(price) + "\nLinku: " + url.toString() +
     "\nJu lutem më kontaktoni për konfirmimin e porosisë.";
+  trackDssEvent("whatsapp_click", {
+    method: "whatsapp",
+    item_id: String(product.id),
+    item_name: product.name || "Produkt",
+    value: price,
+    currency: "EUR"
+  });
   window.open("https://wa.me/355684398803?text=" + encodeURIComponent(message),"_blank","noopener,noreferrer");
 }
 
@@ -628,6 +644,11 @@ function renderRelatedProducts(currentProduct) {
 
 window.openProductDetails = function (p) {
   if (!p) return;
+  trackDssEvent("view_item", {
+    currency: "EUR",
+    value: customerPrice(basePrice(p), p.id),
+    items: [{ item_id: String(p.id), item_name: p.name || "Produkt", item_category: p.category || "", price: customerPrice(basePrice(p), p.id) }]
+  });
 
   let modal = document.getElementById("productDetailsModal");
   if (!document.getElementById("dssProductDetailsStyles")) {
@@ -1361,6 +1382,9 @@ function render() {
           onclick='event.stopPropagation();add(${encodedProduct});const cartBox=document.querySelector("#cart");if(cartBox)cartBox.classList.add("open");const orderForm=document.querySelector("#orderForm");if(orderForm){orderForm.classList.add("dss-order-visible");setTimeout(()=>orderForm.scrollIntoView({behavior:"smooth",block:"start"}),120)}'>
           ${t("order")}
         </button>
+        <button type="button" class="dss-card-whatsapp" aria-label="Porosit në WhatsApp"
+          style="width:100%;margin-top:7px;background:#25d366;color:#fff;border:0;border-radius:10px;padding:10px 8px;font-weight:700;cursor:pointer"
+          onclick='event.stopPropagation();orderProductOnWhatsApp(\${encodedProduct})'>💬 WhatsApp</button>
         <button type="button" class="dss-compare-btn ${compareProductIds.includes(String(p.id)) ? "active" : ""}"
           data-compare-id="${esc(p.id)}"
           onclick="event.stopPropagation();toggleCompareProduct('${esc(p.id)}')">
@@ -1400,6 +1424,11 @@ if (categoryContainer) {
 ========================================= */
 
 window.add = (p) => {
+  trackDssEvent("add_to_cart", {
+    currency: "EUR",
+    value: customerPrice(basePrice(p), p.id),
+    items: [{ item_id: String(p.id), item_name: p.name || "Produkt", item_category: p.category || "", price: customerPrice(basePrice(p), p.id), quantity: 1 }]
+  });
   const existing = cart.find(
     (x) => String(x.id) === String(p.id)
   );
@@ -2102,6 +2131,12 @@ if (orderForm) {
       return;
     }
 
+    trackDssEvent("begin_checkout", {
+      currency: "EUR",
+      value: cart.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 0), 0),
+      items: cart.map(item => ({ item_id: String(item.id), item_name: item.name || "Produkt", price: Number(item.price || 0), quantity: Number(item.qty || 0) }))
+    });
+
     const button = e.target.querySelector(
       'button[type="submit"]'
     );
@@ -2154,6 +2189,14 @@ if (orderForm) {
         (a, x) => a + x.price * x.qty,
         0
       );
+
+      // Successful COD order request; this is not a confirmed payment.
+      trackDssEvent("generate_lead", {
+        currency: "EUR",
+        value: total,
+        transaction_id: String(orderId),
+        items: cart.map(item => ({ item_id: String(item.id), item_name: item.name || "Produkt", price: Number(item.price || 0), quantity: Number(item.qty || 0) }))
+      });
 
       const message =
         "Përshëndetje DSS, dua të bëj një porosi.\n\n" +
