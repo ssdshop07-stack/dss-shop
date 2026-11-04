@@ -73,8 +73,8 @@ function head({ title, desc, path, image, extra = "" }) {
 <link rel="icon" href="/favicon.png"><meta property="og:site_name" content="DSS Shop">
 <meta property="og:type" content="product"><meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${SITE}${path}">
-<meta property="og:image" content="${esc(image || SITE + "/icon-512.png")}">
-<meta name="twitter:card" content="summary_large_image"><style>${CSS}</style>${extra}
+<meta property="og:image" content="${esc(image || SITE + "/icon-512.png")}"><meta property="og:image:alt" content="${esc(title)}">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${esc(image || SITE + "/icon-512.png")}"><style>${CSS}</style>${extra}
 </head><body>
 <header><div class="wrap nav"><a class="brand" href="/"><img src="/logo-dss-shop.svg" alt="DSS Shop"></a><a class="shop" href="/#products">Hap dyqanin</a></div></header>`;
 }
@@ -93,7 +93,7 @@ function productPage(p, related) {
   const desc = (`${p.name} në DSS Shop. ${p.category} në Shqipëri, me çmim €${money(price)} dhe porosi online. ` + (intro || "Shiko detajet dhe porosit me WhatsApp.")).slice(0, 158);
   const ld = { "@context":"https://schema.org","@type":"Product",name:p.name,sku:p.sku || String(p.id),category:p.category,description:String(p.description || p.name).replace(/\s+/g," ").slice(0,500),...(p.image_url ? {image:[p.image_url]} : {}),brand:{"@type":"Brand",name:"DSS Shop"},offers:{"@type":"Offer",url:SITE+path,priceCurrency:"EUR",price:money(price),availability:inStock?"https://schema.org/InStock":"https://schema.org/OutOfStock",itemCondition:condition==="used"?"https://schema.org/UsedCondition":"https://schema.org/NewCondition",seller:{"@type":"Organization",name:"DSS Shop"}}};
   const crumbs = {"@context":"https://schema.org","@type":"BreadcrumbList",itemListElement:[{"@type":"ListItem",position:1,name:"Kryesore",item:SITE+"/"},{"@type":"ListItem",position:2,name:p.category,item:SITE+`/k/${p._cslug}`},{"@type":"ListItem",position:3,name:p.name,item:SITE+path}]};
-  const extra = `<script type="application/ld+json">${jsonForHtml(ld)}</script><script type="application/ld+json">${jsonForHtml(crumbs)}</script>`;
+  const extra = `<meta property="product:price:amount" content="${money(price)}"><meta property="product:price:currency" content="EUR"><meta property="product:availability" content="${inStock ? "in stock" : "out of stock"}"><script type="application/ld+json">${jsonForHtml(ld)}</script><script type="application/ld+json">${jsonForHtml(crumbs)}</script>`;
   const waText = encodeURIComponent(`Përshëndetje, dua të porosis: ${p.name} (${p.sku || p.id}) — €${money(price)}`);
   return head({title,desc,path,image:p.image_url,extra})+`
 <main class="wrap"><div class="crumbs"><a href="/">Kryesore</a> › <a href="/k/${p._cslug}">${esc(p.category)}</a> › ${esc(p.name)}</div>
