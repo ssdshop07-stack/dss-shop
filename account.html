@@ -25,6 +25,16 @@
 @media(max-width:650px){main{width:92%;margin:18px auto 100px}.customer-dashboard{padding:20px 16px;margin-bottom:24px}.customer-identity{gap:13px}.customer-avatar{width:72px;height:72px;flex-basis:72px}.customer-identity h2{font-size:22px}.customer-tabs{gap:8px;margin-right:-4px;padding-top:20px}.customer-tabs button{font-size:15px;padding:13px 12px}.account-heading{font-size:27px;margin:26px 0 22px}.panel{padding:18px}.customer-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:1000;display:flex;justify-content:space-around;align-items:center;background:#0b0b0b;border-top:1px solid #292929;padding:9px 10px calc(9px + env(safe-area-inset-bottom));min-height:70px}.customer-bottom-nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:#ccc;text-decoration:none;font-size:12px}.customer-bottom-nav a.active{color:#e50914}.customer-bottom-nav svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}body{padding-bottom:75px}}
 
 .tracking-panel{border-color:#e5e7eb;background:#fff;color:#20242a;box-shadow:0 8px 28px #1018280d}
+/* Force the order-tracking area to keep the DSS white theme, even under dark-mode/browser styles. */
+#orderTrackingPanel{background:#fff!important;color:#20242a!important;color-scheme:light!important;border:1px solid #e5e7eb!important}
+#orderTrackingPanel h2,#orderTrackingPanel label,#orderTrackingPanel strong{color:#20242a}
+#orderTrackingPanel p,#orderTrackingPanel .muted{color:#5f6670!important}
+#orderTrackingPanel input{background:#fff!important;color:#20242a!important;border:1px solid #d5d9df!important}
+#orderTrackingPanel #trackOrderResult{background:#fff!important;color:#20242a!important}
+#orderTrackingPanel #trackOrderResult p,#orderTrackingPanel #trackOrderResult .muted{color:#68717d!important}
+#orderTrackingPanel .track-step strong{color:#20242a!important}
+#orderTrackingPanel .track-step small{color:#68717d!important}
+#orderTrackingPanel .track-items{color:#303640!important}
 .tracking-panel h2{margin-bottom:6px;color:#20242a;font-size:23px}
 .tracking-panel p{color:#5f6670}
 .tracking-panel input{background:#fff;color:#20242a;border-color:#d5d9df}
