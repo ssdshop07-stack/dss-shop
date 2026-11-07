@@ -99,6 +99,13 @@ html body main #orderTrackingPanel .track-step.done .track-dot {
 }
 
 
+
+.dss-social-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+.dss-social-link{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-width:138px;padding:11px 16px;border-radius:10px;text-decoration:none;font-weight:700;border:1px solid #e5e7eb;background:#fff;color:#20242a}
+.dss-social-link svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.dss-instagram{color:#c13584;border-color:#f2d7e8}
+.dss-facebook{color:#1877f2;border-color:#d6e5fb}
+
 /* DSS LIGHT ACCOUNT CONTENT: all customer sections from profile through page bottom. */
 html body main #profilePanel {
   background: #ffffff !important;
@@ -212,6 +219,18 @@ html body main #profilePanel .customer-avatar {
 <label for="address">Adresa e dorëzimit</label><input id="address" autocomplete="street-address" required>
 <button type="submit" style="margin-top:14px">Ruaj të dhënat</button>
 </form><div class="row" style="margin-top:16px"><button id="reloadOrders" class="secondary" type="button">Rifresko porositë</button><button id="logout" class="secondary" type="button">Dil nga llogaria</button></div></div>
+<div class="panel account-section" id="accountSocialSection" aria-label="Rrjetet sociale DSS">
+<h2>Na ndiq në rrjetet sociale</h2>
+<p class="muted">Lidhu me DSS Shop në Instagram dhe Facebook.</p>
+<div class="dss-social-links">
+<a class="dss-social-link dss-instagram" href="https://www.instagram.com/pro.security.golem/" target="_blank" rel="noopener noreferrer" aria-label="DSS Shop në Instagram">
+<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg><span>Instagram</span>
+</a>
+<a class="dss-social-link dss-facebook" href="https://www.facebook.com/share/1HYfafBQqb/" target="_blank" rel="noopener noreferrer" aria-label="DSS Shop në Facebook">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 21v-8h3l.5-4H14V7c0-1.2.4-2 2-2h1.7V1.4C17 1.2 15.8 1 14.4 1 11.5 1 9.5 2.8 9.5 6.2V9H6v4h3.5v8Z" fill="currentColor" stroke="none"/></svg><span>Facebook</span>
+</a>
+</div>
+</div>
 <div class="panel hero"><p class="muted">MIRË SE ERDHE NË DSS SHOP</p><h2>Paneli yt i klientit</h2><p>Menaxho profilin, shiko ofertat dhe ndiq porositë nga një vend i vetëm.</p><div class="discount">10% ULJE</div><p>Ulje për klientët e kyçur në llogari. Kontrollo çmimin përfundimtar në shportë para se të porositësh.</p></div><div class="panel account-section" id="accountNotificationsSection"><h2>🔔 Njoftimet <span id="notificationCount" class="notification-count" hidden>0</span></h2><p class="muted">Përditësimet e porosive dhe njoftimet për produktet e reja e ofertat.</p><div id="customerNotifications" class="notifications-list"><p class="muted">Po ngarkohen njoftimet…</p></div></div><div class="panel account-section" id="accountOffersSection"><h2>Ofertat për ty</h2><p class="muted">Produktet me çmim promocional të publikuara në DSS Shop.</p><div id="customerOffers" class="offers-grid"><p class="muted">Po ngarkohen ofertat…</p></div><p><a class="btn" href="./#products">Shiko të gjitha produktet</a></p></div><div class="panel account-section" id="accountOrdersSection"><h2>Porositë e mia</h2><p class="muted">Këtu shfaqen porositë e bëra pasi je kyçur në llogarinë tënde.</p><div id="orders"><p class="muted">Po ngarkohen porositë…</p></div></div><div class="panel account-section" id="accountWishlistSection"><h2>Lista e dëshirave</h2><p class="muted">Produktet e ruajtura për t’i parë më vonë do të shfaqen këtu.</p><div id="customerWishlist"><p class="muted">Lista e dëshirave është bosh.</p></div><a class="btn" href="./#products">Shfleto produktet</a></div>
 </section>
 </main>
